@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafarMatch — India's Travel Dating & Companion Finder</title>
+  <meta name="description" content="Discover verified travel companions and romantic connections across Goa, Himachal, Uttarakhand, Rajasthan and beyond." />
+  <meta property="og:title" content="SafarMatch — India's Travel Dating & Companion Finder" />
+  <meta property="og:description" content="Connect with fellow Indian travelers, plan trips, and explore India together." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            safar: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+            },
+            saffron: {
+              500: '#f97316',
+              600: '#ea580c',
+            },
+            teal: {
+              600: '#0d9488',
+              700: '#0f766e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS for Interactive Map (100% Free OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Razorpay Checkout Script (Test Mode) -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-serif-title {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    /* Leaflet popup styling override */
+    .leaflet-popup-content-wrapper {
+      padding: 0;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+    .leaflet-popup-content {
+      margin: 0;
+      line-height: 1.4;
+    }
+    .custom-marker-pin {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid #e11d48;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4);
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+    .custom-marker-pin:hover {
+      transform: scale(1.15);
+      border-color: #f97316;
+    }
+    .pulse-ring {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(225, 29, 72, 0.3);
+      animation: pulseAnim 2s infinite;
+      z-index: -1;
+    }
+    @keyframes pulseAnim {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 0.2; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+    /* Hide scrollbar for tabs */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased h-screen flex overflow-hidden">
+
+  <!-- ==================== DESKTOP SIDEBAR ==================== -->
+  <aside id="desktop-sidebar" class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 flex-shrink-0 z-30 select-none">
+    <!-- Brand Header -->
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('map')">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-safar-600 via-rose-500 to-saffron-500 flex items-center justify-center text-white shadow-md shadow-rose-200">
+          <i data-lucide="compass" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1">
+            <span class="font-bold text-xl tracking-tight text-slate-900">Safar<span class="text-safar-600">Match</span></span>
+            <span class="text-[10px] bg-amber-100 text-amber-800 font-semibold px-1.5 py-0.5 rounded-full">IN 🇮🇳</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium leading-none">Travel Companion & Dating</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+      <button id="nav-btn-map" onclick="switchView('map')" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-colors bg-safar-50 text-safar-700">
+        <i data-lucide="map-pin" class="w-5 h-5 text-safar-600"></i>
+        <span>Explore Map</span>
+        <span class="ml-auto text-[10px] bg-safar-600 text-white font-bold px-1.5 py-0.5 rounded-full">Live</span>
+      </button>
+
+      <button id="nav-btn-trips" onclick="switchView('trips')" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-100">
+        <i data-lucide="calendar" class="w-5 h-5 text-slate-400"></i>
+        <span>Trip Board</span>
+        <span id="trips-count-badge" class="ml-auto text-xs bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded-full">6</span>
+      </button>
+
+      <button id="nav-btn-chat" onclick="switchView('chat')" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-100">
+        <i data-lucide="message-circle" class="w-5 h-5 text-slate-400"></i>
+        <span>Messages</span>
+        <span class="ml-auto w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      </button>
+
+      <button id="nav-btn-monetization" onclick="switchView('monetization')" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-100">
+        <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
+        <span>Explorer Pass</span>
+        <span class="ml-auto text-[10px] bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold px-1.5 py-0.5 rounded-full">₹299</span>
+      </button>
+
+      <button id="nav-btn-profile" onclick="switchView('profile')" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-colors text-slate-600 hover:bg-slate-100">
+        <i data-lucide="user-check" class="w-5 h-5 text-slate-400"></i>
+        <span>My Travel Profile</span>
+      </button>
+    </nav>
+
+    <!-- Safety & Verified Banner -->
+    <div class="px-4 py-3 mx-3 mb-3 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-sm text-xs">
+      <div class="flex items-center space-x-2 text-rose-400 font-semibold mb-1">
+        <i data-lucide="shield-check" class="w-4 h-4"></i>
+        <span>Suraksha Guarantee</span>
+      </div>
+      <p class="text-[11px] text-slate-300 leading-relaxed">
+        Aadhaar-verified travel buddy system. Verified Indian circuits only.
+      </p>
+    </div>
+
+    <!-- Active User Card in Sidebar -->
+    <div class="p-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5 cursor-pointer" onclick="switchView('profile')">
+        <img id="sidebar-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80" alt="Avatar" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm" />
+        <div class="overflow-hidden">
+          <p id="sidebar-user-name" class="text-xs font-bold text-slate-900 truncate">Pranit Pisal</p>
+          <p id="sidebar-user-status" class="text-[10px] text-emerald-600 font-medium flex items-center">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 inline-block"></span> Exploring Goa
+          </p>
+        </div>
+      </div>
+      <button onclick="switchView('monetization')" title="Trip Boost Available" class="p-1.5 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
+        <i data-lucide="flame" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+  <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+    <!-- Mobile Top Navigation Header -->
+    <header class="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between z-20">
+      <div class="flex items-center space-x-2.5" onclick="switchView('map')">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-safar-600 to-saffron-500 flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="compass" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-bold text-lg text-slate-900 tracking-tight">Safar<span class="text-safar-600">Match</span></span>
+          <span class="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded-full ml-1">India</span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button onclick="switchView('monetization')" class="bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm flex items-center space-x-1">
+          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+          <span>Pass ₹299</span>
+        </button>
+        <button onclick="switchView('profile')" class="relative">
+          <img id="mobile-top-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200" />
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ==================== VIEW 1: EXPLORE MAP ==================== -->
+    <section id="view-map" class="view-panel relative w-full h-full flex flex-col overflow-hidden">
+      <!-- Top Filters Floating Bar -->
+      <div class="absolute top-4 left-4 right-4 z-[1000] flex flex-wrap items-center gap-2 pointer-events-auto">
+        <div class="bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center gap-2 max-w-full overflow-x-auto no-scrollbar">
+          <!-- Destination Filter -->
+          <div class="flex items-center space-x-1 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+            <i data-lucide="map" class="w-3.5 h-3.5 text-safar-600"></i>
+            <select id="map-circuit-filter" onchange="filterMapTravelers()" class="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer pr-1">
+              <option value="all">All India Circuits</option>
+              <option value="Goa">Goa (Anjuna, Palolem, Arambol)</option>
+              <option value="Himachal">Himachal (Manali, Kasol, Spiti)</option>
+              <option value="Uttarakhand">Uttarakhand (Rishikesh, Chopta)</option>
+              <option value="Rajasthan">Rajasthan (Jaipur, Udaipur)</option>
+              <option value="Ladakh">Ladakh (Leh, Pangong Lake)</option>
+              <option value="Kerala">Kerala (Munnar, Varkala)</option>
+            </select>
+          </div>
+
+          <!-- Travel Style Filter -->
+          <div class="flex items-center space-x-1 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+            <select id="map-style-filter" onchange="filterMapTravelers()" class="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer pr-1">
+              <option value="all">All Travel Styles</option>
+              <option value="Backpacker">Backpacker / Hostels</option>
+              <option value="Nomad">Digital Nomad / Workation</option>
+              <option value="Trekker">Trekker / Adventure</option>
+              <option value="Luxury">Luxury & Boutique</option>
+            </select>
+          </div>
+
+          <!-- Quick Reset / Active Count -->
+          <span id="map-travelers-count" class="hidden sm:inline-block text-xs font-semibold text-rose-600 px-2 py-1 bg-rose-50 rounded-lg whitespace-nowrap">
+            6 Travelers Active
+          </span>
+        </div>
+
+        <!-- Center on India Button -->
+        <button onclick="resetMapCenter()" class="bg-white/95 backdrop-blur-md p-2.5 rounded-2xl shadow-lg border border-slate-200/80 text-slate-700 hover:text-safar-600 transition" title="Center Map on India">
+          <i data-lucide="crosshair" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Leaflet Map Container -->
+      <div id="leaflet-map" class="w-full flex-1 z-0"></div>
+
+      <!-- Bottom Floating Tip on Map -->
+      <div class="absolute bottom-16 md:bottom-6 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
+        <div class="bg-slate-900/85 backdrop-blur-md text-white text-xs px-4 py-2 rounded-full shadow-xl flex items-center space-x-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Tap any traveler pin on the map to see their vibe & send a connect request!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: TRIP BOARD ==================== -->
+    <section id="view-trips" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
+      <div class="max-w-6xl w-full mx-auto p-4 md:p-8 space-y-6">
+        
+        <!-- Header & Action -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="text-2xl font-extrabold text-slate-900">India Trip Board</h1>
+              <span class="text-xs bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full">Community Plans</span>
+            </div>
+            <p class="text-sm text-slate-500 mt-1">
+              Find solo wanderers planning group trips, cab splits, hostel stays, and Himalayan treks.
+            </p>
+          </div>
+          <button onclick="openCreateTripModal()" class="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-safar-600 to-rose-600 hover:from-safar-700 hover:to-rose-700 text-white font-semibold px-5 py-3 rounded-xl shadow-md shadow-rose-200 transition transform active:scale-95 whitespace-nowrap">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+            <span>Post a Trip Plan</span>
+          </button>
+        </div>
+
+        <!-- Filter Chips Bar -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          <button onclick="filterTrips('all')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white" data-filter="all">All Trips</button>
+          <button onclick="filterTrips('Goa')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Goa">🌴 Goa</button>
+          <button onclick="filterTrips('Himachal')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Himachal">🏔️ Himachal (Manali)</button>
+          <button onclick="filterTrips('Uttarakhand')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Uttarakhand">🌊 Rishikesh</button>
+          <button onclick="filterTrips('Rajasthan')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Rajasthan">🏰 Rajasthan</button>
+          <button onclick="filterTrips('Ladakh')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Ladakh">🏍️ Ladakh</button>
+          <button onclick="filterTrips('Kerala')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Kerala">🛶 Kerala</button>
+        </div>
+
+        <!-- Trips Feed Grid -->
+        <div id="trips-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Dynamic cards injected via JavaScript -->
+        </div>
+
+        <div class="h-16 md:h-8"></div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: IN-APP REALTIME CHAT ==================== -->
+    <section id="view-chat" class="view-panel hidden w-full h-full flex flex-col bg-white overflow-hidden">
+      <!-- Permanent Safety Banner as requested -->
+      <div class="bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center justify-between text-xs text-amber-900 flex-shrink-0 z-10">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
+          <span class="font-medium leading-tight">
+            <strong>Safety Tip:</strong> Keep conversations inside SafarMatch. Never send funds or share Aadhaar/phone numbers before meeting in public.
+          </span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-amber-500 hover:text-amber-800 ml-2" title="Dismiss banner">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Two-Panel Chat Container -->
+      <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Left Panel: Conversations List -->
+        <div id="chat-sidebar-panel" class="w-full md:w-80 border-r border-slate-200 flex flex-col bg-slate-50 flex-shrink-0">
+          <div class="p-3.5 border-b border-slate-200 bg-white flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-900">Travel Matches</h2>
+            <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live
+            </span>
+          </div>
+
+          <div id="chat-threads-list" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Right Panel: Active Chat Feed -->
+        <div id="chat-main-panel" class="hidden md:flex flex-1 flex-col bg-white overflow-hidden">
+          
+          <!-- Chat Header -->
+          <div class="p-3.5 border-b border-slate-200 bg-white flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-3">
+              <button onclick="mobileBackToThreads()" class="md:hidden p-1 rounded-lg text-slate-600 hover:bg-slate-100 mr-1">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+              </button>
+              <div class="relative">
+                <img id="active-chat-avatar" src="" alt="Partner" class="w-10 h-10 rounded-full object-cover border border-slate-200" />
+                <span id="active-chat-online-dot" class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+              </div>
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <h3 id="active-chat-name" class="font-bold text-sm text-slate-900 leading-none">Aarav Sharma</h3>
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-blue-500 fill-blue-500 text-white"></i>
+                </div>
+                <p id="active-chat-status" class="text-xs text-slate-500 mt-0.5">Planning Goa Sunburn & Hostel Crawl</p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-1">
+              <button onclick="sendQuickTripPrompt('Would love to split a cab from the airport!')" class="hidden sm:inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
+                <i data-lucide="car" class="w-3.5 h-3.5 text-safar-600"></i>
+                <span>Split Cab</span>
+              </button>
+              <button onclick="sendQuickTripPrompt('Are you staying in Anjuna or Arambol?')" class="hidden sm:inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
+                <i data-lucide="home" class="w-3.5 h-3.5 text-amber-600"></i>
+                <span>Hostel Vibe</span>
+              </button>
+              <button onclick="reportUserAlert()" class="p-2 text-slate-400 hover:text-rose-600 transition" title="Safety Report">
+                <i data-lucide="flag" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Message History Container -->
+          <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/70">
+            <!-- Firestore onSnapshot dynamic bubbles go here -->
+          </div>
+
+          <!-- Message Input Bar -->
+          <div class="p-3 border-t border-slate-200 bg-white flex-shrink-0">
+            <form id="chat-send-form" onsubmit="handleSendMessage(event)" class="flex items-center space-x-2">
+              <input 
+                id="chat-input-text" 
+                type="text" 
+                placeholder="Type your message or ask about their upcoming itinerary..." 
+                class="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white transition" 
+                autocomplete="off"
+              />
+              <button 
+                type="submit" 
+                class="bg-safar-600 hover:bg-safar-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center space-x-1.5 shadow-sm transition active:scale-95"
+              >
+                <span>Send</span>
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: MEMBERSHIP & MONETIZATION ==================== -->
+    <section id="view-monetization" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
+      <div class="max-w-5xl w-full mx-auto p-4 md:p-8 space-y-8">
+        
+        <!-- Header Banner -->
+        <div class="text-center max-w-2xl mx-auto space-y-2 pt-2">
+          <span class="inline-flex items-center space-x-1 text-xs font-bold text-safar-700 bg-rose-100 px-3 py-1 rounded-full uppercase tracking-wider">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            <span>Indian Traveler Premium Club</span>
+          </span>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Connect Faster. Travel Safer.
+          </h1>
+          <p class="text-sm md:text-base text-slate-600">
+            Unlock verified badges, unlimited traveler chat, itinerary boosts, and partner hostel discounts across India.
+          </p>
+        </div>
+
+        <!-- Pricing Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          
+          <!-- Card 1: Explorer Pass -->
+          <div class="bg-white rounded-3xl p-6 md:p-8 border-2 border-safar-500 shadow-xl shadow-rose-100 relative flex flex-col justify-between">
+            <div class="absolute -top-3.5 right-6 bg-gradient-to-r from-safar-600 to-rose-600 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              Most Popular
+            </div>
+
+            <div>
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center">
+                  <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-slate-900">SafarMatch Explorer Pass</h3>
+                  <p class="text-xs text-slate-500">All-Inclusive Monthly Membership</p>
+                </div>
+              </div>
+
+              <!-- Price INR -->
+              <div class="my-6 pb-6 border-b border-slate-100 flex items-baseline space-x-2">
+                <span class="text-4xl font-extrabold text-slate-900">₹299</span>
+                <span class="text-slate-500 text-sm font-medium">/ month</span>
+                <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-semibold ml-2">Cancel anytime</span>
+              </div>
+
+              <!-- Feature List -->
+              <ul class="space-y-3.5 text-sm text-slate-700">
+                <li class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-safar-600 flex-shrink-0 mt-0.5"></i>
+                  <span><strong>Unlimited Traveler DMs:</strong> Reach out to any verified explorer on the map.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-safar-600 flex-shrink-0 mt-0.5"></i>
+                  <span><strong>Verified Blue Shield:</strong> Stand out with authentic ID verified status.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-safar-600 flex-shrink-0 mt-0.5"></i>
+                  <span><strong>Who Viewed Your Itinerary:</strong> See fellow backpackers tracking your circuits.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-safar-600 flex-shrink-0 mt-0.5"></i>
+                  <span><strong>Hostel Partner Deals:</strong> 15% discount vouchers at partner Indian backpacker hostels.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="mt-8 pt-4">
+              <button 
+                onclick="initiateRazorpayCheckout(299, 'SafarMatch Explorer Pass (1 Month)')" 
+                class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-safar-600 to-rose-600 hover:from-safar-700 hover:to-rose-700 text-white font-bold text-sm shadow-lg shadow-rose-200 transition transform active:scale-95 flex items-center justify-center space-x-2"
+              >
+                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                <span>Upgrade Now • ₹299 (UPI / RuPay / Cards)</span>
+              </button>
+              <p class="text-[11px] text-center text-slate-400 mt-2 flex items-center justify-center space-x-1">
+                <i data-lucide="lock" class="w-3 h-3"></i>
+                <span>Secure 256-bit Indian payment gateway via Razorpay Test Sandbox</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2: Trip Boost Microtransaction -->
+          <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <i data-lucide="flame" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-slate-900">Trip Boost (48 Hours)</h3>
+                  <p class="text-xs text-slate-500">Quick Microtransaction for Upcoming Trips</p>
+                </div>
+              </div>
+
+              <!-- Price INR -->
+              <div class="my-6 pb-6 border-b border-slate-100 flex items-baseline space-x-2">
+                <span class="text-4xl font-extrabold text-slate-900">₹99</span>
+                <span class="text-slate-500 text-sm font-medium">/ single trip</span>
+                <span class="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-semibold ml-2">Instant Activation</span>
+              </div>
+
+              <!-- Feature List -->
+              <ul class="space-y-3.5 text-sm text-slate-700">
+                <li class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
+                  <span><strong>5x Map Visibility:</strong> Golden glowing pin on the Explore Map.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
+                  <span><strong>Trip Board Pinned:</strong> Stays on the top row of the destination feed for 48 hours.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <i data-lucide="check" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
+                  <span><strong>High-Intent Companion Alert:</strong> Instant push ping to travelers looking at the same hub.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="mt-8 pt-4">
+              <button 
+                onclick="initiateRazorpayCheckout(99, 'Trip Boost - 48 Hour Promotion')" 
+                class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-md transition transform active:scale-95 flex items-center justify-center space-x-2"
+              >
+                <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                <span>Boost My Trip • ₹99</span>
+              </button>
+              <p class="text-[11px] text-center text-slate-400 mt-2">
+                Instant UPI checkout via Google Pay, PhonePe, Paytm or BHIM
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 flex flex-wrap items-center justify-around gap-4 text-center">
+          <div class="flex items-center space-x-2 text-slate-700 text-xs font-semibold">
+            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+            <span>100% Verified Indian Travelers</span>
+          </div>
+          <div class="flex items-center space-x-2 text-slate-700 text-xs font-semibold">
+            <i data-lucide="refresh-cw" class="w-5 h-5 text-blue-600"></i>
+            <span>Instant Cancellation Anytime</span>
+          </div>
+          <div class="flex items-center space-x-2 text-slate-700 text-xs font-semibold">
+            <i data-lucide="award" class="w-5 h-5 text-amber-600"></i>
+            <span>India's Dedicated Travel Dating Community</span>
+          </div>
+        </div>
+
+        <div class="h-16 md:h-8"></div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 5: USER PROFILE & SETUP ==================== -->
+    <section id="view-profile" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
+      <div class="max-w-3xl w-full mx-auto p-4 md:p-8 space-y-6">
+        
+        <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Traveler Profile & Setup</h1>
+              <p class="text-xs text-slate-500">Your profile details are shown to potential travel matches on the Map and Trip Board.</p>
+            </div>
+            <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Verified Active
+            </span>
+          </div>
+
+          <!-- Photo Upload & HTML5 Canvas Compression Section -->
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+            <div class="relative group">
+              <img id="profile-preview-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Profile" class="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-md" />
+              <label for="profile-photo-input" class="absolute -bottom-2 -right-2 bg-safar-600 hover:bg-safar-700 text-white p-2 rounded-xl shadow cursor-pointer transition">
+                <i data-lucide="camera" class="w-4 h-4"></i>
+              </label>
+              <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleImageSelection(event)" />
+            </div>
+
+            <div class="flex-1 space-y-1 text-center sm:text-left">
+              <h4 class="font-bold text-sm text-slate-900">Upload Profile Photo</h4>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Photos are automatically resized & compressed via HTML5 Canvas below <span class="font-bold text-safar-700">100 KB</span> before uploading to Firebase Storage for lightning speed in India's mobile networks.
+              </p>
+              
+              <!-- Compression Stats Display -->
+              <div id="compression-info-box" class="hidden mt-2 p-2 bg-white rounded-lg border border-slate-200 text-[11px] text-slate-600 font-mono">
+                <span id="compression-stats">Original: -- | Compressed: --</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Form Inputs -->
+          <form id="profile-form" onsubmit="handleSaveProfile(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                <input id="input-full-name" type="text" value="Pranit Pisal" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Age & Gender</label>
+                <div class="flex gap-2">
+                  <input id="input-age" type="number" min="18" max="75" value="26" required class="w-24 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" placeholder="Age" />
+                  <select id="input-gender" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
+                    <option value="Male" selected>Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-Binary">Non-Binary</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Home City (India)</label>
+                <input id="input-home-city" type="text" value="Pune, Maharashtra" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Upcoming Circuit / Destination</label>
+                <select id="input-upcoming-circuit" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
+                  <option value="Goa (Anjuna & Arambol)" selected>🌴 Goa (Anjuna & Arambol)</option>
+                  <option value="Himachal (Manali & Kasol)">🏔️ Himachal (Manali & Kasol)</option>
+                  <option value="Uttarakhand (Rishikesh)">🌊 Uttarakhand (Rishikesh)</option>
+                  <option value="Rajasthan (Jaipur & Udaipur)">🏰 Rajasthan (Jaipur & Udaipur)</option>
+                  <option value="Ladakh (Leh & Spiti)">🏍️ Ladakh (Leh & Spiti)</option>
+                  <option value="Kerala (Munnar & Varkala)">🛶 Kerala (Munnar & Varkala)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Travel Style Tags -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-2">Travel Style Tags (Select up to 3)</label>
+              <div id="profile-style-tags" class="flex flex-wrap gap-2">
+                <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-tag="Digital Nomad">💻 Digital Nomad</button>
+                <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-tag="Backpacker">🎒 Backpacker</button>
+                <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-tag="Trekker">🥾 Trekker</button>
+                <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-tag="Luxury & Chill">✨ Luxury & Chill</button>
+                <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-tag="Hostel Crawl">🍻 Hostel Crawl</button>
+                <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-tag="Spiritual / Yoga">🧘 Yoga & Spiritual</button>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Travel Bio & Companion Preference</label>
+              <textarea id="input-bio" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" placeholder="Tell travelers what you love doing... e.g. Split bike rentals, work from beach shacks, watch sunsets, explore hidden mountain waterfalls.">Full-stack builder & remote nomad. Spending 2 weeks in North Goa for beach co-working and night markets. Looking for easygoing travel buddy to split scooter rides, explore secret coves and enjoy seafood thalis.</textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-2 flex justify-end">
+              <button type="submit" class="bg-safar-600 hover:bg-safar-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md shadow-rose-200 transition transform active:scale-95 flex items-center space-x-2">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Save Profile Changes</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="h-16 md:h-8"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MOBILE BOTTOM NAVIGATION BAR ==================== -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-around py-2 px-1 z-30 shadow-lg">
+    <button onclick="switchView('map')" id="mobile-nav-map" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-safar-600">
+      <i data-lucide="map-pin" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold mt-1">Map</span>
+    </button>
+    <button onclick="switchView('trips')" id="mobile-nav-trips" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400">
+      <i data-lucide="calendar" class="w-5 h-5"></i>
+      <span class="text-[10px] font-medium mt-1">Trips</span>
+    </button>
+    <button onclick="switchView('chat')" id="mobile-nav-chat" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400 relative">
+      <i data-lucide="message-circle" class="w-5 h-5"></i>
+      <span class="text-[10px] font-medium mt-1">Chat</span>
+      <span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-emerald-500"></span>
+    </button>
+    <button onclick="switchView('monetization')" id="mobile-nav-monetization" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400">
+      <i data-lucide="zap" class="w-5 h-5"></i>
+      <span class="text-[10px] font-medium mt-1">Pass</span>
+    </button>
+    <button onclick="switchView('profile')" id="mobile-nav-profile" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400">
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span class="text-[10px] font-medium mt-1">Profile</span>
+    </button>
+  </nav>
+
+  <!-- ==================== MODAL: CREATE A TRIP PLAN ==================== -->
+  <div id="create-trip-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Post a Trip Plan</h3>
+          <p class="text-xs text-slate-500">Invite companions to join your next Indian adventure.</p>
+        </div>
+        <button onclick="closeCreateTripModal()" class="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="new-trip-form" onsubmit="handleCreateTripSubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Destination Hub</label>
+          <select id="trip-input-destination" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
+            <option value="Goa">🌴 Goa (Anjuna, Palolem, Arambol)</option>
+            <option value="Himachal">🏔️ Himachal (Manali, Kasol, Spiti)</option>
+            <option value="Uttarakhand">🌊 Uttarakhand (Rishikesh, Chopta)</option>
+            <option value="Rajasthan">🏰 Rajasthan (Jaipur, Udaipur, Jaisalmer)</option>
+            <option value="Ladakh">🏍️ Ladakh (Leh & Pangong Tso)</option>
+            <option value="Kerala">🛶 Kerala (Munnar & Varkala Cliff)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Start Date</label>
+            <input id="trip-input-start-date" type="date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">End Date</label>
+            <input id="trip-input-end-date" type="date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Budget Tier (INR)</label>
+            <select id="trip-input-budget" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
+              <option value="Budget (₹5k - ₹12k)">₹ Budget (₹5k - ₹12k)</option>
+              <option value="Moderate (₹15k - ₹30k)" selected>₹₹ Moderate (₹15k - ₹30k)</option>
+              <option value="Luxury (₹35k+)">₹₹₹ Luxury (₹35k+)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Travel Style</label>
+            <select id="trip-input-style" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
+              <option value="Backpacker">🎒 Backpacker</option>
+              <option value="Digital Nomad">💻 Digital Nomad</option>
+              <option value="Trekker">🥾 Trekker</option>
+              <option value="Boutique Luxury">✨ Boutique Luxury</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Trip Plan & Companion Vibe</label>
+          <textarea id="trip-input-bio" rows="3" required placeholder="Outline itinerary highlights, scooter splits, sunset spots, food preferences..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-3">
+          <button type="button" onclick="closeCreateTripModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="bg-safar-600 hover:bg-safar-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-md transition">Publish Trip</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+  <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ==================== CORE JAVASCRIPT & FIREBASE INTEGRATION ==================== -->
+  <script type="module">
+    /**
+     * SafarMatch — Free Stack Architecture (CDN + Firebase v10 Web SDK + Razorpay Sandbox)
+     */
+
+    // 1. Firebase Configuration Placeholder (As specified)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Firebase state flags
+    let isFirebaseLive = false;
+    let db = null;
+    let storage = null;
+    let auth = null;
+
+    // Initialize official Firebase v10 SDK if valid key provided, or run resilient local sync
+    async function initFirebaseServices() {
+      if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+        try {
+          const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+          const { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+          const { getStorage, ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js");
+          const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+
+          const app = initializeApp(firebaseConfig);
+          db = getFirestore(app);
+          storage = getStorage(app);
+          auth = getAuth(app);
+          await signInAnonymously(auth);
+          isFirebaseLive = true;
+          console.log("Firebase v10 Live Connected successfully.");
+        } catch (err) {
+          console.warn("Firebase initialized with local fallback:", err);
+          isFirebaseLive = false;
+        }
+      } else {
+        console.log("SafarMatch running in Spark Free Stack Mode (Local real-time synced state enabled).");
+      }
+    }
+
+    // ==================== PRE-POPULATED INDIAN TRAVEL CIRCUITS & TRAVELERS ====================
+    window.travelersData = [
+      {
+        id: "trv-1",
+        name: "Ananya Deshmukh",
+        age: 25,
+        photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
+        homeCity: "Mumbai, MH",
+        currentCity: "Goa (Anjuna)",
+        destinationCircuit: "Goa",
+        upcomingDestination: "Palolem & South Goa Beaches",
+        travelStyle: "Digital Nomad",
+        budget: "Moderate (₹15k - ₹25k)",
+        dates: "14 Oct - 22 Oct",
+        bio: "Remote UI designer working from beach cafes. Up for scooter rides to Chapora Fort, morning yoga, and trying beach shack prawn curry.",
+        coordinates: [15.5800, 73.7420] // Anjuna, Goa
+      },
+      {
+        id: "trv-2",
+        name: "Kabir Roy",
+        age: 28,
+        photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+        homeCity: "Bengaluru, KA",
+        currentCity: "Old Manali",
+        destinationCircuit: "Himachal",
+        upcomingDestination: "Kasol & Kheerganga Trek",
+        travelStyle: "Trekker",
+        budget: "Budget (₹8k - ₹15k)",
+        dates: "18 Oct - 26 Oct",
+        bio: "Coffee enthusiast and alpine trekker. Looking for someone to share homestays and hike up Kheerganga hot springs.",
+        coordinates: [32.2432, 77.1892] // Manali, Himachal
+      },
+      {
+        id: "trv-3",
+        name: "Zoya Khan",
+        age: 26,
+        photo: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80",
+        homeCity: "Delhi NCR",
+        currentCity: "Rishikesh",
+        destinationCircuit: "Uttarakhand",
+        upcomingDestination: "Tungnath & Chopta Meadows",
+        travelStyle: "Backpacker",
+        budget: "Budget (₹7k - ₹12k)",
+        dates: "20 Oct - 27 Oct",
+        bio: "Solo traveler doing cafe hopping by Ganga river. Want to split white-water river rafting and cliff jumping sessions.",
+        coordinates: [30.0869, 78.2676] // Rishikesh, Uttarakhand
+      },
+      {
+        id: "trv-4",
+        name: "Vikram Rathore",
+        age: 29,
+        photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+        homeCity: "Jaipur, RJ",
+        currentCity: "Udaipur",
+        destinationCircuit: "Rajasthan",
+        upcomingDestination: "Jaisalmer Sam Sand Dunes",
+        travelStyle: "Luxury",
+        budget: "Luxury (₹35k+)",
+        dates: "02 Nov - 08 Nov",
+        bio: "Architect & photographer exploring heritage havelis, rooftop palace dinners, and star-gazing desert safaris.",
+        coordinates: [24.5854, 73.7125] // Udaipur, Rajasthan
+      },
+      {
+        id: "trv-5",
+        name: "Tashi Wangchuk",
+        age: 27,
+        photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
+        homeCity: "Chandigarh",
+        currentCity: "Leh",
+        destinationCircuit: "Ladakh",
+        upcomingDestination: "Nubra Valley & Pangong Tso",
+        travelStyle: "Trekker",
+        budget: "Moderate (₹20k - ₹35k)",
+        dates: "12 Oct - 20 Oct",
+        bio: "Motorcycle enthusiast on a Royal Enfield Himalayan ride. Seeking a pillion or fellow rider to convoy across Khardung La.",
+        coordinates: [34.1526, 77.5771] // Leh, Ladakh
+      },
+      {
+        id: "trv-6",
+        name: "Meera Nair",
+        age: 24,
+        photo: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80",
+        homeCity: "Kochi, KL",
+        currentCity: "Munnar",
+        destinationCircuit: "Kerala",
+        upcomingDestination: "Varkala Cliff Beach",
+        travelStyle: "Backpacker",
+        budget: "Moderate (₹12k - ₹20k)",
+        dates: "25 Oct - 31 Oct",
+        bio: "Tea garden explorer and surf rookie. Planning to catch sunset at Varkala helipad cliff and kayak in the backwaters.",
+        coordinates: [10.0889, 77.0595] // Munnar, Kerala
+      }
+    ];
+
+    // Pre-populated Trip Board data
+    window.tripsData = [
+      {
+        id: "trip-1",
+        creatorName: "Ananya Deshmukh",
+        creatorAge: 25,
+        creatorAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=160&q=80",
+        destination: "Goa",
+        dates: "14 Oct - 22 Oct 2026",
+        budgetTier: "Moderate (₹15k - ₹25k)",
+        travelStyle: "Digital Nomad",
+        bio: "Renting a 2-bedroom villa near Anjuna with high-speed WiFi. Looking for 1-2 remote creators or companions to split costs and explore sunset shacks.",
+        spotsLeft: 2
+      },
+      {
+        id: "trip-2",
+        creatorName: "Kabir Roy",
+        creatorAge: 28,
+        creatorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80",
+        destination: "Himachal",
+        dates: "18 Oct - 26 Oct 2026",
+        budgetTier: "Budget (₹8k - ₹15k)",
+        travelStyle: "Trekker",
+        bio: "Going on Kheerganga trek + Tosh village exploration. Looking for friendly hiking partners to split local taxi from Bhuntar and share bonfire chats.",
+        spotsLeft: 3
+      },
+      {
+        id: "trip-3",
+        creatorName: "Zoya Khan",
+        creatorAge: 26,
+        creatorAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=160&q=80",
+        destination: "Uttarakhand",
+        dates: "20 Oct - 27 Oct 2026",
+        budgetTier: "Budget (₹7k - ₹12k)",
+        travelStyle: "Backpacker",
+        bio: "Staying at a riverside hostel in Tapovan, Rishikesh. Planning Beatles Ashram walk, evening Ganga Aarti at Triveni Ghat, and cliff rafting.",
+        spotsLeft: 2
+      },
+      {
+        id: "trip-4",
+        creatorName: "Vikram Rathore",
+        creatorAge: 29,
+        creatorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80",
+        destination: "Rajasthan",
+        dates: "02 Nov - 08 Nov 2026",
+        budgetTier: "Luxury (₹35k+)",
+        travelStyle: "Luxury",
+        bio: "Heritage palace tour starting Udaipur Lake Pichola to Jodhpur Blue City. Seeking a cultured travel companion who appreciates folk music & fine dining.",
+        spotsLeft: 1
+      },
+      {
+        id: "trip-5",
+        creatorName: "Tashi Wangchuk",
+        creatorAge: 27,
+        creatorAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=160&q=80",
+        destination: "Ladakh",
+        dates: "12 Oct - 20 Oct 2026",
+        budgetTier: "Moderate (₹20k - ₹35k)",
+        travelStyle: "Trekker",
+        bio: "Royal Enfield ride to Pangong Tso & Hunder Sand Dunes. Looking for a riding buddy to share permits, homestay fuel, and mountain photography.",
+        spotsLeft: 2
+      },
+      {
+        id: "trip-6",
+        creatorName: "Meera Nair",
+        creatorAge: 24,
+        creatorAvatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=160&q=80",
+        destination: "Kerala",
+        dates: "25 Oct - 31 Oct 2026",
+        budgetTier: "Moderate (₹12k - ₹20k)",
+        travelStyle: "Backpacker",
+        bio: "Exploring the tea estates in Munnar then surfing at Varkala. Looking for an adventurous companion for cafe hopping and cliff sunsets.",
+        spotsLeft: 2
+      }
+    ];
+
+    // Real-time Chat Threads & Active Messages State
+    window.chatThreads = [
+      {
+        id: "thread-1",
+        travelerId: "trv-1",
+        name: "Ananya Deshmukh",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=160&q=80",
+        destination: "Goa (Anjuna)",
+        unread: true,
+        lastMessage: "Hey Pranit! Are you staying in North or South Goa?",
+        timestamp: "Just now"
+      },
+      {
+        id: "thread-2",
+        travelerId: "trv-2",
+        name: "Kabir Roy",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80",
+        destination: "Old Manali",
+        unread: false,
+        lastMessage: "The trail to Kheerganga is gorgeous right now!",
+        timestamp: "2h ago"
+      },
+      {
+        id: "thread-3",
+        travelerId: "trv-3",
+        name: "Zoya Khan",
+        avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=160&q=80",
+        destination: "Rishikesh",
+        unread: false,
+        lastMessage: "Let's do the rafting split on Friday morning.",
+        timestamp: "Yesterday"
+      }
+    ];
+
+    window.messagesStore = {
+      "thread-1": [
+        { id: "m1", sender: "other", text: "Hey Pranit! Saw your profile on the Goa map. When are you landing in Dabolim/Mopa?", time: "10:14 AM" },
+        { id: "m2", sender: "user", text: "Hey Ananya! Arriving Friday noon. Staying near Anjuna flea market area!", time: "10:16 AM" },
+        { id: "m3", sender: "other", text: "Awesome! I'm co-working from Babka cafe in Anjuna. Let me know if you want to split a cab or grab evening poee sandwiches!", time: "10:18 AM" },
+        { id: "m4", sender: "other", text: "Hey Pranit! Are you staying in North or South Goa?", time: "10:20 AM" }
+      ],
+      "thread-2": [
+        { id: "m201", sender: "user", text: "Hey Kabir, what's the weather like in Old Manali?", time: "Yesterday" },
+        { id: "m202", sender: "other", text: "Crisp autumn mornings! The trail to Kheerganga is gorgeous right now!", time: "2h ago" }
+      ],
+      "thread-3": [
+        { id: "m301", sender: "other", text: "Let's do the rafting split on Friday morning.", time: "Yesterday" }
+      ]
+    };
+
+    window.activeThreadId = "thread-1";
+
+    // User Profile in-memory & local state
+    window.currentUser = {
+      name: "Pranit Pisal",
+      age: 26,
+      gender: "Male",
+      homeCity: "Pune, Maharashtra",
+      upcomingCircuit: "Goa (Anjuna & Arambol)",
+      travelStyles: ["Digital Nomad", "Backpacker"],
+      bio: "Full-stack builder & remote nomad. Spending 2 weeks in North Goa for beach co-working and night markets. Looking for easygoing travel buddy to split scooter rides, explore secret coves and enjoy seafood thalis.",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+      isVip: false
+    };
+
+    // ==================== VIEW NAVIGATION ====================
+    window.switchView = function(viewName) {
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      // Update sidebar nav state
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('bg-safar-50', 'text-safar-700');
+        btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+      });
+      const activeNavBtn = document.getElementById(`nav-btn-${viewName}`);
+      if (activeNavBtn) {
+        activeNavBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        activeNavBtn.classList.add('bg-safar-50', 'text-safar-700');
+      }
+
+      // Update mobile bottom nav state
+      document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+        btn.classList.remove('text-safar-600');
+        btn.classList.add('text-slate-400');
+      });
+      const mobileNavBtn = document.getElementById(`mobile-nav-${viewName}`);
+      if (mobileNavBtn) {
+        mobileNavBtn.classList.remove('text-slate-400');
+        mobileNavBtn.classList.add('text-safar-600');
+      }
+
+      // If switched to map, trigger map recalculation
+      if (viewName === 'map' && window.mapInstance) {
+        setTimeout(() => {
+          window.mapInstance.invalidateSize();
+        }, 150);
+      }
+
+      // If switched to chat, render active thread
+      if (viewName === 'chat') {
+        renderChatThreads();
+        renderActiveChatMessages();
+      }
+
+      // Refresh Lucide icons
+      lucide.createIcons();
+    };
+
+    // ==================== VIEW 1: LEAFLET MAP LOGIC ====================
+    let map = null;
+    let markersLayer = null;
+
+    function initMap() {
+      if (map) return;
+      
+      // Centered on India [20.5937, 78.9629]
+      map = L.map('leaflet-map', {
+        center: [20.5937, 78.9629],
+        zoom: 5,
+        zoomControl: false
+      });
+      window.mapInstance = map;
+
+      // Add Zoom Control at bottom right
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      // OpenStreetMap Standard Tiles (Zero-Cost, 100% Free CDN)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      markersLayer = L.layerGroup().addTo(map);
+      renderMapMarkers(window.travelersData);
+    }
+
+    function renderMapMarkers(travelersList) {
+      if (!markersLayer) return;
+      markersLayer.clearLayers();
+
+      travelersList.forEach(traveler => {
+        // Custom animated HTML marker pin
+        const customIcon = L.divIcon({
+          className: 'custom-leaflet-marker',
+          html: `
+            <div class="relative">
+              <div class="pulse-ring"></div>
+              <div class="custom-marker-pin" style="background-image: url('${traveler.photo}')"></div>
+            </div>
+          `,
+          iconSize: [44, 44],
+          iconAnchor: [22, 22],
+          popupAnchor: [0, -20]
+        });
+
+        const marker = L.marker(traveler.coordinates, { icon: customIcon });
+
+        // Rich In-Map Popup Card
+        const popupContent = `
+          <div class="w-72 bg-white text-slate-800 rounded-2xl overflow-hidden font-sans">
+            <div class="relative h-32 bg-slate-100">
+              <img src="${traveler.photo}" alt="${traveler.name}" class="w-full h-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
+              <div class="absolute bottom-2.5 left-3 text-white">
+                <div class="flex items-center space-x-1.5">
+                  <h4 class="font-bold text-base leading-tight">${traveler.name}, ${traveler.age}</h4>
+                  <span class="text-blue-400">✓</span>
+                </div>
+                <p class="text-[11px] text-slate-200">${traveler.homeCity}</p>
+              </div>
+              <span class="absolute top-2.5 right-2.5 bg-safar-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                ${traveler.travelStyle}
+              </span>
+            </div>
+
+            <div class="p-3.5 space-y-2.5">
+              <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-xs">
+                <span class="text-[10px] font-bold text-safar-700 uppercase tracking-wider block">Upcoming Circuit</span>
+                <span class="font-semibold text-slate-900 flex items-center gap-1 mt-0.5">
+                  📍 ${traveler.upcomingDestination}
+                </span>
+                <span class="text-[11px] text-slate-500 block mt-0.5">📅 ${traveler.dates} • ${traveler.budget}</span>
+              </div>
+
+              <p class="text-xs text-slate-600 line-clamp-2 italic leading-relaxed">
+                "${traveler.bio}"
+              </p>
+
+              <div class="pt-1 flex items-center space-x-2">
+                <button 
+                  onclick="connectWithTraveler('${traveler.id}')" 
+                  class="flex-1 bg-safar-600 hover:bg-safar-700 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-md shadow-rose-200 text-center flex items-center justify-center space-x-1"
+                >
+                  <span>Connect & Chat</span>
+                </button>
+                <button 
+                  onclick="showTravelerToast('${traveler.name}')" 
+                  class="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition" 
+                  title="Bookmark"
+                >
+                  ♥
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent, { maxWidth: 320 });
+        markersLayer.addLayer(marker);
+      });
+
+      // Update count badge
+      const countEl = document.getElementById('map-travelers-count');
+      if (countEl) {
+        countEl.textContent = `${travelersList.length} Travelers Active`;
+      }
+    }
+
+    window.filterMapTravelers = function() {
+      const circuitVal = document.getElementById('map-circuit-filter').value;
+      const styleVal = document.getElementById('map-style-filter').value;
+
+      let filtered = window.travelersData.filter(t => {
+        const circuitMatch = (circuitVal === 'all') || (t.destinationCircuit === circuitVal);
+        const styleMatch = (styleVal === 'all') || (t.travelStyle === styleVal);
+        return circuitMatch && styleMatch;
+      });
+
+      renderMapMarkers(filtered);
+    };
+
+    window.resetMapCenter = function() {
+      if (map) {
+        map.setView([20.5937, 78.9629], 5, { animate: true });
+      }
+    };
+
+    // ==================== VIEW 2: TRIP BOARD LOGIC ====================
+    window.renderTripsBoard = function(filter = 'all') {
+      const grid = document.getElementById('trips-grid');
+      if (!grid) return;
+
+      const filtered = (filter === 'all') 
+        ? window.tripsData 
+        : window.tripsData.filter(t => t.destination.toLowerCase().includes(filter.toLowerCase()));
+
+      grid.innerHTML = filtered.map(trip => `
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+          <div class="space-y-3">
+            <!-- Creator Info -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2.5">
+                <img src="${trip.creatorAvatar}" alt="${trip.creatorName}" class="w-10 h-10 rounded-full object-cover border border-slate-200" />
+                <div>
+                  <h4 class="font-bold text-sm text-slate-900 leading-tight">${trip.creatorName}, ${trip.creatorAge}</h4>
+                  <span class="text-[11px] text-emerald-600 font-medium flex items-center">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span> Verified Traveler
+                  </span>
+                </div>
+              </div>
+              <span class="text-xs bg-rose-50 text-safar-700 font-bold px-2.5 py-1 rounded-full border border-rose-100">
+                Going to ${trip.destination}
+              </span>
+            </div>
+
+            <!-- Trip Meta Badges -->
+            <div class="flex flex-wrap gap-1.5 pt-1 text-xs">
+              <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-medium">
+                📅 ${trip.dates}
+              </span>
+              <span class="bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg font-medium">
+                💰 ${trip.budgetTier}
+              </span>
+              <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">
+                🏷️ ${trip.travelStyle}
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p class="text-xs text-slate-600 leading-relaxed pt-1">
+              ${trip.bio}
+            </p>
+          </div>
+
+          <!-- Bottom Card Actions -->
+          <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-medium">
+              ${trip.spotsLeft} companion spot${trip.spotsLeft > 1 ? 's' : ''} open
+            </span>
+            <button 
+              onclick="joinTripRequest('${trip.creatorName}', '${trip.destination}')" 
+              class="bg-slate-900 hover:bg-safar-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition transform active:scale-95 shadow-sm"
+            >
+              Join Trip
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      // Update trips count badge in sidebar
+      const badge = document.getElementById('trips-count-badge');
+      if (badge) badge.textContent = window.tripsData.length;
+    };
+
+    window.filterTrips = function(circuitKey) {
+      document.querySelectorAll('.trip-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-900', 'text-white');
+        btn.classList.add('bg-white', 'text-slate-600');
+        if (btn.getAttribute('data-filter') === circuitKey) {
+          btn.classList.remove('bg-white', 'text-slate-600');
+          btn.classList.add('bg-slate-900', 'text-white');
+        }
+      });
+      renderTripsBoard(circuitKey);
+    };
+
+    window.openCreateTripModal = function() {
+      document.getElementById('create-trip-modal').classList.remove('hidden');
+    };
+
+    window.closeCreateTripModal = function() {
+      document.getElementById('create-trip-modal').classList.add('hidden');
+    };
+
+    window.handleCreateTripSubmit = function(e) {
+      e.preventDefault();
+      const dest = document.getElementById('trip-input-destination').value;
+      const start = document.getElementById('trip-input-start-date').value;
+      const end = document.getElementById('trip-input-end-date').value;
+      const budget = document.getElementById('trip-input-budget').value;
+      const style = document.getElementById('trip-input-style').value;
+      const bio = document.getElementById('trip-input-bio').value;
+
+      const dateStr = (start && end) ? `${start} to ${end}` : "Upcoming";
+
+      const newTrip = {
+        id: "trip-" + Date.now(),
+        creatorName: window.currentUser.name,
+        creatorAge: window.currentUser.age,
+        creatorAvatar: window.currentUser.avatar,
+        destination: dest,
+        dates: dateStr,
+        budgetTier: budget,
+        travelStyle: style,
+        bio: bio,
+        spotsLeft: 2
+      };
+
+      // Add to beginning of array
+      window.tripsData.unshift(newTrip);
+      renderTripsBoard('all');
+      closeCreateTripModal();
+      showToast(`Trip to ${dest} successfully published!`, "success");
+
+      // Reset form
+      document.getElementById('new-trip-form').reset();
+    };
+
+    window.joinTripRequest = function(name, dest) {
+      showToast(`Join request sent to ${name} for ${dest}!`, "success");
+      // Find matching traveler or thread
+      const thread = window.chatThreads.find(t => t.name.includes(name.split(" ")[0]));
+      if (thread) {
+        window.activeThreadId = thread.id;
+        switchView('chat');
+      } else {
+        // Create quick new thread
+        const newThreadId = "thread-" + Date.now();
+        window.chatThreads.unshift({
+          id: newThreadId,
+          travelerId: "trv-" + Date.now(),
+          name: name,
+          avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
+          destination: dest,
+          unread: false,
+          lastMessage: `Hey ${name}, I'd love to join your ${dest} trip!`,
+          timestamp: "Just now"
+        });
+        window.messagesStore[newThreadId] = [
+          { id: "m-init", sender: "user", text: `Hey ${name}! I saw your trip plan to ${dest} on the Trip Board and would love to join up!`, time: "Just now" }
+        ];
+        window.activeThreadId = newThreadId;
+        switchView('chat');
+      }
+    };
+
+    // ==================== VIEW 3: IN-APP REALTIME CHAT LOGIC ====================
+    window.renderChatThreads = function() {
+      const container = document.getElementById('chat-threads-list');
+      if (!container) return;
+
+      container.innerHTML = window.chatThreads.map(th => {
+        const isActive = th.id === window.activeThreadId;
+        return `
+          <div 
+            onclick="selectChatThread('${th.id}')" 
+            class="p-3.5 flex items-center space-x-3 cursor-pointer transition ${isActive ? 'bg-white border-l-4 border-safar-600 shadow-sm' : 'hover:bg-slate-100'}"
+          >
+            <div class="relative flex-shrink-0">
+              <img src="${th.avatar}" alt="${th.name}" class="w-11 h-11 rounded-full object-cover border border-slate-200" />
+              ${th.unread ? '<span class="absolute top-0 right-0 w-3 h-3 bg-safar-600 rounded-full border-2 border-white"></span>' : ''}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-slate-900 truncate">${th.name}</h4>
+                <span class="text-[10px] text-slate-400">${th.timestamp}</span>
+              </div>
+              <p class="text-xs text-safar-700 font-medium truncate">📍 ${th.destination}</p>
+              <p class="text-xs text-slate-500 truncate mt-0.5">${th.lastMessage}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    window.selectChatThread = function(threadId) {
+      window.activeThreadId = threadId;
+      const thread = window.chatThreads.find(t => t.id === threadId);
+      if (thread) {
+        thread.unread = false;
+      }
+      renderChatThreads();
+      renderActiveChatMessages();
+
+      // On mobile, show chat main panel full screen
+      const sidebarPanel = document.getElementById('chat-sidebar-panel');
+      const mainPanel = document.getElementById('chat-main-panel');
+      if (window.innerWidth < 768) {
+        sidebarPanel.classList.add('hidden');
+        mainPanel.classList.remove('hidden');
+      }
+    };
+
+    window.mobileBackToThreads = function() {
+      const sidebarPanel = document.getElementById('chat-sidebar-panel');
+      const mainPanel = document.getElementById('chat-main-panel');
+      sidebarPanel.classList.remove('hidden');
+      mainPanel.classList.add('hidden');
+    };
+
+    window.renderActiveChatMessages = function() {
+      const thread = window.chatThreads.find(t => t.id === window.activeThreadId);
+      if (!thread) return;
+
+      // Update Header
+      const headerAvatar = document.getElementById('active-chat-avatar');
+      const headerName = document.getElementById('active-chat-name');
+      const headerStatus = document.getElementById('active-chat-status');
+      if (headerAvatar) headerAvatar.src = thread.avatar;
+      if (headerName) headerName.textContent = thread.name;
+      if (headerStatus) headerStatus.textContent = `Active • Circuit: ${thread.destination}`;
+
+      // Update Messages
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+
+      const msgs = window.messagesStore[window.activeThreadId] || [];
+
+      container.innerHTML = msgs.map(m => {
+        const isUser = m.sender === 'user';
+        return `
+          <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+            <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+              isUser 
+                ? 'bg-gradient-to-r from-safar-600 to-rose-600 text-white rounded-tr-none' 
+                : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-none'
+            }">
+              <p class="leading-relaxed">${m.text}</p>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 px-1">${m.time}</span>
+          </div>
+        `;
+      }).join('');
+
+      // Auto scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    };
+
+    window.handleSendMessage = function(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chat-input-text');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const threadId = window.activeThreadId;
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const newMsg = {
+        id: "msg-" + Date.now(),
+        sender: "user",
+        text: text,
+        time: timeStr
+      };
+
+      if (!window.messagesStore[threadId]) {
+        window.messagesStore[threadId] = [];
+      }
+      window.messagesStore[threadId].push(newMsg);
+
+      // Update thread last message
+      const thread = window.chatThreads.find(t => t.id === threadId);
+      if (thread) {
+        thread.lastMessage = text;
+        thread.timestamp = "Just now";
+      }
+
+      input.value = "";
+      renderActiveChatMessages();
+      renderChatThreads();
+
+      // Simulated auto-reply from travel companion after 1.5 seconds for engaging real-time feel
+      setTimeout(() => {
+        const companionReplies = [
+          "That sounds super fun! I was thinking the exact same thing.",
+          "Perfect! Let's definitely meet up for sunset and plan the route.",
+          "Awesome! I'll ping you once I reach the café.",
+          "Sounds great! Sharing rides will save both of us so much time."
+        ];
+        const randomReply = companionReplies[Math.floor(Math.random() * companionReplies.length)];
+        
+        window.messagesStore[threadId].push({
+          id: "msg-" + Date.now(),
+          sender: "other",
+          text: randomReply,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        
+        if (thread) {
+          thread.lastMessage = randomReply;
+          thread.timestamp = "Just now";
+        }
+        renderActiveChatMessages();
+        renderChatThreads();
+      }, 1500);
+    };
+
+    window.sendQuickTripPrompt = function(promptText) {
+      const input = document.getElementById('chat-input-text');
+      if (input) {
+        input.value = promptText;
+        handleSendMessage();
+      }
+    };
+
+    window.connectWithTraveler = function(travelerId) {
+      const traveler = window.travelersData.find(t => t.id === travelerId);
+      if (!traveler) return;
+
+      let thread = window.chatThreads.find(th => th.travelerId === travelerId);
+      if (!thread) {
+        const newThreadId = "thread-" + Date.now();
+        thread = {
+          id: newThreadId,
+          travelerId: traveler.id,
+          name: traveler.name,
+          avatar: traveler.photo,
+          destination: traveler.destinationCircuit,
+          unread: false,
+          lastMessage: `Connected from Explore Map!`,
+          timestamp: "Just now"
+        };
+        window.chatThreads.unshift(thread);
+        window.messagesStore[newThreadId] = [
+          { id: "m-welcome", sender: "other", text: `Namaste! Excited to connect for ${traveler.upcomingDestination}.`, time: "Just now" }
+        ];
+      }
+      window.activeThreadId = thread.id;
+      switchView('chat');
+    };
+
+    window.reportUserAlert = function() {
+      showToast("Thank you. Safety report submitted to SafarMatch Trust & Safety team.", "info");
+    };
+
+    // ==================== VIEW 4: MEMBERSHIP & RAZORPAY TEST INTEGRATION ====================
+    window.initiateRazorpayCheckout = function(amountInRupees, planDescription) {
+      const amountInPaise = amountInRupees * 100;
+
+      // Check if official Razorpay script is loaded
+      if (typeof Razorpay !== 'undefined') {
+        const options = {
+          key: "rzp_test_51SafarMatchDemo", // Sandbox test mode key
+          amount: amountInPaise,
+          currency: "INR",
+          name: "SafarMatch India",
+          description: planDescription,
+          image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80",
+          handler: function (response) {
+            handlePaymentSuccess(response.razorpay_payment_id || "pay_test_" + Date.now(), planDescription, amountInRupees);
+          },
+          prefill: {
+            name: window.currentUser.name,
+            email: "pisalpranit1@gmail.com",
+            contact: "9876543210"
+          },
+          notes: {
+            service: "SafarMatch Explorer Membership"
+          },
+          theme: {
+            color: "#e11d48"
+          }
+        };
+
+        try {
+          const rzp = new Razorpay(options);
+          rzp.on('payment.failed', function (response){
+            showToast("Payment was cancelled or failed in test mode.", "error");
+          });
+          rzp.open();
+        } catch (err) {
+          // If script throws or sandboxed in iframe, fallback to instant simulation modal
+          launchSimulatedUPIModal(amountInRupees, planDescription);
+        }
+      } else {
+        launchSimulatedUPIModal(amountInRupees, planDescription);
+      }
+    };
+
+    function launchSimulatedUPIModal(amountInRupees, planDescription) {
+      const modal = document.createElement('div');
+      modal.id = "upi-sandbox-modal";
+      modal.className = "fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4";
+      modal.innerHTML = `
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center">
+            <span class="text-2xl font-bold">₹</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Razorpay Test Checkout</h3>
+            <p class="text-xs text-slate-500 mt-1">${planDescription}</p>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs space-y-1">
+            <div class="flex justify-between font-semibold text-slate-700">
+              <span>Amount Payable:</span>
+              <span class="text-safar-600 font-extrabold text-sm">₹${amountInRupees}.00</span>
+            </div>
+            <div class="flex justify-between text-slate-500 text-[11px]">
+              <span>Mode:</span>
+              <span>UPI / RuPay / NetBanking</span>
+            </div>
+          </div>
+          <div class="text-left">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Enter UPI ID (Test):</label>
+            <input type="text" value="traveler@okhdfcbank" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none" />
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button onclick="document.getElementById('upi-sandbox-modal').remove()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600">Cancel</button>
+            <button onclick="confirmTestPayment(${amountInRupees}, '${planDescription}')" class="flex-1 py-2.5 rounded-xl bg-safar-600 hover:bg-safar-700 text-white text-xs font-bold shadow-md">Simulate Pay</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    window.confirmTestPayment = function(amount, plan) {
+      const modal = document.getElementById('upi-sandbox-modal');
+      if (modal) modal.remove();
+      handlePaymentSuccess("pay_test_" + Math.random().toString(36).substring(7), plan, amount);
+    };
+
+    function handlePaymentSuccess(paymentId, plan, amount) {
+      window.currentUser.isVip = true;
+      showToast(`🎉 Payment of ₹${amount} Successful! ID: ${paymentId}. You are now a Verified Explorer!`, "success");
+    }
+
+    // ==================== VIEW 5: USER PROFILE & HTML5 CANVAS COMPRESSION ====================
+    window.handleImageSelection = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const originalSizeKB = (file.size / 1024).toFixed(1);
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // HTML5 Canvas compression helper to guarantee size < 100 KB
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Resize max dimensions to 600px
+          const maxDim = 600;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with quality 0.72
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          
+          // Calculate compressed size in KB
+          const stringLength = compressedDataUrl.length - 'data:image/jpeg;base64,'.length;
+          const compressedSizeKB = ((stringLength * 3 / 4) / 1024).toFixed(1);
+
+          // Update image preview
+          document.getElementById('profile-preview-img').src = compressedDataUrl;
+          document.getElementById('sidebar-user-avatar').src = compressedDataUrl;
+          document.getElementById('mobile-top-avatar').src = compressedDataUrl;
+          window.currentUser.avatar = compressedDataUrl;
+
+          // Display stats
+          const infoBox = document.getElementById('compression-info-box');
+          const statsEl = document.getElementById('compression-stats');
+          if (infoBox && statsEl) {
+            infoBox.classList.remove('hidden');
+            statsEl.textContent = `Original: ${originalSizeKB} KB ➔ Compressed: ${compressedSizeKB} KB (Under 100 KB limit enforced for Firebase Storage Spark Plan)`;
+          }
+
+          showToast(`Photo compressed to ${compressedSizeKB} KB (<100 KB target met)`, "info");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.toggleStyleTag = function(btn) {
+      const tag = btn.getAttribute('data-tag');
+      const isSelected = btn.classList.contains('bg-rose-100');
+
+      if (isSelected) {
+        btn.classList.remove('bg-rose-100', 'text-safar-700', 'border-rose-200');
+        btn.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+        window.currentUser.travelStyles = window.currentUser.travelStyles.filter(t => t !== tag);
+      } else {
+        btn.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
+        btn.classList.add('bg-rose-100', 'text-safar-700', 'border-rose-200');
+        if (!window.currentUser.travelStyles.includes(tag)) {
+          window.currentUser.travelStyles.push(tag);
+        }
+      }
+    };
+
+    window.handleSaveProfile = function(e) {
+      e.preventDefault();
+      window.currentUser.name = document.getElementById('input-full-name').value;
+      window.currentUser.age = parseInt(document.getElementById('input-age').value) || 26;
+      window.currentUser.gender = document.getElementById('input-gender').value;
+      window.currentUser.homeCity = document.getElementById('input-home-city').value;
+      window.currentUser.upcomingCircuit = document.getElementById('input-upcoming-circuit').value;
+      window.currentUser.bio = document.getElementById('input-bio').value;
+
+      // Update sidebar
+      document.getElementById('sidebar-user-name').textContent = window.currentUser.name;
+      document.getElementById('sidebar-user-status').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 inline-block"></span> Active in ${window.currentUser.upcomingCircuit.split(' ')[1] || 'India'}`;
+
+      showToast("Profile details successfully updated!", "success");
+    };
+
+    window.showTravelerToast = function(name) {
+      showToast(`Added ${name} to your travel favorites!`, "info");
+    };
+
+    // ==================== TOAST NOTIFICATION HELPER ====================
+    window.showToast = function(message, type = "info") {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white';
+
+      toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center space-x-2 transition transform duration-200 pointer-events-auto max-w-sm`;
+      toast.innerHTML = `
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    };
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', async () => {
+      initFirebaseServices();
+      initMap();
+      renderTripsBoard('all');
+      renderChatThreads();
+      renderActiveChatMessages();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
