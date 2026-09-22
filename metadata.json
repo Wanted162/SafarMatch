@@ -1,6 +1,6 @@
 {
   "name": "SafarMatch",
   "description": "Travel dating and companion finder platform built exclusively for Indian travelers.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["camera", "geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

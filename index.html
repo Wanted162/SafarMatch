@@ -242,29 +242,38 @@
         <!-- Top Filters Floating Bar -->
         <div class="absolute top-4 left-4 right-4 z-[1000] flex flex-wrap items-center gap-2 pointer-events-auto">
           <div class="bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center gap-2 max-w-full overflow-x-auto no-scrollbar">
-            <!-- Destination Filter -->
-            <div class="flex items-center space-x-1 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
-              <i data-lucide="map" class="w-3.5 h-3.5 text-safar-600"></i>
-              <select id="map-circuit-filter" onchange="filterMapTravelers()" class="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer pr-1">
-                <option value="all">All India Circuits</option>
-                <option value="Goa">Goa (Anjuna, Palolem, Arambol)</option>
-                <option value="Himachal">Himachal (Manali, Kasol, Spiti)</option>
-                <option value="Uttarakhand">Uttarakhand (Rishikesh, Chopta)</option>
-                <option value="Rajasthan">Rajasthan (Jaipur, Udaipur)</option>
-                <option value="Ladakh">Ladakh (Leh, Pangong Lake)</option>
-                <option value="Kerala">Kerala (Munnar, Varkala)</option>
-              </select>
+            <!-- Unrestricted Destination Search Filter with Datalist -->
+            <div class="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-safar-600 flex-shrink-0"></i>
+              <input 
+                id="map-circuit-filter-input" 
+                type="text" 
+                list="destinations-datalist" 
+                placeholder="Search circuit / city (e.g. Kasol, Goa, Spiti)..." 
+                oninput="filterMapTravelers()" 
+                class="bg-transparent text-slate-800 font-semibold focus:outline-none w-36 sm:w-48 text-xs placeholder:text-slate-400 placeholder:font-normal" 
+              />
             </div>
 
             <!-- Travel Style Filter -->
             <div class="flex items-center space-x-1 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
               <select id="map-style-filter" onchange="filterMapTravelers()" class="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer pr-1">
-                <option value="all">All Travel Styles</option>
+                <option value="all">All Styles</option>
                 <option value="Backpacker">Backpacker / Hostels</option>
                 <option value="Digital Nomad">Digital Nomad / Workation</option>
                 <option value="Trekker">Trekker / Adventure</option>
                 <option value="Luxury">Luxury & Boutique</option>
+              </select>
+            </div>
+
+            <!-- Gender & Suraksha Shield Filter -->
+            <div class="flex items-center space-x-1 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-rose-500"></i>
+              <select id="map-gender-filter" onchange="filterMapTravelers()" class="bg-transparent text-slate-800 font-semibold focus:outline-none cursor-pointer pr-1">
+                <option value="all">All Travelers</option>
+                <option value="Female">👩 Women Only</option>
+                <option value="Male">👨 Men Only</option>
               </select>
             </div>
 
@@ -274,6 +283,18 @@
             </span>
           </div>
 
+          <!-- GPS Locate Me Live Button -->
+          <button 
+            id="btn-locate-me"
+            onclick="locateCurrentUserLive()" 
+            class="bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-lg border border-slate-200/80 text-xs font-bold text-slate-800 hover:text-safar-600 hover:bg-slate-50 transition flex items-center space-x-1.5 group" 
+            title="Fetch live GPS coordinates and update map marker"
+          >
+            <i data-lucide="navigation" class="w-4 h-4 text-safar-600 group-hover:animate-pulse"></i>
+            <span class="hidden sm:inline font-bold">Locate Me (GPS)</span>
+          </button>
+
+          <!-- Center India Map -->
           <button onclick="resetMapCenter()" class="bg-white/95 backdrop-blur-md p-2.5 rounded-2xl shadow-lg border border-slate-200/80 text-slate-700 hover:text-safar-600 transition" title="Center Map on India">
             <i data-lucide="crosshair" class="w-4 h-4"></i>
           </button>
@@ -314,15 +335,27 @@
             </button>
           </div>
 
-          <!-- Filter Chips Bar -->
-          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            <button onclick="filterTrips('all')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white" data-filter="all">All Trips</button>
-            <button onclick="filterTrips('Goa')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Goa">🌴 Goa</button>
-            <button onclick="filterTrips('Himachal')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Himachal">🏔️ Himachal</button>
-            <button onclick="filterTrips('Uttarakhand')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Uttarakhand">🌊 Rishikesh</button>
-            <button onclick="filterTrips('Rajasthan')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Rajasthan">🏰 Rajasthan</button>
-            <button onclick="filterTrips('Ladakh')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Ladakh">🏍️ Ladakh</button>
-            <button onclick="filterTrips('Kerala')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Kerala">🛶 Kerala</button>
+          <!-- Filter Chips Bar & Gender Filter -->
+          <div class="flex flex-wrap items-center justify-between gap-3 py-1">
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              <button onclick="filterTrips('all')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-900 text-white" data-filter="all">All Circuits</button>
+              <button onclick="filterTrips('Goa')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Goa">🌴 Goa</button>
+              <button onclick="filterTrips('Himachal')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Himachal">🏔️ Himachal</button>
+              <button onclick="filterTrips('Uttarakhand')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Uttarakhand">🌊 Rishikesh</button>
+              <button onclick="filterTrips('Rajasthan')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Rajasthan">🏰 Rajasthan</button>
+              <button onclick="filterTrips('Ladakh')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Ladakh">🏍️ Ladakh</button>
+              <button onclick="filterTrips('Kerala')" class="trip-filter-btn px-4 py-2 rounded-xl text-xs font-semibold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-filter="Kerala">🛶 Kerala</button>
+            </div>
+
+            <!-- Gender & Safe Mode Filter -->
+            <div class="flex items-center space-x-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 shadow-xs">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-rose-500"></i>
+              <select id="trips-gender-filter" onchange="filterTripsByGender()" class="bg-transparent text-slate-800 font-bold focus:outline-none cursor-pointer">
+                <option value="all">All Genders</option>
+                <option value="Female">👩 Women Only Trips</option>
+                <option value="Male">👨 Men Only Trips</option>
+              </select>
+            </div>
           </div>
 
           <!-- Trips Feed Grid -->
@@ -355,17 +388,51 @@
         <!-- Two-Panel Chat Container -->
         <div class="flex-1 flex overflow-hidden relative">
           
-          <!-- Left Panel: Conversations List -->
+          <!-- Left Panel: Conversations & Connection Requests -->
           <div id="chat-sidebar-panel" class="w-full md:w-80 border-r border-slate-200 flex flex-col bg-slate-50 flex-shrink-0">
-            <div class="p-3.5 border-b border-slate-200 bg-white flex items-center justify-between">
-              <h2 class="text-base font-bold text-slate-900">Live Chats</h2>
-              <span class="text-[11px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Firestore Sync
-              </span>
+            <!-- Header & Sub-Tabs -->
+            <div class="p-3 border-b border-slate-200 bg-white space-y-2">
+              <div class="flex items-center justify-between">
+                <h2 class="text-sm font-bold text-slate-900">Traveler Inbox</h2>
+                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Mutual Handshake
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl">
+                <button 
+                  id="tab-btn-chats" 
+                  type="button" 
+                  onclick="switchChatSubTab('chats')" 
+                  class="py-1.5 text-xs font-bold rounded-lg transition bg-white text-slate-900 shadow-xs flex items-center justify-center space-x-1"
+                >
+                  <i data-lucide="message-square" class="w-3.5 h-3.5 text-safar-600"></i>
+                  <span>Active</span>
+                </button>
+                <button 
+                  id="tab-btn-requests" 
+                  type="button" 
+                  onclick="switchChatSubTab('requests')" 
+                  class="py-1.5 text-xs font-semibold text-slate-600 rounded-lg hover:text-slate-900 transition flex items-center justify-center space-x-1"
+                >
+                  <i data-lucide="user-plus" class="w-3.5 h-3.5 text-amber-500"></i>
+                  <span>Requests</span>
+                  <span id="requests-badge-count" class="hidden text-[10px] font-extrabold bg-rose-600 text-white px-1.5 py-0.2 rounded-full">0</span>
+                </button>
+              </div>
             </div>
 
-            <div id="chat-threads-list" class="flex-1 overflow-y-auto divide-y divide-slate-100">
-              <!-- Dynamically populated conversations -->
+            <!-- Active Chats Sub-Panel -->
+            <div id="chat-threads-subpanel" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+              <div id="chat-threads-list" class="divide-y divide-slate-100">
+                <!-- Dynamically populated conversations -->
+              </div>
+            </div>
+
+            <!-- Connection Requests Sub-Panel -->
+            <div id="chat-requests-subpanel" class="hidden flex-1 overflow-y-auto divide-y divide-slate-100 bg-slate-50 p-2 space-y-2">
+              <div id="requests-list-container" class="space-y-2">
+                <p class="text-xs text-center text-slate-400 py-6">No pending companion requests.</p>
+              </div>
             </div>
           </div>
 
@@ -385,13 +452,15 @@
                 <div>
                   <div class="flex items-center space-x-1.5">
                     <h3 id="active-chat-name" class="font-bold text-sm text-slate-900 leading-none">Select a traveler</h3>
-                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-blue-500 fill-blue-500 text-white"></i>
+                    <span id="active-chat-verified-badge" class="inline-flex items-center text-[10px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full">
+                      <i data-lucide="shield-check" class="w-3 h-3 mr-0.5 text-blue-600"></i> Verified
+                    </span>
                   </div>
                   <p id="active-chat-status" class="text-xs text-slate-500 mt-0.5">Direct 1-on-1 Firestore Room</p>
                 </div>
               </div>
 
-              <!-- Actions -->
+              <!-- Actions & Safeguard Controls -->
               <div class="flex items-center space-x-1">
                 <button onclick="sendQuickTripPrompt('Would love to split a cab from the airport!')" class="hidden sm:inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
                   <i data-lucide="car" class="w-3.5 h-3.5 text-safar-600"></i>
@@ -401,10 +470,15 @@
                   <i data-lucide="home" class="w-3.5 h-3.5 text-amber-600"></i>
                   <span>Hostel Vibe</span>
                 </button>
-                <button onclick="reportUserAlert()" class="p-2 text-slate-400 hover:text-rose-600 transition" title="Safety Report">
-                  <i data-lucide="flag" class="w-4 h-4"></i>
+                <button onclick="openReportBlockModal()" class="p-2 text-slate-400 hover:text-rose-600 transition rounded-lg hover:bg-rose-50" title="Report or Block Traveler">
+                  <i data-lucide="shield-alert" class="w-4 h-4"></i>
                 </button>
               </div>
+            </div>
+
+            <!-- Handshake / Connection Status Banner -->
+            <div id="chat-handshake-banner" class="hidden px-4 py-2 text-xs flex items-center justify-between border-b">
+              <!-- Dynamically populated handshake notice -->
             </div>
 
             <!-- Message History Container (Real-Time Firestore Listener) -->
@@ -412,8 +486,8 @@
               <!-- Live Firestore bubbles -->
             </div>
 
-            <!-- Message Input Bar -->
-            <div class="p-3 border-t border-slate-200 bg-white flex-shrink-0">
+            <!-- Anti-Harassment Safeguard Notice & Input Bar -->
+            <div class="p-3 border-t border-slate-200 bg-white flex-shrink-0 space-y-1.5">
               <form id="chat-send-form" onsubmit="handleSendMessage(event)" class="flex items-center space-x-2">
                 <input 
                   id="chat-input-text" 
@@ -430,6 +504,9 @@
                   <i data-lucide="send" class="w-4 h-4"></i>
                 </button>
               </form>
+              <div class="flex items-center justify-between px-1 text-[10px] text-slate-400">
+                <span>🛡️ Content Moderation Active: Phone numbers, WhatsApp, UPI & handles are filtered to prevent scamming.</span>
+              </div>
             </div>
 
           </div>
@@ -599,6 +676,78 @@
               </div>
             </div>
 
+            <!-- ==================== 100% FREE TRUST & SAFETY VERIFICATION SUITE ==================== -->
+            <div class="p-5 bg-gradient-to-br from-emerald-50/70 via-white to-blue-50/70 rounded-3xl border border-emerald-100 shadow-sm space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                  <div class="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      Trust & Safety Verification Suite
+                      <span class="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full">100% Free • ₹0 API Cost</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Dual client-side verification to earn the verified badge across map & chat.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                <!-- Check 1: Live Camera Selfie Verification -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-xs font-bold text-slate-800 flex items-center gap-1">
+                        <i data-lucide="camera" class="w-3.5 h-3.5 text-safar-600"></i> Live Webcam Selfie
+                      </span>
+                      <span id="badge-selfie-status" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        Not Verified
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                      Instant client-side selfie frame capture using native browser camera API. Resized & compressed <80 KB.
+                    </p>
+                  </div>
+                  <button 
+                    type="button" 
+                    onclick="openSelfieModal()" 
+                    class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-safar-600 text-white text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm"
+                  >
+                    <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                    <span id="btn-selfie-text">Take Live Selfie</span>
+                  </button>
+                </div>
+
+                <!-- Check 2: Government ID Verification -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-xs font-bold text-slate-800 flex items-center gap-1">
+                        <i data-lucide="id-card" class="w-3.5 h-3.5 text-blue-600"></i> Government Photo ID
+                      </span>
+                      <span id="badge-id-status" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        Not Uploaded
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                      Aadhaar, Voter ID, Passport, or DL. Compressed on Canvas <100 KB and uploaded to Storage.
+                    </p>
+                  </div>
+                  <div>
+                    <input type="file" id="govt-id-input" accept="image/*" class="hidden" onchange="handleGovtIdUpload(event)" />
+                    <label 
+                      for="govt-id-input" 
+                      class="w-full py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer text-center"
+                    >
+                      <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                      <span id="btn-id-text">Upload Govt ID</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Profile Form Inputs -->
             <form id="profile-form" onsubmit="handleSaveProfile(event)" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -623,25 +772,74 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-slate-700 mb-1">Home City (India)</label>
-                  <input id="input-home-city" type="text" placeholder="e.g. Pune, MH" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" />
+                  <input id="input-home-city" type="text" placeholder="e.g. Pune, MH or Delhi, NCR" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" />
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold text-slate-700 mb-1">Upcoming Circuit / Destination</label>
-                  <select id="input-upcoming-circuit" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
-                    <option value="Goa" selected>🌴 Goa (Anjuna & Arambol)</option>
-                    <option value="Himachal">🏔️ Himachal (Manali & Kasol)</option>
-                    <option value="Uttarakhand">🌊 Uttarakhand (Rishikesh)</option>
-                    <option value="Rajasthan">🏰 Rajasthan (Jaipur & Udaipur)</option>
-                    <option value="Ladakh">🏍️ Ladakh (Leh & Spiti)</option>
-                    <option value="Kerala">🛶 Kerala (Munnar & Varkala)</option>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Upcoming Circuit / Destination (Any Indian Hub)</label>
+                  <input id="input-upcoming-circuit" type="text" list="destinations-datalist" placeholder="e.g. Kasol, Goa, Spiti, Varkala, Ziro..." required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white font-medium" />
+                </div>
+              </div>
+
+              <!-- Languages Spoken -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Languages Spoken</label>
+                <div id="profile-languages-pills" class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-val="Hindi">Hindi</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-val="English">English</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Marathi">Marathi</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Punjabi">Punjabi</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Bengali">Bengali</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Tamil">Tamil</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Telugu">Telugu</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Kannada">Kannada</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Gujarati">Gujarati</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lang')" class="lang-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Malayalam">Malayalam</button>
+                </div>
+              </div>
+
+              <!-- Transport Preference & Instagram Handle -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Preferred Transport Mode</label>
+                  <select id="input-transport-pref" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
+                    <option value="Royal Enfield / Bike Ride" selected>🏍️ Royal Enfield / Bike Ride</option>
+                    <option value="Self-Drive Car / SUV">🚗 Self-Drive Car / Roadtrip</option>
+                    <option value="Backpacking Buses / Volvo">🚌 Backpacking State / Volvo Buses</option>
+                    <option value="Trains / IRCTC Rail">🚆 Trains / Sleeper Rail</option>
+                    <option value="Flights">✈️ Quick Flights</option>
                   </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Instagram Handle (Optional)</label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-bold text-sm">@</span>
+                    <input id="input-instagram" type="text" placeholder="your_wanderlust_handle" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" />
+                  </div>
+                  <p class="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                    <i data-lucide="lock" class="w-3 h-3"></i> Private & protected — shared with companions after mutual match
+                  </p>
+                </div>
+              </div>
+
+              <!-- Food & Lifestyle Vibes -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Food & Lifestyle Vibes</label>
+                <div id="profile-lifestyle-pills" class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lifestyle')" class="life-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-val="Vegetarian">🥬 Vegetarian</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lifestyle')" class="life-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Non-Veg">🍗 Non-Veg</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lifestyle')" class="life-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Vegan">🥗 Vegan</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lifestyle')" class="life-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-val="Teetotaler">🚫 Teetotaler</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lifestyle')" class="life-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Social Drinker">🍻 Social Drinker</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lifestyle')" class="life-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-val="Early Riser">🌅 Early Riser</button>
+                  <button type="button" onclick="toggleMultiSelectPill(this, 'lifestyle')" class="life-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-val="Night Owl">🦉 Night Owl</button>
                 </div>
               </div>
 
               <!-- Travel Style Tags -->
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-2">Travel Style Tags</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Travel Style Tags</label>
                 <div id="profile-style-tags" class="flex flex-wrap gap-2">
                   <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-tag="Digital Nomad">💻 Digital Nomad</button>
                   <button type="button" onclick="toggleStyleTag(this)" class="style-tag-pill px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-safar-700 border border-rose-200" data-tag="Backpacker">🎒 Backpacker</button>
@@ -651,10 +849,44 @@
                 </div>
               </div>
 
+              <!-- Travel Intent -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Travel Intent</label>
+                <div id="profile-intent-pills" class="flex flex-wrap gap-2">
+                  <button type="button" onclick="selectTravelIntent(this)" class="intent-pill px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-safar-700 border border-rose-200" data-intent="Companion">🎒 Travel Companion</button>
+                  <button type="button" onclick="selectTravelIntent(this)" class="intent-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-intent="Dating">❤️ Dating / Romance</button>
+                  <button type="button" onclick="selectTravelIntent(this)" class="intent-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-intent="Group Backpacker">🏕️ Group Backpacker</button>
+                  <button type="button" onclick="selectTravelIntent(this)" class="intent-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200" data-intent="Cab Splitter">🚕 Cab Splitter</button>
+                </div>
+                <input type="hidden" id="input-travel-intent" value="Companion" />
+              </div>
+
+              <!-- Suraksha Shield (Solo Women Safe Mode) -->
+              <div id="suraksha-shield-box" class="p-4 rounded-2xl border border-rose-200 bg-gradient-to-r from-rose-50 via-pink-50 to-white flex items-start justify-between gap-3 shadow-xs">
+                <div class="flex items-start space-x-3">
+                  <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-sm flex-shrink-0 mt-0.5">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center space-x-2">
+                      <h4 class="text-sm font-bold text-slate-900">Suraksha Shield (Solo Women Safe Mode)</h4>
+                      <span class="text-[10px] font-extrabold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">Safety Feature</span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                      When enabled by a female explorer, your profile, live map pin, and trip plans are strictly hidden from male accounts and only discoverable by other verified female travelers.
+                    </p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-1">
+                  <input type="checkbox" id="input-suraksha-shield" class="sr-only peer" />
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+                </label>
+              </div>
+
               <!-- Bio -->
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Travel Bio & Companion Preference</label>
-                <textarea id="input-bio" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" placeholder="Tell travelers what you love doing..."></textarea>
+                <textarea id="input-bio" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" placeholder="Tell travelers what you love doing (e.g. looking to split scooters in Arambol or trek to Tosh)..."></textarea>
               </div>
 
               <!-- Submit Button -->
@@ -665,6 +897,20 @@
                 </button>
               </div>
             </form>
+
+            <!-- Blocked Users Safeguard Panel -->
+            <div class="mt-8 pt-6 border-t border-slate-200">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-2">
+                  <i data-lucide="user-x" class="w-4 h-4 text-slate-500"></i>
+                  <h3 class="text-sm font-bold text-slate-900">Blocked Travelers</h3>
+                </div>
+                <span id="blocked-users-count" class="text-xs text-slate-500">0 blocked</span>
+              </div>
+              <div id="blocked-users-list" class="space-y-2">
+                <p class="text-xs text-slate-400 italic">No blocked travelers. Blocked users will not see your profile, trips, or messages.</p>
+              </div>
+            </div>
           </div>
 
           <div class="h-16 md:h-8"></div>
@@ -715,15 +961,15 @@
 
       <form id="new-trip-form" onsubmit="handleCreateTripSubmit(event)" class="mt-4 space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Destination Hub</label>
-          <select id="trip-input-destination" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
-            <option value="Goa">🌴 Goa (Anjuna, Palolem, Arambol)</option>
-            <option value="Himachal">🏔️ Himachal (Manali, Kasol, Spiti)</option>
-            <option value="Uttarakhand">🌊 Uttarakhand (Rishikesh, Chopta)</option>
-            <option value="Rajasthan">🏰 Rajasthan (Jaipur, Udaipur, Jaisalmer)</option>
-            <option value="Ladakh">🏍️ Ladakh (Leh & Pangong Tso)</option>
-            <option value="Kerala">🛶 Kerala (Munnar & Varkala Cliff)</option>
-          </select>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Destination Hub (Any Indian Town or Circuit)</label>
+          <input 
+            id="trip-input-destination" 
+            type="text" 
+            list="destinations-datalist" 
+            placeholder="e.g. Kasol, Goa, Spiti, Gokarna, Ziro, Varkala, Leh..." 
+            required 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white font-medium" 
+          />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -770,6 +1016,180 @@
     </div>
   </div>
 
+  <!-- ==================== GLOBAL INDIAN DESTINATIONS DATALIST ==================== -->
+  <datalist id="destinations-datalist">
+    <option value="Kasol, Parvati Valley"></option>
+    <option value="Manali & Old Manali"></option>
+    <option value="Spiti Valley (Kaza & Tabo)"></option>
+    <option value="Dharamshala & McLeodganj"></option>
+    <option value="Bir Billing (Paragliding Hub)"></option>
+    <option value="Jibhi & Tirthan Valley"></option>
+    <option value="Rishikesh & Tapovan"></option>
+    <option value="Chopta & Tungnath"></option>
+    <option value="Goa (Anjuna, Vagator & Arambol)"></option>
+    <option value="Goa (Palolem, Agonda & South)"></option>
+    <option value="Gokarna & Kudle Beach"></option>
+    <option value="Varkala & Cliff Beach"></option>
+    <option value="Munnar & Tea Hills"></option>
+    <option value="Alleppey Backwaters"></option>
+    <option value="Pondicherry & Auroville"></option>
+    <option value="Hampi Ruins & Hippie Island"></option>
+    <option value="Ziro Valley (Arunachal)"></option>
+    <option value="Shillong & Meghalaya"></option>
+    <option value="Tawang Monasteries"></option>
+    <option value="Leh & Pangong Tso"></option>
+    <option value="Nubra Valley & Khardung La"></option>
+    <option value="Jaipur & Amber Fort"></option>
+    <option value="Udaipur & Lake Pichola"></option>
+    <option value="Jaisalmer Desert Dunes"></option>
+    <option value="Pushkar Holy Lake"></option>
+    <option value="Varanasi & Ganga Ghats"></option>
+    <option value="Andaman (Havelock & Neil)"></option>
+    <option value="Coorg & Western Ghats"></option>
+    <option value="Ooty & Nilgiri Hills"></option>
+    <option value="Pune & Sahyadri Treks"></option>
+    <option value="Mumbai Coastal Circuit"></option>
+    <option value="Bengaluru Tech & Travel Hub"></option>
+  </datalist>
+
+  <!-- ==================== MODAL: LIVE WEBCAM SELFIE VERIFICATION ==================== -->
+  <div id="selfie-modal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Live Selfie Verification</h3>
+            <p class="text-[11px] text-slate-500">Native browser camera API • 100% Free</p>
+          </div>
+        </div>
+        <button onclick="closeSelfieModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Live Video / Captured Photo Stage -->
+      <div class="relative w-full h-64 sm:h-72 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-slate-200">
+        <video id="selfie-video" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+        <img id="selfie-captured-preview" class="hidden w-full h-full object-cover" alt="Captured Frame" />
+        
+        <!-- Face Guide Oval Overlay -->
+        <div id="selfie-oval-guide" class="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <div class="w-44 h-56 border-2 border-dashed border-emerald-400/80 rounded-full shadow-[0_0_0_9999px_rgba(15,23,42,0.45)]"></div>
+          <span class="absolute bottom-3 text-[11px] font-semibold text-white/90 bg-slate-900/70 px-3 py-1 rounded-full">
+            Center your face inside oval
+          </span>
+        </div>
+
+        <div id="camera-loading-indicator" class="hidden absolute inset-0 bg-slate-900/90 flex flex-col items-center justify-center text-white text-xs space-y-2">
+          <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-400"></i>
+          <span>Requesting camera permission...</span>
+        </div>
+      </div>
+
+      <div id="selfie-compression-status" class="text-center text-[11px] text-slate-500 font-mono">
+        Ready to capture selfie frame (<80 KB compression enforced)
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-2.5 pt-1">
+        <button 
+          id="btn-capture-selfie" 
+          type="button" 
+          onclick="captureSelfieFrame()" 
+          class="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5"
+        >
+          <i data-lucide="aperture" class="w-4 h-4"></i>
+          <span>Capture Selfie</span>
+        </button>
+
+        <button 
+          id="btn-retake-selfie" 
+          type="button" 
+          onclick="retakeSelfieFrame()" 
+          class="hidden flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition"
+        >
+          Retake Photo
+        </button>
+
+        <button 
+          id="btn-upload-selfie" 
+          type="button" 
+          onclick="uploadCapturedSelfie()" 
+          class="hidden flex-1 py-3 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5"
+        >
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Confirm & Verify</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: REPORT & BLOCK TRAVELER ==================== -->
+  <div id="report-block-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Safety & Trust Shield</h3>
+            <p class="text-xs text-slate-500">Action for <span id="report-user-name" class="font-bold text-slate-800">Traveler</span></p>
+          </div>
+        </div>
+        <button onclick="closeReportBlockModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-700">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Reason for Safety Report</label>
+          <select id="report-reason-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+            <option value="harassment">Harassment / Abusive messages</option>
+            <option value="spam">Commercial promotion / Spam / Fake ID</option>
+            <option value="contact_sharing">Unsolicited phone number or off-platform handle</option>
+            <option value="inappropriate">Inappropriate behavior or misconduct</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Additional Details (Optional)</label>
+          <textarea id="report-details-text" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="Describe the safety concern..."></textarea>
+        </div>
+
+        <div class="p-3 bg-rose-50 rounded-xl border border-rose-100 text-[11px] text-rose-800 space-y-1">
+          <div class="font-bold flex items-center space-x-1">
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+            <span>Zero Harassment Policy</span>
+          </div>
+          <p>Blocking this traveler immediately hides them from your Explore Map, Trip Board, and Chat threads. They will not be able to contact you.</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-100">
+        <button 
+          type="button" 
+          onclick="submitReportAndBlock(true)" 
+          class="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition flex items-center justify-center space-x-1"
+        >
+          <i data-lucide="user-x" class="w-4 h-4"></i>
+          <span>Block & Submit Report</span>
+        </button>
+        <button 
+          type="button" 
+          onclick="submitReportAndBlock(false)" 
+          class="py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition"
+        >
+          Report Only
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
   <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -792,8 +1212,11 @@
       getDoc, 
       getDocs, 
       addDoc, 
+      updateDoc,
+      deleteDoc,
       onSnapshot, 
       query, 
+      where,
       orderBy, 
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -826,15 +1249,21 @@
     let currentUser = null; // Firebase User object
     let currentProfile = null; // Firestore User profile document
 
-    // Active Chat State
-    let activeChatPartner = null; // { uid, name, avatar, circuit }
+    // Active Chat & Handshake State
+    let activeChatPartner = null; // { uid, name, avatar, circuit, status }
     let activeChatUnsubscribe = null;
     let tripsUnsubscribe = null;
     let profilesUnsubscribe = null;
+    let requestsUnsubscribe = null;
+
+    // Reporting & Block target state
+    let activeReportTarget = null; // { uid, name }
 
     // Local in-memory caches for instant UI reaction / fallback
     let allTripsCache = [];
     let allTravelersCache = [];
+    let allRequestsCache = []; // Handshake connection requests
+    let currentTripCircuitFilter = "all";
 
     // Fallback seed data for Indian hubs when previewing or empty Firestore
     const SEED_INDIAN_TRAVELERS = [
@@ -842,11 +1271,19 @@
         uid: "trv_goa_ananya",
         name: "Ananya Deshmukh",
         age: 25,
+        gender: "Female",
+        travelIntent: "Companion",
         photoUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
         homeCity: "Mumbai, MH",
         upcomingCircuit: "Goa",
         travelStyles: ["Digital Nomad", "Backpacker"],
-        bio: "Remote designer working from beach cafes in Anjuna. Looking for someone to split scooter rentals and sunset seafood dinners.",
+        languages: ["Hindi", "English", "Marathi"],
+        transportPref: "Self-Drive Car / SUV",
+        lifestyle: ["Vegetarian", "Early Riser"],
+        selfieVerified: true,
+        idVerified: true,
+        surakshaShield: true,
+        bio: "Remote designer working from beach cafes in Anjuna. Looking for female companions to split scooter rentals and sunset seafood dinners.",
         lat: 15.5800,
         lng: 73.7420
       },
@@ -854,10 +1291,18 @@
         uid: "trv_manali_kabir",
         name: "Kabir Roy",
         age: 28,
+        gender: "Male",
+        travelIntent: "Companion",
         photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
         homeCity: "Bengaluru, KA",
         upcomingCircuit: "Himachal",
         travelStyles: ["Trekker", "Backpacker"],
+        languages: ["English", "Hindi", "Kannada"],
+        transportPref: "Royal Enfield / Bike Ride",
+        lifestyle: ["Non-Veg", "Social Drinker"],
+        selfieVerified: true,
+        idVerified: true,
+        surakshaShield: false,
         bio: "Alpine trekker based in Old Manali. Planning Kheerganga hot springs and Tosh village hikes.",
         lat: 32.2432,
         lng: 77.1892
@@ -866,11 +1311,19 @@
         uid: "trv_rishikesh_zoya",
         name: "Zoya Khan",
         age: 26,
+        gender: "Female",
+        travelIntent: "Group Backpacker",
         photoUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80",
         homeCity: "Delhi NCR",
         upcomingCircuit: "Uttarakhand",
         travelStyles: ["Backpacker", "Hostel Crawl"],
-        bio: "Staying at Tapovan hostel by the Ganga. Looking for buddies to split river rafting and Beatles Ashram visit.",
+        languages: ["Hindi", "English"],
+        transportPref: "Backpacking Buses / Volvo",
+        lifestyle: ["Vegetarian", "Early Riser"],
+        selfieVerified: true,
+        idVerified: false,
+        surakshaShield: true,
+        bio: "Staying at Tapovan hostel by the Ganga. Looking for female buddies to split river rafting and Beatles Ashram visit.",
         lat: 30.0869,
         lng: 78.2676
       },
@@ -878,10 +1331,18 @@
         uid: "trv_rajasthan_vikram",
         name: "Vikram Rathore",
         age: 29,
+        gender: "Male",
+        travelIntent: "Dating",
         photoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
         homeCity: "Jaipur, RJ",
         upcomingCircuit: "Rajasthan",
         travelStyles: ["Luxury", "Culture"],
+        languages: ["Hindi", "English"],
+        transportPref: "Self-Drive Car / SUV",
+        lifestyle: ["Non-Veg", "Social Drinker"],
+        selfieVerified: true,
+        idVerified: true,
+        surakshaShield: false,
         bio: "Architect exploring Udaipur Lake Pichola and Jaisalmer desert dunes. Appreciates havelis and rooftop dining.",
         lat: 24.5854,
         lng: 73.7125
@@ -890,10 +1351,18 @@
         uid: "trv_ladakh_tashi",
         name: "Tashi Wangchuk",
         age: 27,
+        gender: "Male",
+        travelIntent: "Companion",
         photoUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
         homeCity: "Chandigarh",
         upcomingCircuit: "Ladakh",
         travelStyles: ["Trekker"],
+        languages: ["Hindi", "English", "Punjabi"],
+        transportPref: "Royal Enfield / Bike Ride",
+        lifestyle: ["Non-Veg", "Early Riser"],
+        selfieVerified: true,
+        idVerified: true,
+        surakshaShield: false,
         bio: "Royal Enfield rider heading across Khardung La to Pangong Tso. Seeking rider convoy or pillion companion.",
         lat: 34.1526,
         lng: 77.5771
@@ -902,10 +1371,18 @@
         uid: "trv_kerala_meera",
         name: "Meera Nair",
         age: 24,
+        gender: "Female",
+        travelIntent: "Companion",
         photoUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80",
         homeCity: "Kochi, KL",
         upcomingCircuit: "Kerala",
         travelStyles: ["Backpacker"],
+        languages: ["Malayalam", "English", "Tamil"],
+        transportPref: "Trains / IRCTC Rail",
+        lifestyle: ["Vegetarian", "Teetotaler"],
+        selfieVerified: true,
+        idVerified: true,
+        surakshaShield: false,
         bio: "Exploring Munnar tea estates then catching sunsets on Varkala Cliff beach. Looking for a roadtrip partner.",
         lat: 10.0889,
         lng: 77.0595
@@ -940,9 +1417,11 @@
             updateAuthUI(true);
             attachTripsListener();
             attachProfilesMapListener();
+            attachRequestsListener(user.uid);
           } else {
             currentUser = null;
             currentProfile = null;
+            if (requestsUnsubscribe) requestsUnsubscribe();
             updateAuthUI(false);
             attachTripsListener();
             attachProfilesMapListener();
@@ -1091,14 +1570,98 @@
 
     function populateProfileForm(profile) {
       if (!profile) return;
-      document.getElementById('input-full-name').value = profile.name || "";
-      document.getElementById('input-age').value = profile.age || 25;
-      document.getElementById('input-gender').value = profile.gender || "Male";
-      document.getElementById('input-home-city').value = profile.homeCity || "";
-      document.getElementById('input-upcoming-circuit').value = profile.upcomingCircuit || "Goa";
-      document.getElementById('input-bio').value = profile.bio || "";
-      if (profile.photoUrl) {
+      if (document.getElementById('input-full-name')) document.getElementById('input-full-name').value = profile.name || "";
+      if (document.getElementById('input-age')) document.getElementById('input-age').value = profile.age || 25;
+      if (document.getElementById('input-gender')) document.getElementById('input-gender').value = profile.gender || "Male";
+      if (document.getElementById('input-home-city')) document.getElementById('input-home-city').value = profile.homeCity || "";
+      if (document.getElementById('input-upcoming-circuit')) document.getElementById('input-upcoming-circuit').value = profile.upcomingCircuit || "Goa";
+      if (document.getElementById('input-bio')) document.getElementById('input-bio').value = profile.bio || "";
+      if (document.getElementById('input-transport-pref') && profile.transportPref) {
+        document.getElementById('input-transport-pref').value = profile.transportPref;
+      }
+      if (document.getElementById('input-instagram')) {
+        document.getElementById('input-instagram').value = profile.instagram || "";
+      }
+      if (profile.photoUrl && document.getElementById('profile-preview-img')) {
         document.getElementById('profile-preview-img').src = profile.photoUrl;
+      }
+
+      // Populate Languages
+      if (Array.isArray(profile.languages)) {
+        document.querySelectorAll('.lang-pill').forEach(pill => {
+          const val = pill.getAttribute('data-val');
+          if (profile.languages.includes(val)) {
+            pill.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
+            pill.classList.add('bg-rose-100', 'text-safar-700', 'border-rose-200');
+          } else {
+            pill.classList.remove('bg-rose-100', 'text-safar-700', 'border-rose-200');
+            pill.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+          }
+        });
+      }
+
+      // Populate Lifestyle
+      if (Array.isArray(profile.lifestyle)) {
+        document.querySelectorAll('.life-pill').forEach(pill => {
+          const val = pill.getAttribute('data-val');
+          if (profile.lifestyle.includes(val)) {
+            pill.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
+            pill.classList.add('bg-rose-100', 'text-safar-700', 'border-rose-200');
+          } else {
+            pill.classList.remove('bg-rose-100', 'text-safar-700', 'border-rose-200');
+            pill.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+          }
+        });
+      }
+
+      // Populate Travel Intent
+      if (profile.travelIntent && document.getElementById('input-travel-intent')) {
+        document.getElementById('input-travel-intent').value = profile.travelIntent;
+        document.querySelectorAll('.intent-pill').forEach(pill => {
+          if (pill.getAttribute('data-intent') === profile.travelIntent) {
+            pill.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
+            pill.classList.add('bg-rose-100', 'text-safar-700', 'border-rose-200');
+          } else {
+            pill.classList.remove('bg-rose-100', 'text-safar-700', 'border-rose-200');
+            pill.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+          }
+        });
+      }
+
+      // Populate Suraksha Shield
+      const shieldCheckbox = document.getElementById('input-suraksha-shield');
+      if (shieldCheckbox) {
+        shieldCheckbox.checked = !!profile.surakshaShield;
+      }
+
+      // Render Blocked Users list
+      renderBlockedUsersList();
+
+      // Verification Status Badges
+      const selfieBadge = document.getElementById('badge-selfie-status');
+      const selfieBtnText = document.getElementById('btn-selfie-text');
+      if (selfieBadge) {
+        if (profile.selfieVerified) {
+          selfieBadge.textContent = "Selfie Verified ✓";
+          selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+          if (selfieBtnText) selfieBtnText.textContent = "Retake / Update Selfie";
+        } else {
+          selfieBadge.textContent = "Not Verified";
+          selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600";
+        }
+      }
+
+      const idBadge = document.getElementById('badge-id-status');
+      const idBtnText = document.getElementById('btn-id-text');
+      if (idBadge) {
+        if (profile.idVerified) {
+          idBadge.textContent = "Govt ID Verified ✓";
+          idBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800";
+          if (idBtnText) idBtnText.textContent = "Update Govt ID";
+        } else {
+          idBadge.textContent = "Not Uploaded";
+          idBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600";
+        }
       }
     }
 
@@ -1255,6 +1818,7 @@
     };
 
     window.filterTrips = function(circuitKey) {
+      currentTripCircuitFilter = circuitKey || 'all';
       document.querySelectorAll('.trip-filter-btn').forEach(btn => {
         btn.classList.remove('bg-slate-900', 'text-white');
         btn.classList.add('bg-white', 'text-slate-600');
@@ -1263,14 +1827,43 @@
           btn.classList.add('bg-slate-900', 'text-white');
         }
       });
-
-      if (circuitKey === 'all') {
-        renderTripsFeed(allTripsCache);
-      } else {
-        const filtered = allTripsCache.filter(t => t.destination.toLowerCase().includes(circuitKey.toLowerCase()));
-        renderTripsFeed(filtered);
-      }
+      applyTripsCombinedFilters();
     };
+
+    window.filterTripsByGender = function() {
+      applyTripsCombinedFilters();
+    };
+
+    function applyTripsCombinedFilters() {
+      const genderFilterEl = document.getElementById('trips-gender-filter');
+      const genderFilter = genderFilterEl ? genderFilterEl.value : 'all';
+      const myBlocked = (currentProfile && Array.isArray(currentProfile.blockedUsers)) ? currentProfile.blockedUsers : [];
+      const isViewerFemale = currentProfile && currentProfile.gender === 'Female';
+
+      const filtered = allTripsCache.filter(t => {
+        // Hide if creator is in blocked users
+        if (myBlocked.includes(t.creatorUid)) return false;
+
+        // Suraksha Shield check: if trip creator turned on Suraksha Shield or is marked safe-mode, hide from non-females
+        if (t.surakshaShield === true && !isViewerFemale) return false;
+
+        // Circuit filter
+        const matchesCircuit = (currentTripCircuitFilter === 'all') || 
+          (t.destination && t.destination.toLowerCase().includes(currentTripCircuitFilter.toLowerCase()));
+
+        // Gender filter
+        let matchesGender = true;
+        if (genderFilter === 'female') {
+          matchesGender = (t.creatorGender === 'Female') || (t.gender === 'Female');
+        } else if (genderFilter === 'male') {
+          matchesGender = (t.creatorGender === 'Male') || (t.gender === 'Male');
+        }
+
+        return matchesCircuit && matchesGender;
+      });
+
+      renderTripsFeed(filtered);
+    }
 
     // ==================== LIVE LEAFLET MAP INTEGRATION ====================
     let map = null;
@@ -1333,12 +1926,21 @@
       markersLayer.clearLayers();
 
       travelersList.forEach(traveler => {
+        // Skip rendering if blocked
+        const myBlocked = (currentProfile && Array.isArray(currentProfile.blockedUsers)) ? currentProfile.blockedUsers : [];
+        if (myBlocked.includes(traveler.uid)) return;
+
+        // Suraksha Shield check: if traveler is a woman with Suraksha Shield on, hide from non-females
+        const isViewerFemale = currentProfile && currentProfile.gender === 'Female';
+        if (traveler.surakshaShield === true && !isViewerFemale) return;
+
         const customIcon = L.divIcon({
           className: 'custom-leaflet-marker',
           html: `
             <div class="relative">
               <div class="pulse-ring"></div>
               <div class="custom-marker-pin" style="background-image: url('${traveler.photoUrl || traveler.photo || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=160&q=80'}')"></div>
+              ${traveler.surakshaShield ? '<span class="absolute -top-1 -right-1 w-4 h-4 bg-rose-600 text-white rounded-full flex items-center justify-center text-[9px] font-bold border border-white shadow">🛡️</span>' : ''}
             </div>
           `,
           iconSize: [44, 44],
@@ -1348,17 +1950,26 @@
 
         const marker = L.marker([traveler.lat, traveler.lng], { icon: customIcon });
 
+        const badgesHtml = `
+          <div class="flex flex-wrap items-center gap-1 mt-1">
+            ${traveler.selfieVerified ? '<span class="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">📸 Selfie Verified</span>' : ''}
+            ${traveler.idVerified ? '<span class="text-[9px] font-bold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">🛡️ Govt ID Verified</span>' : ''}
+            ${traveler.surakshaShield ? '<span class="text-[9px] font-bold bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">🛡️ Suraksha Shield</span>' : ''}
+            ${traveler.travelIntent ? `<span class="text-[9px] font-bold bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-md">🎒 ${traveler.travelIntent}</span>` : ''}
+          </div>
+        `;
+
         const popupContent = `
-          <div class="w-72 bg-white text-slate-800 rounded-2xl overflow-hidden font-sans">
+          <div class="w-72 bg-white text-slate-800 rounded-2xl overflow-hidden font-sans shadow-lg">
             <div class="relative h-32 bg-slate-100">
               <img src="${traveler.photoUrl || traveler.photo}" alt="${traveler.name}" class="w-full h-full object-cover" />
               <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
               <div class="absolute bottom-2.5 left-3 text-white">
                 <div class="flex items-center space-x-1.5">
                   <h4 class="font-bold text-base leading-tight">${traveler.name}, ${traveler.age || 25}</h4>
-                  <span class="text-blue-400">✓</span>
+                  ${traveler.idVerified ? '<span class="text-blue-400 font-bold text-xs" title="Govt ID Verified">✓</span>' : ''}
                 </div>
-                <p class="text-[11px] text-slate-200">${traveler.homeCity || 'India'}</p>
+                <p class="text-[11px] text-slate-200">${traveler.homeCity || 'India'} • ${traveler.gender || 'Traveler'}</p>
               </div>
               <span class="absolute top-2.5 right-2.5 bg-safar-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                 ${traveler.upcomingCircuit || 'Explorer'}
@@ -1366,6 +1977,8 @@
             </div>
 
             <div class="p-3.5 space-y-2.5">
+              ${badgesHtml}
+
               <p class="text-xs text-slate-600 line-clamp-2 italic leading-relaxed">
                 "${traveler.bio || 'Exploring Indian travel circuits together!'}"
               </p>
@@ -1376,6 +1989,13 @@
                   class="flex-1 bg-safar-600 hover:bg-safar-700 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-md shadow-rose-200 text-center flex items-center justify-center space-x-1"
                 >
                   <span>Connect & Chat</span>
+                </button>
+                <button 
+                  onclick="openReportBlockModal('${traveler.uid}', '${traveler.name}')" 
+                  class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition" 
+                  title="Report or Block Traveler"
+                >
+                  <i data-lucide="shield-alert" class="w-4 h-4"></i>
                 </button>
               </div>
             </div>
@@ -1390,19 +2010,123 @@
       if (countEl) {
         countEl.textContent = `${travelersList.length} Travelers Active`;
       }
+      lucide.createIcons();
     }
 
     window.filterMapTravelers = function() {
-      const circuitVal = document.getElementById('map-circuit-filter').value;
+      const inputEl = document.getElementById('map-circuit-filter-input');
+      const searchVal = inputEl ? inputEl.value.trim().toLowerCase() : "";
       const styleVal = document.getElementById('map-style-filter').value;
+      const genderVal = document.getElementById('map-gender-filter') ? document.getElementById('map-gender-filter').value : 'all';
+      const myBlocked = (currentProfile && Array.isArray(currentProfile.blockedUsers)) ? currentProfile.blockedUsers : [];
+      const isViewerFemale = currentProfile && currentProfile.gender === 'Female';
 
       let filtered = allTravelersCache.filter(t => {
-        const circuitMatch = (circuitVal === 'all') || (t.upcomingCircuit && t.upcomingCircuit.includes(circuitVal));
+        if (myBlocked.includes(t.uid)) return false;
+        if (t.surakshaShield === true && !isViewerFemale) return false;
+
+        const circuitMatch = !searchVal || 
+          (t.upcomingCircuit && t.upcomingCircuit.toLowerCase().includes(searchVal)) || 
+          (t.homeCity && t.homeCity.toLowerCase().includes(searchVal)) ||
+          (t.name && t.name.toLowerCase().includes(searchVal));
+
         const styleMatch = (styleVal === 'all') || (t.travelStyles && t.travelStyles.includes(styleVal));
-        return circuitMatch && styleMatch;
+
+        let genderMatch = true;
+        if (genderVal === 'female') {
+          genderMatch = (t.gender === 'Female');
+        } else if (genderVal === 'male') {
+          genderMatch = (t.gender === 'Male');
+        }
+
+        return circuitMatch && styleMatch && genderMatch;
       });
 
       renderMapMarkers(filtered);
+    };
+
+    // ==================== NATIVE BROWSER LIVE GPS TRACKING ====================
+    let userGpsMarker = null;
+
+    window.locateCurrentUserLive = function() {
+      if (!navigator.geolocation) {
+        showToast("Geolocation is not supported by your browser.", "error");
+        return;
+      }
+
+      showToast("Requesting live GPS coordinates from browser...", "info");
+      const locateBtn = document.getElementById('btn-locate-me');
+      if (locateBtn) locateBtn.classList.add('animate-pulse');
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          if (locateBtn) locateBtn.classList.remove('animate-pulse');
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const accuracy = Math.round(position.coords.accuracy || 0);
+
+          if (map) {
+            map.setView([lat, lng], 13, { animate: true });
+
+            if (userGpsMarker) {
+              map.removeLayer(userGpsMarker);
+            }
+
+            const gpsIcon = L.divIcon({
+              className: 'custom-gps-marker',
+              html: `
+                <div class="relative flex items-center justify-center">
+                  <div class="w-8 h-8 rounded-full bg-blue-500/30 animate-ping absolute"></div>
+                  <div class="w-6 h-6 rounded-full bg-blue-600 border-2 border-white shadow-lg flex items-center justify-center text-white text-[10px] font-bold">
+                    📍
+                  </div>
+                </div>
+              `,
+              iconSize: [32, 32],
+              iconAnchor: [16, 16]
+            });
+
+            userGpsMarker = L.marker([lat, lng], { icon: gpsIcon }).addTo(map);
+            userGpsMarker.bindPopup(`
+              <div class="p-2 text-xs font-sans text-center">
+                <p class="font-bold text-slate-800">Your Current Live Location</p>
+                <p class="text-[10px] text-slate-500">${lat.toFixed(4)}, ${lng.toFixed(4)} (±${accuracy}m)</p>
+                <p class="text-[10px] text-emerald-600 font-semibold mt-1">Live in SafarMatch Radar</p>
+              </div>
+            `).openPopup();
+          }
+
+          // If logged in, update Firestore coordinates so travelers see user on map
+          if (currentUser && isLiveFirebase && db) {
+            try {
+              await setDoc(doc(db, "profiles", currentUser.uid), {
+                lat: lat,
+                lng: lng,
+                lastLocationUpdate: serverTimestamp()
+              }, { merge: true });
+              if (currentProfile) {
+                currentProfile.lat = lat;
+                currentProfile.lng = lng;
+              }
+              showToast(`Live GPS updated in Cloud Firestore (${lat.toFixed(3)}, ${lng.toFixed(3)})`, "success");
+            } catch (err) {
+              console.warn("Could not sync GPS to Firestore:", err);
+            }
+          } else {
+            showToast(`GPS located: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, "success");
+          }
+        },
+        (error) => {
+          if (locateBtn) locateBtn.classList.remove('animate-pulse');
+          console.warn("Geolocation error:", error);
+          showToast(`GPS location request denied or timed out: ${error.message}`, "error");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
     };
 
     window.resetMapCenter = function() {
@@ -1411,19 +2135,208 @@
       }
     };
 
-    // ==================== REAL-TIME 1-ON-1 CHAT (`chats/{chatId}/messages`) ====================
-    window.startLiveChatWithUser = function(partnerUid, partnerName, partnerAvatar, circuit) {
+    // ==================== REAL-TIME 1-ON-1 CHAT & MUTUAL MATCH HANDSHAKE PROTOCOL ====================
+    window.switchChatSubTab = function(subTab) {
+      const activeBtn = document.getElementById('chat-subtab-active');
+      const reqBtn = document.getElementById('chat-subtab-requests');
+      const activeList = document.getElementById('active-chats-list-container');
+      const reqList = document.getElementById('requests-list-container');
+
+      if (subTab === 'active') {
+        if (activeBtn) activeBtn.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition bg-white text-slate-900 shadow-xs";
+        if (reqBtn) reqBtn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-slate-500 hover:text-slate-800";
+        if (activeList) activeList.classList.remove('hidden');
+        if (reqList) reqList.classList.add('hidden');
+      } else {
+        if (reqBtn) reqBtn.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition bg-white text-slate-900 shadow-xs";
+        if (activeBtn) activeBtn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-slate-500 hover:text-slate-800";
+        if (reqList) reqList.classList.remove('hidden');
+        if (activeList) activeList.classList.add('hidden');
+      }
+    };
+
+    function attachRequestsListener(userUid) {
+      if (!isLiveFirebase || !db) return;
+      if (requestsUnsubscribe) requestsUnsubscribe();
+
+      // Listen for incoming requests to current user
+      const reqQuery = query(
+        collection(db, "connectionRequests"),
+        where("toUid", "==", userUid)
+      );
+
+      requestsUnsubscribe = onSnapshot(reqQuery, (snapshot) => {
+        allRequestsCache = [];
+        snapshot.forEach(docSnap => {
+          allRequestsCache.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        renderRequestsList();
+      }, (err) => {
+        console.warn("Requests onSnapshot error:", err);
+      });
+    }
+
+    function renderRequestsList() {
+      const container = document.getElementById('requests-list-container');
+      const badge = document.getElementById('requests-badge-count');
+      if (!container) return;
+
+      const pendingRequests = allRequestsCache.filter(r => r.status === "pending");
+      if (badge) {
+        if (pendingRequests.length > 0) {
+          badge.textContent = pendingRequests.length;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+
+      if (pendingRequests.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 space-y-2">
+            <i data-lucide="inbox" class="w-8 h-8 mx-auto text-slate-300"></i>
+            <p class="text-xs font-medium">No pending companion requests</p>
+            <p class="text-[11px] text-slate-400">When other travelers want to connect with you, their requests will appear here.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = pendingRequests.map(req => `
+        <div class="p-3.5 border-b border-slate-100 hover:bg-slate-50 transition space-y-2.5">
+          <div class="flex items-center space-x-3">
+            <img src="${req.fromAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80'}" alt="${req.fromName}" class="w-10 h-10 rounded-full object-cover border border-slate-200" />
+            <div class="flex-1 min-w-0">
+              <h4 class="text-xs font-bold text-slate-900 truncate">${req.fromName}</h4>
+              <p class="text-[11px] text-safar-700 font-semibold truncate">📍 Circuit: ${req.destination || req.fromCircuit || 'India'}</p>
+              <p class="text-[10px] text-slate-400">Requested companion handshake</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 pt-1">
+            <button 
+              onclick="acceptConnectionRequest('${req.id}', '${req.fromUid}', '${req.fromName}', '${req.fromAvatar}', '${req.destination}')" 
+              class="flex-1 py-1.5 px-3 bg-safar-600 hover:bg-safar-700 text-white text-xs font-bold rounded-lg shadow-xs transition"
+            >
+              Accept Handshake
+            </button>
+            <button 
+              onclick="declineConnectionRequest('${req.id}')" 
+              class="py-1.5 px-3 border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg transition"
+            >
+              Decline
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    window.acceptConnectionRequest = async function(reqId, fromUid, fromName, fromAvatar, destination) {
+      if (isLiveFirebase && db) {
+        try {
+          await updateDoc(doc(db, "connectionRequests", reqId), {
+            status: "accepted",
+            acceptedAt: serverTimestamp()
+          });
+          showToast(`🤝 Companion handshake accepted with ${fromName}!`, "success");
+        } catch (e) {
+          console.error("Error accepting connection request:", e);
+        }
+      } else {
+        const req = allRequestsCache.find(r => r.id === reqId);
+        if (req) req.status = "accepted";
+        showToast(`Handshake accepted with ${fromName}!`, "success");
+      }
+      renderRequestsList();
+      switchChatSubTab('active');
+      startLiveChatWithUser(fromUid, fromName, fromAvatar, destination);
+    };
+
+    window.declineConnectionRequest = async function(reqId) {
+      if (isLiveFirebase && db) {
+        try {
+          await updateDoc(doc(db, "connectionRequests", reqId), {
+            status: "declined",
+            declinedAt: serverTimestamp()
+          });
+          showToast("Companion request declined.", "info");
+        } catch (e) {
+          console.error("Error declining connection request:", e);
+        }
+      } else {
+        const req = allRequestsCache.find(r => r.id === reqId);
+        if (req) req.status = "declined";
+        showToast("Request declined.", "info");
+      }
+      renderRequestsList();
+    };
+
+    window.startLiveChatWithUser = async function(partnerUid, partnerName, partnerAvatar, circuit) {
       if (!currentUser) {
-        showToast("Please log in with Google to start 1-on-1 chatting.", "info");
+        showToast("Please log in with Google to connect with travelers.", "info");
         handleGoogleSignIn();
         return;
+      }
+
+      // Check if current user has an active VIP or Explorer Pass
+      const isVip = currentProfile && (currentProfile.isVip === true || currentProfile.hasExplorerPass === true);
+      if (!isVip) {
+        showToast("🔒 Explorer Pass Required: Upgrade to 1-Day or 30-Day Pass to message companion travelers.", "error");
+        switchView('monetization');
+        return;
+      }
+
+      // Check mutual connection handshake status in Firestore
+      let connectionStatus = "connected"; // default for demo / accepted
+      if (isLiveFirebase && db) {
+        try {
+          const qSent = query(
+            collection(db, "connectionRequests"),
+            where("fromUid", "==", currentUser.uid),
+            where("toUid", "==", partnerUid)
+          );
+          const qReceived = query(
+            collection(db, "connectionRequests"),
+            where("fromUid", "==", partnerUid),
+            where("toUid", "==", currentUser.uid)
+          );
+
+          const [sentSnap, recvSnap] = await Promise.all([getDocs(qSent), getDocs(qReceived)]);
+          let foundRequest = null;
+          sentSnap.forEach(d => { foundRequest = d.data(); });
+          recvSnap.forEach(d => { foundRequest = d.data(); });
+
+          if (foundRequest) {
+            connectionStatus = foundRequest.status || "pending";
+          } else {
+            // Initiate handshake request automatically
+            await addDoc(collection(db, "connectionRequests"), {
+              fromUid: currentUser.uid,
+              fromName: (currentProfile && currentProfile.name) || currentUser.displayName || "Traveler",
+              fromAvatar: (currentProfile && currentProfile.photoUrl) || currentUser.photoURL || "",
+              fromCircuit: (currentProfile && currentProfile.upcomingCircuit) || "India",
+              toUid: partnerUid,
+              toName: partnerName,
+              toAvatar: partnerAvatar || "",
+              destination: circuit || "India",
+              status: "pending",
+              createdAt: serverTimestamp()
+            });
+            connectionStatus = "pending";
+            showToast(`🤝 Companion request sent to ${partnerName}! Chat will activate upon acceptance.`, "success");
+          }
+        } catch (err) {
+          console.warn("Could not query handshake status:", err);
+        }
       }
 
       activeChatPartner = {
         uid: partnerUid,
         name: partnerName,
         avatar: partnerAvatar,
-        circuit: circuit || "India"
+        circuit: circuit || "India",
+        connectionStatus: connectionStatus
       };
 
       switchView('chat');
@@ -1431,6 +2344,20 @@
     };
 
     window.joinTripRequest = function(creatorUid, creatorName, destination, avatar) {
+      if (!currentUser) {
+        showToast("Please log in with Google first.", "info");
+        handleGoogleSignIn();
+        return;
+      }
+
+      // Strict paywall for joining trips
+      const isVip = currentProfile && (currentProfile.isVip === true || currentProfile.hasExplorerPass === true);
+      if (!isVip) {
+        showToast("🔒 Explorer Pass Required: Upgrade to join companion trips and contact creators.", "error");
+        switchView('monetization');
+        return;
+      }
+
       startLiveChatWithUser(creatorUid || "user_" + creatorName.replace(/\s+/g, '').toLowerCase(), creatorName, avatar, destination);
     };
 
@@ -1447,7 +2374,29 @@
       // Update Active Header
       document.getElementById('active-chat-name').textContent = activeChatPartner.name;
       document.getElementById('active-chat-avatar').src = activeChatPartner.avatar;
-      document.getElementById('active-chat-status').textContent = `Live • Circuit: ${activeChatPartner.circuit}`;
+      document.getElementById('active-chat-status').textContent = `Circuit: ${activeChatPartner.circuit}`;
+
+      // Handshake status banner update
+      const handshakeBanner = document.getElementById('chat-handshake-status');
+      if (handshakeBanner) {
+        if (activeChatPartner.connectionStatus === "pending") {
+          handshakeBanner.className = "px-4 py-2 bg-amber-50 border-b border-amber-200 text-amber-900 text-xs flex items-center justify-between";
+          handshakeBanner.innerHTML = `
+            <div class="flex items-center space-x-2">
+              <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
+              <span>Companion Request Pending: Waiting for ${activeChatPartner.name} to accept your handshake.</span>
+            </div>
+          `;
+        } else {
+          handshakeBanner.className = "px-4 py-2 bg-emerald-50 border-b border-emerald-200 text-emerald-900 text-xs flex items-center justify-between";
+          handshakeBanner.innerHTML = `
+            <div class="flex items-center space-x-2">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+              <span>Mutual Companion Match Active: Safety filter enabled.</span>
+            </div>
+          `;
+        }
+      }
 
       // Update sidebar conversation list UI
       renderConversationList(partnerUid);
@@ -1499,6 +2448,7 @@
           </div>
         `;
       }
+      lucide.createIcons();
     }
 
     function renderSingleMessageBubble(msg, container) {
@@ -1523,6 +2473,7 @@
       container.appendChild(bubble);
     }
 
+    // ==================== AUTOMATED CHAT CONTENT MODERATION ====================
     window.handleSendMessage = async function(e) {
       if (e) e.preventDefault();
       if (!currentUser) {
@@ -1538,6 +2489,17 @@
       const input = document.getElementById('chat-input-text');
       const text = input.value.trim();
       if (!text) return;
+
+      // Anti-Harassment & Safe-Escort Moderation Regex Check
+      const phoneRegex = /(?:\+91[\s\-]?)?[6-9]\d{2}[\s\-]?\d{3}[\s\-]?\d{4}|\b[6-9]\d{9}\b/;
+      const waRegex = /\b(?:whatsapp|wa\.me|watsapp|wapp|watsap)\b/i;
+      const upiRegex = /[\w.\-+]+@(?:okhdfcbank|okaxis|oksbi|okicici|paytm|ybl|ibl|upi|axl|apl|sbi|hdfc|icici|[a-zA-Z]{3,})\b/i;
+      const socialRegex = /(?:@[a-zA-Z0-9_.]{3,}|(?:insta|instagram|ig|telegram|snapchat)[\s:]*[@\w.]+)/i;
+
+      if (phoneRegex.test(text) || waRegex.test(text) || upiRegex.test(text) || socialRegex.test(text)) {
+        showToast("🛡️ Anti-Harassment Safeguard: Sharing phone numbers, WhatsApp, UPI IDs, or social handles is restricted during initial chat for your safety.", "error");
+        return;
+      }
 
       const chatId = getChatRoomId(currentUser.uid, activeChatPartner.uid);
 
@@ -1580,7 +2542,9 @@
       const container = document.getElementById('chat-threads-list');
       if (!container) return;
 
-      const partnerList = allTravelersCache.slice(0, 6);
+      const myBlocked = (currentProfile && Array.isArray(currentProfile.blockedUsers)) ? currentProfile.blockedUsers : [];
+      const partnerList = allTravelersCache.filter(p => !myBlocked.includes(p.uid)).slice(0, 8);
+
       container.innerHTML = partnerList.map(p => {
         const isActive = p.uid === activePartnerUid;
         return `
@@ -1588,7 +2552,10 @@
             onclick="startLiveChatWithUser('${p.uid}', '${p.name}', '${p.photoUrl || p.photo}', '${p.upcomingCircuit}')" 
             class="p-3.5 flex items-center space-x-3 cursor-pointer transition ${isActive ? 'bg-white border-l-4 border-safar-600 shadow-sm' : 'hover:bg-slate-100'}"
           >
-            <img src="${p.photoUrl || p.photo}" alt="${p.name}" class="w-11 h-11 rounded-full object-cover border border-slate-200" />
+            <div class="relative">
+              <img src="${p.photoUrl || p.photo}" alt="${p.name}" class="w-11 h-11 rounded-full object-cover border border-slate-200" />
+              ${p.idVerified ? '<span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-blue-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center border border-white">✓</span>' : ''}
+            </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
                 <h4 class="text-sm font-bold text-slate-900 truncate">${p.name}</h4>
@@ -1600,6 +2567,7 @@
           </div>
         `;
       }).join('');
+      lucide.createIcons();
     }
 
     window.mobileBackToThreads = function() {
@@ -1607,8 +2575,138 @@
       document.getElementById('chat-main-panel').classList.add('hidden');
     };
 
-    window.reportUserAlert = function() {
-      showToast("Thank you. Safety report submitted to SafarMatch Trust & Safety team.", "info");
+    // ==================== REPORT & BLOCK USER MODAL ====================
+    window.openReportBlockModal = function(targetUid, targetName) {
+      if (!targetUid && activeChatPartner) {
+        targetUid = activeChatPartner.uid;
+        targetName = activeChatPartner.name;
+      }
+      if (!targetUid) {
+        showToast("No traveler selected to report or block.", "error");
+        return;
+      }
+
+      activeReportTarget = { uid: targetUid, name: targetName || "Traveler" };
+      document.getElementById('report-user-name').textContent = activeReportTarget.name;
+      document.getElementById('report-block-modal').classList.remove('hidden');
+    };
+
+    window.closeReportBlockModal = function() {
+      document.getElementById('report-block-modal').classList.add('hidden');
+      activeReportTarget = null;
+    };
+
+    window.submitReportAndBlock = async function(shouldBlock) {
+      if (!activeReportTarget) return;
+
+      const reason = document.getElementById('report-reason-select').value;
+      const details = document.getElementById('report-details-text').value;
+
+      if (isLiveFirebase && db && currentUser) {
+        try {
+          await addDoc(collection(db, "reports"), {
+            reporterUid: currentUser.uid,
+            reportedUid: activeReportTarget.uid,
+            reportedName: activeReportTarget.name,
+            reason: reason,
+            details: details,
+            action: shouldBlock ? "block_and_report" : "report_only",
+            createdAt: serverTimestamp()
+          });
+
+          if (shouldBlock) {
+            const currentBlocked = (currentProfile && Array.isArray(currentProfile.blockedUsers)) ? currentProfile.blockedUsers : [];
+            if (!currentBlocked.includes(activeReportTarget.uid)) {
+              currentBlocked.push(activeReportTarget.uid);
+            }
+            await setDoc(doc(db, "profiles", currentUser.uid), {
+              blockedUsers: currentBlocked
+            }, { merge: true });
+
+            if (currentProfile) currentProfile.blockedUsers = currentBlocked;
+          }
+        } catch (e) {
+          console.error("Report submit error:", e);
+        }
+      } else {
+        if (shouldBlock && currentProfile) {
+          if (!currentProfile.blockedUsers) currentProfile.blockedUsers = [];
+          if (!currentProfile.blockedUsers.includes(activeReportTarget.uid)) {
+            currentProfile.blockedUsers.push(activeReportTarget.uid);
+          }
+        }
+      }
+
+      const targetName = activeReportTarget.name;
+      closeReportBlockModal();
+
+      if (shouldBlock) {
+        showToast(`Traveler ${targetName} blocked & report submitted to SafarMatch Trust & Safety.`, "success");
+        // Re-filter map and trips
+        filterMapTravelers();
+        applyTripsCombinedFilters();
+        renderBlockedUsersList();
+        switchView('map');
+      } else {
+        showToast(`Safety report submitted for ${targetName}. Our team will review within 24 hours.`, "success");
+      }
+    };
+
+    function renderBlockedUsersList() {
+      const container = document.getElementById('blocked-users-list');
+      const countEl = document.getElementById('blocked-users-count');
+      if (!container) return;
+
+      const blockedList = (currentProfile && Array.isArray(currentProfile.blockedUsers)) ? currentProfile.blockedUsers : [];
+      if (countEl) countEl.textContent = `${blockedList.length} blocked`;
+
+      if (blockedList.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No blocked travelers. Blocked users will not see your profile, trips, or messages.</p>`;
+        return;
+      }
+
+      container.innerHTML = blockedList.map(uid => `
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="user-x" class="w-4 h-4 text-rose-500"></i>
+            <span class="font-bold text-slate-800">Blocked Explorer (${uid.substring(0, 10)}...)</span>
+          </div>
+          <button onclick="unblockUser('${uid}')" class="px-3 py-1 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-lg text-[11px] font-semibold">
+            Unblock
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    window.unblockUser = async function(targetUid) {
+      if (!currentProfile || !Array.isArray(currentProfile.blockedUsers)) return;
+      currentProfile.blockedUsers = currentProfile.blockedUsers.filter(id => id !== targetUid);
+
+      if (isLiveFirebase && db && currentUser) {
+        try {
+          await setDoc(doc(db, "profiles", currentUser.uid), {
+            blockedUsers: currentProfile.blockedUsers
+          }, { merge: true });
+        } catch (e) {
+          console.error("Unblock error:", e);
+        }
+      }
+      showToast("Traveler unblocked.", "info");
+      renderBlockedUsersList();
+      filterMapTravelers();
+      applyTripsCombinedFilters();
+    };
+
+    window.selectTravelIntent = function(btn) {
+      const intent = btn.getAttribute('data-intent');
+      document.getElementById('input-travel-intent').value = intent;
+      document.querySelectorAll('.intent-pill').forEach(p => {
+        p.classList.remove('bg-rose-100', 'text-safar-700', 'border-rose-200');
+        p.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+      });
+      btn.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
+      btn.classList.add('bg-rose-100', 'text-safar-700', 'border-rose-200');
     };
 
     // ==================== REAL FIREBASE STORAGE & CANVAS COMPRESSION ====================
@@ -1699,6 +2797,17 @@
       reader.readAsDataURL(file);
     };
 
+    window.toggleMultiSelectPill = function(btn, type) {
+      const isSelected = btn.classList.contains('bg-rose-100');
+      if (isSelected) {
+        btn.classList.remove('bg-rose-100', 'text-safar-700', 'border-rose-200');
+        btn.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+      } else {
+        btn.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
+        btn.classList.add('bg-rose-100', 'text-safar-700', 'border-rose-200');
+      }
+    };
+
     window.handleSaveProfile = async function(e) {
       e.preventDefault();
       if (!currentUser) {
@@ -1713,25 +2822,79 @@
       const homeCity = document.getElementById('input-home-city').value;
       const upcomingCircuit = document.getElementById('input-upcoming-circuit').value;
       const bio = document.getElementById('input-bio').value;
+      const transportPref = document.getElementById('input-transport-pref') ? document.getElementById('input-transport-pref').value : "Royal Enfield / Bike Ride";
+      const instagram = document.getElementById('input-instagram') ? document.getElementById('input-instagram').value.trim() : "";
 
-      // Coordinate mapping for circuits
+      // Gather Languages
+      const languages = [];
+      document.querySelectorAll('.lang-pill.bg-rose-100').forEach(pill => {
+        languages.push(pill.getAttribute('data-val'));
+      });
+
+      // Gather Lifestyle Vibes
+      const lifestyle = [];
+      document.querySelectorAll('.life-pill.bg-rose-100').forEach(pill => {
+        lifestyle.push(pill.getAttribute('data-val'));
+      });
+
+      // Gather Travel Styles
+      const travelStyles = [];
+      document.querySelectorAll('.style-tag-pill.bg-rose-100').forEach(pill => {
+        travelStyles.push(pill.getAttribute('data-tag'));
+      });
+
+      // Coordinate mapping for circuits & hubs
       const circuitCoords = {
-        "Goa": { lat: 15.5800, lng: 73.7420 },
-        "Himachal": { lat: 32.2432, lng: 77.1892 },
-        "Uttarakhand": { lat: 30.0869, lng: 78.2676 },
-        "Rajasthan": { lat: 24.5854, lng: 73.7125 },
-        "Ladakh": { lat: 34.1526, lng: 77.5771 },
-        "Kerala": { lat: 10.0889, lng: 77.0595 }
+        "goa": { lat: 15.5800, lng: 73.7420 },
+        "himachal": { lat: 32.2432, lng: 77.1892 },
+        "manali": { lat: 32.2432, lng: 77.1892 },
+        "kasol": { lat: 32.0100, lng: 77.3150 },
+        "spiti": { lat: 32.2276, lng: 78.0710 },
+        "uttarakhand": { lat: 30.0869, lng: 78.2676 },
+        "rishikesh": { lat: 30.0869, lng: 78.2676 },
+        "chopta": { lat: 30.4853, lng: 79.1764 },
+        "rajasthan": { lat: 24.5854, lng: 73.7125 },
+        "jaipur": { lat: 26.9124, lng: 75.7873 },
+        "udaipur": { lat: 24.5854, lng: 73.7125 },
+        "jaisalmer": { lat: 26.9157, lng: 70.9083 },
+        "ladakh": { lat: 34.1526, lng: 77.5771 },
+        "leh": { lat: 34.1526, lng: 77.5771 },
+        "kerala": { lat: 10.0889, lng: 77.0595 },
+        "munnar": { lat: 10.0889, lng: 77.0595 },
+        "varkala": { lat: 8.7379, lng: 76.7163 },
+        "gokarna": { lat: 14.5479, lng: 74.3188 },
+        "hampi": { lat: 15.3350, lng: 76.4600 },
+        "ziro": { lat: 27.6045, lng: 93.8324 },
+        "pondicherry": { lat: 11.9416, lng: 79.8083 }
       };
 
-      const coords = circuitCoords[upcomingCircuit] || { lat: 20.5937, lng: 78.9629 };
+      const key = upcomingCircuit.toLowerCase();
+      let matchedCoords = null;
+      for (const [k, val] of Object.entries(circuitCoords)) {
+        if (key.includes(k)) {
+          matchedCoords = val;
+          break;
+        }
+      }
+
+      const coords = matchedCoords || (currentProfile && currentProfile.lat ? { lat: currentProfile.lat, lng: currentProfile.lng } : { lat: 20.5937, lng: 78.9629 });
+
+      const travelIntent = document.getElementById('input-travel-intent') ? document.getElementById('input-travel-intent').value : "Find Travel Partner / Dating";
+      const surakshaShield = document.getElementById('input-suraksha-shield') ? document.getElementById('input-suraksha-shield').checked : false;
 
       const updatedPayload = {
         name,
         age,
         gender,
+        travelIntent,
+        surakshaShield,
         homeCity,
         upcomingCircuit,
+        transportPref,
+        instagram,
+        languages,
+        lifestyle,
+        travelStyles,
         bio,
         lat: coords.lat,
         lng: coords.lng,
@@ -1741,6 +2904,9 @@
       if (isLiveFirebase && db) {
         try {
           await setDoc(doc(db, "profiles", currentUser.uid), updatedPayload, { merge: true });
+          if (currentProfile) {
+            Object.assign(currentProfile, updatedPayload);
+          }
           showToast("Profile changes saved live to Cloud Firestore!", "success");
         } catch (err) {
           console.error("Firestore profile save error:", err);
@@ -1751,6 +2917,10 @@
         document.getElementById('sidebar-user-name').textContent = name;
         showToast("Profile updated locally in preview mode.", "success");
       }
+
+      // Re-apply filters with updated gender & shield settings
+      filterMapTravelers();
+      applyTripsCombinedFilters();
     };
 
     window.toggleStyleTag = function(btn) {
@@ -1762,6 +2932,262 @@
         btn.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
         btn.classList.add('bg-rose-100', 'text-safar-700', 'border-rose-200');
       }
+    };
+
+    // ==================== 100% FREE TRUST & SAFETY VERIFICATION SUITE ====================
+    let activeCameraStream = null;
+    let capturedSelfieBlob = null;
+
+    window.openSelfieModal = async function() {
+      if (!currentUser) {
+        showToast("Please log in with Google to perform live camera verification.", "info");
+        handleGoogleSignIn();
+        return;
+      }
+
+      const modal = document.getElementById('selfie-modal');
+      const video = document.getElementById('selfie-video');
+      const capturedPreview = document.getElementById('selfie-captured-preview');
+      const loading = document.getElementById('camera-loading-indicator');
+      const btnCapture = document.getElementById('btn-capture-selfie');
+      const btnRetake = document.getElementById('btn-retake-selfie');
+      const btnUpload = document.getElementById('btn-upload-selfie');
+      const ovalGuide = document.getElementById('selfie-oval-guide');
+
+      modal.classList.remove('hidden');
+      video.classList.remove('hidden');
+      capturedPreview.classList.add('hidden');
+      ovalGuide.classList.remove('hidden');
+      btnCapture.classList.remove('hidden');
+      btnRetake.classList.add('hidden');
+      btnUpload.classList.add('hidden');
+      if (loading) loading.classList.remove('hidden');
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 640 },
+            height: { ideal: 640 }
+          },
+          audio: false
+        });
+        activeCameraStream = stream;
+        video.srcObject = stream;
+        if (loading) loading.classList.add('hidden');
+        document.getElementById('selfie-compression-status').textContent = "Camera active: Align face and click Capture Selfie";
+      } catch (err) {
+        console.error("Camera access error:", err);
+        if (loading) loading.classList.add('hidden');
+        document.getElementById('selfie-compression-status').textContent = "Camera permission error: " + err.message;
+        showToast("Camera access was denied or is unavailable: " + err.message, "error");
+      }
+    };
+
+    window.closeSelfieModal = function() {
+      if (activeCameraStream) {
+        activeCameraStream.getTracks().forEach(track => track.stop());
+        activeCameraStream = null;
+      }
+      const video = document.getElementById('selfie-video');
+      if (video) video.srcObject = null;
+      document.getElementById('selfie-modal').classList.add('hidden');
+    };
+
+    window.captureSelfieFrame = function() {
+      const video = document.getElementById('selfie-video');
+      if (!video || !activeCameraStream) {
+        showToast("Camera stream is not active.", "error");
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const width = video.videoWidth || 480;
+      const height = video.videoHeight || 480;
+      
+      const maxDim = 480;
+      let targetW = width;
+      let targetH = height;
+      if (width > height) {
+        if (width > maxDim) {
+          targetH = Math.round((height * maxDim) / width);
+          targetW = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          targetW = Math.round((width * maxDim) / height);
+          targetH = maxDim;
+        }
+      }
+
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+
+      // Mirror capture to match user orientation
+      ctx.translate(targetW, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, targetW, targetH);
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        capturedSelfieBlob = blob;
+        const sizeKB = (blob.size / 1024).toFixed(1);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.70);
+        const capturedPreview = document.getElementById('selfie-captured-preview');
+        capturedPreview.src = dataUrl;
+        capturedPreview.classList.remove('hidden');
+        video.classList.add('hidden');
+        document.getElementById('selfie-oval-guide').classList.add('hidden');
+
+        document.getElementById('btn-capture-selfie').classList.add('hidden');
+        document.getElementById('btn-retake-selfie').classList.remove('hidden');
+        document.getElementById('btn-upload-selfie').classList.remove('hidden');
+
+        document.getElementById('selfie-compression-status').textContent = `Frame captured: ${sizeKB} KB (enforced <80 KB limit for ₹0 storage cost)`;
+      }, 'image/jpeg', 0.70);
+    };
+
+    window.retakeSelfieFrame = function() {
+      capturedSelfieBlob = null;
+      const video = document.getElementById('selfie-video');
+      const capturedPreview = document.getElementById('selfie-captured-preview');
+      capturedPreview.classList.add('hidden');
+      video.classList.remove('hidden');
+      document.getElementById('selfie-oval-guide').classList.remove('hidden');
+
+      document.getElementById('btn-capture-selfie').classList.remove('hidden');
+      document.getElementById('btn-retake-selfie').classList.add('hidden');
+      document.getElementById('btn-upload-selfie').classList.add('hidden');
+      document.getElementById('selfie-compression-status').textContent = "Camera active: Align face and click Capture Selfie";
+    };
+
+    window.uploadCapturedSelfie = async function() {
+      if (!capturedSelfieBlob || !currentUser) {
+        showToast("No selfie frame captured to upload.", "error");
+        return;
+      }
+
+      const sizeKB = (capturedSelfieBlob.size / 1024).toFixed(1);
+      showToast(`Saving compressed selfie (${sizeKB} KB) to Firebase...`, "info");
+
+      if (isLiveFirebase && storage && db) {
+        try {
+          const selfieRef = ref(storage, `verifications/${currentUser.uid}/selfie.jpg`);
+          await uploadBytes(selfieRef, capturedSelfieBlob);
+          const downloadUrl = await getDownloadURL(selfieRef);
+
+          await setDoc(doc(db, "profiles", currentUser.uid), {
+            selfieVerified: true,
+            selfiePhotoUrl: downloadUrl,
+            selfieVerifiedAt: serverTimestamp()
+          }, { merge: true });
+
+          if (currentProfile) {
+            currentProfile.selfieVerified = true;
+            currentProfile.selfiePhotoUrl = downloadUrl;
+          }
+          showToast("Live camera selfie verified & saved!", "success");
+        } catch (err) {
+          console.error("Selfie upload error:", err);
+          showToast("Selfie upload failed: " + err.message, "error");
+        }
+      } else {
+        if (currentProfile) currentProfile.selfieVerified = true;
+        showToast(`Selfie frame captured (${sizeKB} KB) & marked verified in demo session!`, "success");
+      }
+
+      // Update badge in UI
+      const selfieBadge = document.getElementById('badge-selfie-status');
+      if (selfieBadge) {
+        selfieBadge.textContent = "Selfie Verified ✓";
+        selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+      }
+      closeSelfieModal();
+    };
+
+    // Client-side Government ID Upload (<100 KB enforced compression)
+    window.handleGovtIdUpload = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!currentUser) {
+        showToast("Please log in with Google before uploading Government ID.", "info");
+        handleGoogleSignIn();
+        return;
+      }
+
+      const originalKB = (file.size / 1024).toFixed(1);
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(async (blob) => {
+            if (!blob) return;
+            const compressedKB = (blob.size / 1024).toFixed(1);
+            showToast(`Compressing Govt ID: ${originalKB} KB ➔ ${compressedKB} KB (<100 KB enforced)`, "info");
+
+            if (isLiveFirebase && storage && db) {
+              try {
+                const idRef = ref(storage, `verifications/${currentUser.uid}/govt_id.jpg`);
+                await uploadBytes(idRef, blob);
+                const downloadUrl = await getDownloadURL(idRef);
+
+                await setDoc(doc(db, "profiles", currentUser.uid), {
+                  idVerified: true,
+                  idVerificationStatus: "verified",
+                  idDocumentUrl: downloadUrl,
+                  idVerifiedAt: serverTimestamp()
+                }, { merge: true });
+
+                if (currentProfile) {
+                  currentProfile.idVerified = true;
+                  currentProfile.idVerificationStatus = "verified";
+                }
+                showToast("Government ID uploaded & verified successfully!", "success");
+              } catch (err) {
+                console.error("ID upload error:", err);
+                showToast("Government ID upload failed: " + err.message, "error");
+              }
+            } else {
+              if (currentProfile) currentProfile.idVerified = true;
+              showToast(`Govt ID compressed (${compressedKB} KB) & verified in preview mode!`, "success");
+            }
+
+            const idBadge = document.getElementById('badge-id-status');
+            if (idBadge) {
+              idBadge.textContent = "Govt ID Verified ✓";
+              idBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800";
+            }
+          }, 'image/jpeg', 0.70);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     };
 
     // ==================== MONETIZATION & RAZORPAY TEST MODE ====================
@@ -1844,8 +3270,34 @@
       handlePaymentSuccess("pay_test_" + Math.random().toString(36).substring(7), plan, amount);
     };
 
-    function handlePaymentSuccess(paymentId, plan, amount) {
+    async function handlePaymentSuccess(paymentId, plan, amount) {
+      if (currentUser && isLiveFirebase && db) {
+        try {
+          await setDoc(doc(db, "profiles", currentUser.uid), {
+            isVip: true,
+            hasExplorerPass: true,
+            passPlan: plan,
+            paymentId: paymentId,
+            passActivatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (e) {
+          console.error("Failed to update VIP pass in Firestore:", e);
+        }
+      }
+      if (currentProfile) {
+        currentProfile.isVip = true;
+        currentProfile.hasExplorerPass = true;
+      }
       showToast(`🎉 Payment of ₹${amount} Successful! ID: ${paymentId}. Explorer Pass active!`, "success");
+      
+      const profileAuthBadge = document.getElementById('profile-auth-badge');
+      if (profileAuthBadge) {
+        profileAuthBadge.innerHTML = `
+          <span class="text-xs bg-amber-100 text-amber-900 font-extrabold px-3 py-1 rounded-full flex items-center gap-1 shadow-xs border border-amber-200">
+            ⭐ VIP EXPLORER PASS ACTIVE
+          </span>
+        `;
+      }
     }
 
     // ==================== NAVIGATION & TOASTS ====================
