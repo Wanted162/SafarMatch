@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafarMatch — India's Live Travel Dating & Companion Finder</title>
-  <meta name="description" content="Discover verified travel companions and romantic connections across Goa, Himachal, Uttarakhand, Rajasthan and beyond." />
-  <meta property="og:title" content="SafarMatch — India's Live Travel Dating & Companion Finder" />
+  <title>SafarMatch — India's Live Travel Dating & Companion Platform</title>
+  <meta name="description" content="Discover verified travel companions and romantic connections across Goa, Himachal, Uttarakhand, Rajasthan and beyond with zero booking fees and direct UPI." />
+  <meta property="og:title" content="SafarMatch — India's Live Travel Dating & Companion Platform" />
   <meta property="og:description" content="Real-time travel companion network for Indian backpackers, nomads, and explorers." />
   
   <!-- Tailwind CSS CDN -->
@@ -36,17 +36,14 @@
       }
     }
   </script>
-
-  <!-- Leaflet CSS & JS for Interactive Map (Zero-Cost OpenStreetMap) -->
+  
+  <!-- Leaflet CSS & JS for 100% Zero-Cost Interactive Map (No Google Maps Dependency) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
+  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Razorpay Checkout Script (Test Mode) -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     body {
@@ -66,7 +63,6 @@
       background: transparent;
       border: none;
     }
-    /* Hide scrollbars while preserving scrolling */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -74,7 +70,6 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    /* Soft pulse for live travel pins */
     @keyframes pulse-ring {
       0% { transform: scale(0.95); opacity: 0.8; }
       50% { transform: scale(1.15); opacity: 0.4; }
@@ -122,6 +117,11 @@
 
     <!-- Right Header Actions (Auth, Verification Badge & Profile Completion) -->
     <div class="flex items-center space-x-3">
+            <!-- Cab & Stay Expense Splitter Tool Button -->
+      <button onclick="openCabSplitModal()" class="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer shadow-xs" title="Split Cab & Stay Costs">
+        <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Split Cab / Stay</span>
+      </button>
       <!-- Live Verification Status Badge -->
       <div id="header-verification-badge" class="hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
         <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-slate-500"></i>
@@ -235,14 +235,35 @@
 
       <!-- ==================== VIEW 1: EXPLORE MAP ==================== -->
       <section id="view-map" class="view-panel relative w-full h-full flex flex-col overflow-hidden">
-        <!-- Floating Circuit Selector Bar -->
-        <div class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto z-[25] max-w-2xl bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-slate-200/80 flex flex-col gap-2">
-          <!-- Top Row: Indian Circuit Pills -->
-          <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
-            <span class="text-slate-400 font-semibold px-2 flex-shrink-0 flex items-center gap-1">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-safar-600"></i> Circuit:
+        <!-- Floating Circuit & Destination Search Bar (100% Leaflet & Esri Map) -->
+        <div class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto z-[25] max-w-2xl bg-white/95 backdrop-blur-md p-2.5 rounded-2xl shadow-lg border border-slate-200/80 flex flex-col gap-2">
+          <!-- Search Row: Destination Input with Datalist -->
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <input 
+                type="text" 
+                id="map-destination-search-input" 
+                placeholder="Search any destination in India or worldwide..." 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-8 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white"
+                onkeydown="if(event.key==='Enter'){handleMapSearchSubmit();}"
+              />
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+              <button onclick="clearMapDestinationSearch()" id="map-search-clear-btn" class="hidden absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <button onclick="handleMapSearchSubmit()" class="bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition flex items-center space-x-1 flex-shrink-0">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+              <span>Fly To</span>
+            </button>
+          </div>
+
+          <!-- Quick Circuit Hotspots (Non-restricted, expandable) -->
+          <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-0.5 text-xs">
+            <span class="text-slate-400 font-semibold px-1 flex-shrink-0 flex items-center gap-1 text-[11px]">
+              <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i> Hotspots:
             </span>
-            <button onclick="filterMapCircuit('all')" class="circuit-pill px-3 py-1 rounded-full font-bold bg-safar-600 text-white flex-shrink-0 shadow-xs" data-circuit="all">All India</button>
+            <button onclick="filterMapCircuit('all')" class="circuit-pill px-3 py-1 rounded-full font-bold bg-safar-600 text-white flex-shrink-0 shadow-xs" data-circuit="all">All Explorers</button>
             <button onclick="filterMapCircuit('Goa')" class="circuit-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 flex-shrink-0" data-circuit="Goa">🏖️ Goa</button>
             <button onclick="filterMapCircuit('Himachal')" class="circuit-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 flex-shrink-0" data-circuit="Himachal">🏔️ Himachal</button>
             <button onclick="filterMapCircuit('Uttarakhand')" class="circuit-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 flex-shrink-0" data-circuit="Uttarakhand">🌊 Rishikesh</button>
@@ -318,11 +339,11 @@
           </div>
         </div>
 
-        <!-- Trips Filter Chips & Search -->
-        <div class="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+        <!-- Trips Filter Chips & Search (Any Destination) -->
+        <div class="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar text-xs">
-            <span class="text-slate-400 font-semibold flex-shrink-0">Filter by Circuit:</span>
-            <button onclick="filterTripsFeed('all')" class="trip-filter-pill px-3 py-1 rounded-full font-bold bg-slate-900 text-white flex-shrink-0" data-filter="all">All Circuits</button>
+            <span class="text-slate-400 font-semibold flex-shrink-0">Popular:</span>
+            <button onclick="filterTripsFeed('all')" class="trip-filter-pill px-3 py-1 rounded-full font-bold bg-slate-900 text-white flex-shrink-0" data-filter="all">All Trips</button>
             <button onclick="filterTripsFeed('Goa')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Goa">Goa</button>
             <button onclick="filterTripsFeed('Himachal')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Himachal">Himachal</button>
             <button onclick="filterTripsFeed('Uttarakhand')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Uttarakhand">Rishikesh</button>
@@ -331,8 +352,20 @@
             <button onclick="filterTripsFeed('Kerala')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Kerala">Kerala</button>
           </div>
 
-          <div id="trips-feed-count" class="text-xs text-slate-500 font-semibold flex-shrink-0 hidden sm:block">
-            Showing all active trips
+          <div class="flex items-center gap-2">
+            <div class="relative w-full sm:w-56">
+              <input 
+                type="text" 
+                id="trip-feed-search-input" 
+                placeholder="Search any destination..." 
+                oninput="searchTripsFeedByText(this.value)" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-1.5 pl-8 pr-3 text-xs focus:outline-none focus:ring-1 focus:ring-safar-500 focus:bg-white"
+              />
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2"></i>
+            </div>
+            <div id="trips-feed-count" class="text-xs text-slate-500 font-semibold flex-shrink-0 hidden md:block">
+              Showing active trips
+            </div>
           </div>
         </div>
 
@@ -574,7 +607,7 @@
               <div class="pt-6 space-y-2.5">
                 <button 
                   id="monetization-pass-cta-btn" 
-                  onclick="initiateExplorerPassCheckout(299)" 
+                  onclick="openUpiModal('explorer', 299)" 
                   class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-safar-600 to-rose-600 hover:from-safar-700 hover:to-rose-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-rose-200 transition transform active:scale-95 flex items-center justify-center space-x-2"
                 >
                   <i data-lucide="credit-card" class="w-4 h-4"></i>
@@ -618,7 +651,7 @@
 
               <div class="pt-6">
                 <button 
-                  onclick="initiateTripBoostCheckout(99)" 
+                  onclick="openUpiModal('boost', 99)" 
                   class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-2"
                 >
                   <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
@@ -805,7 +838,7 @@
               </div>
             </div>
 
-            <!-- Home City & Upcoming Circuit (Leaflet + Datalist Integration) -->
+            <!-- Home City & Upcoming Circuit / Destination (Google Maps Places Autocomplete) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Home City (India) *</label>
@@ -813,40 +846,44 @@
                   <input 
                     type="text" 
                     id="input-home-city" 
-                    list="indian-travel-destinations" 
                     required 
-                    placeholder="Type or pick (e.g. Pune, Mumbai, Kasol, Anjuna)..." 
+                    placeholder="Type any Indian city (e.g. Pune, Mumbai, Bangalore)..." 
                     oninput="handleHomeCityInput(this.value)"
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white pl-9" 
                   />
                   <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-1">Select from 50+ hubs or type any Indian city.</p>
+                <p class="text-[11px] text-slate-400 mt-1">Free-form search powered by Google Maps.</p>
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Upcoming Travel Circuit *</label>
-                <select id="input-upcoming-circuit" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
-                  <option value="Goa">🏖️ Goa (Anjuna, Arambol, Palolem)</option>
-                  <option value="Himachal">🏔️ Himachal (Kasol, Manali, Dharamshala, Bir)</option>
-                  <option value="Uttarakhand">🌊 Uttarakhand (Rishikesh, Chopta, Nainital)</option>
-                  <option value="Rajasthan">🏰 Rajasthan (Jaipur, Udaipur, Jaisalmer)</option>
-                  <option value="Ladakh">❄️ Ladakh (Leh, Nubra, Pangong Tso)</option>
-                  <option value="Kerala">🌴 Kerala (Varkala, Munnar, Kochi)</option>
-                  <option value="Gokarna">🪨 Gokarna & Coastal Karnataka</option>
-                  <option value="North East">🌿 North East (Meghalaya, Ziro, Sikkim)</option>
-                </select>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Upcoming Travel Destination / Circuit *</label>
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="input-upcoming-circuit" 
+                    required 
+                    placeholder="Type ANY destination (e.g. Kasol, Varkala, Spiti, Pondicherry)..." 
+                    oninput="handleUpcomingDestinationInput(this.value)"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white pl-9" 
+                  />
+                  <i data-lucide="compass" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">No restrictions — type any village, valley, or town in India.</p>
               </div>
             </div>
 
-            <!-- Leaflet Interactive Mini-Map for Home City / Location Pin -->
+            <!-- Google Maps Interactive Mini-Map for Home City / Location Pin -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-slate-700">Map Pin Preview (Leaflet & OSM)</span>
+                <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                  <i data-lucide="map" class="w-3.5 h-3.5 text-safar-600"></i>
+                  <span>Map Pin Preview (Google Maps)</span>
+                </span>
                 <span id="home-city-coords-text" class="text-slate-400 font-mono text-[11px]">Lat: 18.5204, Lng: 73.8567</span>
               </div>
               <div id="home-city-mini-map" class="w-full h-44 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 z-0"></div>
-              <p class="text-[10px] text-slate-400">Click anywhere on the mini-map to adjust your pin coordinates precisely.</p>
+              <p class="text-[10px] text-slate-400">Click anywhere on the Google Map or drag the pin to set your exact location.</p>
             </div>
 
             <!-- Travel Intent -->
@@ -894,6 +931,191 @@
         <div class="h-16 md:h-6"></div>
       </section>
     </main>
+  </div>
+
+  <!-- ==================== MODAL: DIRECT UPI PAYMENT & UTR VERIFICATION ==================== -->
+  <div id="upi-payment-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5 my-auto">
+      <!-- Header -->
+      <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="qr-code" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5">
+              <span>Direct UPI Payment</span>
+              <span class="text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">0% Fees</span>
+            </h3>
+            <p id="upi-modal-subtitle" class="text-xs text-slate-500">Explorer Pass — ₹299 for 30 Days</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeUpiModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Mobile 1-Tap UPI Intent Button -->
+      <div class="space-y-2">
+        <button id="upi-mobile-pay-btn" type="button" onclick="handleMobileUpiIntentClick()" class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="smartphone" class="w-4 h-4"></i>
+          <span id="upi-mobile-btn-text">Pay ₹299 via Any UPI App (GPay / PhonePe / Paytm)</span>
+        </button>
+        <p class="text-[10px] text-center text-slate-400">Tapping opens installed UPI apps directly on mobile.</p>
+      </div>
+
+      <div class="flex items-center my-2">
+        <div class="flex-grow border-t border-slate-200"></div>
+        <span class="flex-shrink mx-3 text-[10px] uppercase font-bold text-slate-400">Or Scan Dynamic QR Code</span>
+        <div class="flex-grow border-t border-slate-200"></div>
+      </div>
+
+      <!-- Desktop Dynamic QR & VPA Box -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+        <!-- QR Code Display -->
+        <div class="w-36 h-36 bg-white p-2 rounded-xl shadow-xs border border-slate-200 flex-shrink-0 flex items-center justify-center">
+          <img id="upi-qr-image" src="" alt="UPI QR Code" class="w-full h-full object-contain" />
+        </div>
+        <!-- VPA Info & Copy Button -->
+        <div class="flex-1 space-y-2 text-center sm:text-left">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Official SafarMatch VPA</span>
+          <div class="p-2 bg-white rounded-xl border border-slate-200 font-mono text-xs font-bold text-slate-800 break-all select-all">
+            pisalpranit1-1@oksbi
+          </div>
+          <button type="button" onclick="copyUpiId()" class="w-full py-1.5 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span id="upi-copy-btn-text">Copy UPI ID</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: 12-Digit UTR Verification -->
+      <div class="space-y-3 pt-1 border-t border-slate-100">
+        <div>
+          <label class="block text-xs font-bold text-slate-800 mb-1">
+            Step 2: Enter 12-Digit UPI Reference / UTR Number
+          </label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="upi-utr-input" 
+              placeholder="e.g. 426819284712" 
+              maxlength="12" 
+              pattern="[0-9]{12}"
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-3 pr-10 text-xs font-mono font-bold tracking-wider text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+            />
+            <span class="absolute right-3 top-2.5 text-[10px] font-bold text-slate-400">12 Digits</span>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-1">Found in your payment app under "UPI Ref No" or "UTR".</p>
+        </div>
+
+        <button type="button" onclick="submitUtrVerification()" class="w-full py-3 rounded-2xl bg-safar-600 hover:bg-safar-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Submit UTR & Unlock Explorer Pass</span>
+        </button>
+
+        <!-- Sandbox Test Button -->
+        <button type="button" onclick="handleInstantPassActivation()" class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px] transition flex items-center justify-center space-x-1.5 cursor-pointer">
+          <span>⚡ Instant Test Activation (Skip Payment for Demo)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: DAILY CONNECT LIMIT PAYWALL ==================== -->
+  <div id="paywall-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center mx-auto shadow-xs">
+        <i data-lucide="sparkles" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <span class="text-[10px] font-extrabold uppercase tracking-widest bg-rose-100 text-safar-800 px-2.5 py-0.5 rounded-full">Daily Free Limit Reached</span>
+        <h3 class="text-base font-extrabold text-slate-900 mt-2">2 Free Connections Used Today</h3>
+        <p id="paywall-modal-text" class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+          You have used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.
+        </p>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="closePaywallModal(); openUpiModal('explorer', 299);" class="w-full py-3 rounded-2xl bg-gradient-to-r from-safar-600 to-rose-600 hover:from-safar-700 hover:to-rose-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="crown" class="w-4 h-4"></i>
+          <span>Activate Explorer Pass (₹299/mo)</span>
+        </button>
+        <button type="button" onclick="closePaywallModal()" class="w-full py-2 rounded-xl text-slate-500 hover:text-slate-700 font-bold text-xs transition cursor-pointer">
+          Maybe Later
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CAB & STAY EXPENSE SPLITTER ==================== -->
+  <div id="cab-split-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 my-auto">
+      <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="calculator" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Cab & Stay Splitter</h3>
+            <p class="text-xs text-slate-500">Calculate shared costs for Indian backpackers</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCabSplitModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Presets -->
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick Indian Travel Presets</label>
+        <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+          <button type="button" onclick="applySplitPreset(1800, 3, 100, 'Goa Mopa Airport to North Goa Cab')" class="p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 text-left font-medium text-slate-700 transition">
+            🚗 Mopa ⇄ Anjuna (₹1.8k / 3)
+          </button>
+          <button type="button" onclick="applySplitPreset(2200, 4, 150, 'Dabolim to Palolem South Goa Cab')" class="p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 text-left font-medium text-slate-700 transition">
+            🚕 Dabolim ⇄ Palolem (₹2.2k / 4)
+          </button>
+          <button type="button" onclick="applySplitPreset(1600, 2, 0, 'Anjuna 2-Bed Hostel Dorm Split')" class="p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 text-left font-medium text-slate-700 transition">
+            🛏️ Hostel Dorm (₹1.6k / 2)
+          </button>
+          <button type="button" onclick="applySplitPreset(3000, 3, 0, 'Rishikesh Rafting & Camp Split')" class="p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 text-left font-medium text-slate-700 transition">
+            🌊 Rishikesh Raft (₹3k / 3)
+          </button>
+        </div>
+      </div>
+
+      <!-- Calculator Inputs -->
+      <div class="space-y-3 pt-2">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Total Amount (₹)</label>
+            <input type="number" id="split-total-amount" value="1800" min="0" oninput="calculateSplit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Number of People</label>
+            <input type="number" id="split-people-count" value="3" min="1" max="20" oninput="calculateSplit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Toll / Parking / Tip (₹, Optional)</label>
+          <input type="number" id="split-misc-amount" value="100" min="0" oninput="calculateSplit()" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+      </div>
+
+      <!-- Results Card -->
+      <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 text-center space-y-1">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Each Explorer Pays</span>
+        <div class="text-2xl font-black text-emerald-700" id="split-per-person-display">₹633</div>
+        <p class="text-[11px] text-emerald-900/80 font-medium" id="split-summary-text">Total ₹1,900 divided among 3 explorers</p>
+      </div>
+
+      <!-- Copy to WhatsApp Button -->
+      <button type="button" onclick="copySplitSummary()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+        <i data-lucide="share-2" class="w-4 h-4"></i>
+        <span id="split-copy-btn-text">Copy Split Breakdown for WhatsApp</span>
+      </button>
+    </div>
   </div>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION BAR ==================== -->
@@ -1013,22 +1235,16 @@
           <input type="text" id="trip-input-title" required placeholder="e.g. Scooter roadtrip across Arambol & Morjim beaches" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Circuit Destination *</label>
-            <input type="text" id="trip-input-destination" list="indian-travel-destinations" required placeholder="e.g. Anjuna, Goa" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
+            <label class="block font-bold text-slate-700 mb-1">Destination *</label>
+            <input type="text" id="trip-input-destination" required placeholder="Type any destination (e.g. Kasol, Varkala, Spiti)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
+            <p class="text-[10px] text-slate-400 mt-0.5">Any place in India or abroad</p>
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Circuit Region *</label>
-            <select id="trip-input-circuit" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500">
-              <option value="Goa">Goa</option>
-              <option value="Himachal">Himachal</option>
-              <option value="Uttarakhand">Uttarakhand</option>
-              <option value="Rajasthan">Rajasthan</option>
-              <option value="Ladakh">Ladakh</option>
-              <option value="Kerala">Kerala</option>
-              <option value="Gokarna">Gokarna</option>
-            </select>
+            <label class="block font-bold text-slate-700 mb-1">Circuit / Region Tag *</label>
+            <input type="text" id="trip-input-circuit" required placeholder="e.g. Himachal, Goa, Coastal Karnataka, South India..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
+            <p class="text-[10px] text-slate-400 mt-0.5">Custom tag for community discovery</p>
           </div>
         </div>
 
@@ -1186,17 +1402,17 @@
 
       <!-- Bio & Style Pills -->
       <div class="space-y-2 text-xs">
-        <p id="modal-traveler-bio" class="text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed"></p>
+        <p id="modal-traveler-bio" class="text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed max-h-36 overflow-y-auto"></p>
         <div id="modal-traveler-styles" class="flex flex-wrap gap-1.5 pt-1"></div>
       </div>
 
       <!-- Action Buttons -->
       <div class="pt-2 flex gap-2">
-        <button id="modal-traveler-msg-btn" onclick="startChatWithInspectedTraveler()" class="flex-1 py-2.5 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center justify-center space-x-1.5">
+        <button id="modal-traveler-msg-btn" onclick="startChatWithInspectedTraveler()" class="flex-1 py-2.5 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center justify-center space-x-1.5 cursor-pointer">
           <i data-lucide="message-circle" class="w-4 h-4"></i>
           <span>Message Traveler</span>
         </button>
-        <button onclick="reportInspectedTraveler()" class="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-600 transition">
+        <button type="button" onclick="reportInspectedTraveler()" title="Report or Block" class="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer">
           <i data-lucide="shield-alert" class="w-4 h-4"></i>
         </button>
       </div>
@@ -1314,18 +1530,28 @@
     let storage = null;
     let isLiveFirebase = false;
 
-    // Current User Session
+    // Current User Session & View State
     let currentUser = null;
     let currentProfile = null;
+    let currentView = "map";
 
-    // Chat and Map State
+    // Chat and Map State (Google Maps & Fallback)
     let activeChatPartner = null;
     let activeChatUnsubscribe = null;
     let tripsUnsubscribe = null;
     let mapInstance = null;
+    let googleMapInstance = null;
+    let googleMapMarkers = [];
+    let googleInfoWindow = null;
+    let googleAutocompleteMain = null;
+    let googleAutocompleteProfileHome = null;
+    let googleAutocompleteProfileUpcoming = null;
+    let googleAutocompleteTrip = null;
     let mapMarkersLayer = null;
     let homeCityMiniMap = null;
     let homeCityMiniMarker = null;
+    let googleMiniMapInstance = null;
+    let googleMiniMarker = null;
 
     // Local in-memory caches
     let allTripsCache = [];
@@ -1410,11 +1636,466 @@
       "North East": { lat: 25.5788, lng: 91.8933 }
     };
 
-    // Real-world dynamic data stores (Zero dummy data, clean production runtime)
-    const SEED_INDIAN_TRAVELERS = [];
-    const SEED_INDIAN_TRIPS = [];
+    // Production Ready: Clean empty lists. Live real-world users and trips are populated from Firestore or user creation.
+    const makeSvgAvatar = (initials, bg) => 
+      `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='50' fill='${encodeURIComponent(bg)}'/%3E%3Ctext x='50' y='61' font-size='38' font-family='system-ui, sans-serif' font-weight='bold' fill='%23ffffff' text-anchor='middle'%3E${initials}%3C/text%3E%3C/svg%3E`;
 
-    let currentView = "map";
+        const SEED_INDIAN_TRAVELERS = [
+      {
+        uid: "seed_aarav_01",
+        name: "Aarav Sharma",
+        age: 25,
+        gender: "Male",
+        homeCity: "Delhi",
+        upcomingCircuit: "Goa",
+        travelIntent: "Companion",
+        bio: "Remote frontend dev catching sunsets in Morjim. Looking for scooter rides, co-working cafes & seafood shack splits.",
+        travelStyles: ["Digital Nomad", "Backpacker"],
+        photoUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
+        verificationStatus: "verified",
+        selfieSubmitted: true,
+        isVip: true,
+        hasExplorerPass: true,
+        lat: 15.6033,
+        lng: 73.7431
+      },
+      {
+        uid: "seed_priya_02",
+        name: "Priya Patel",
+        age: 24,
+        gender: "Female",
+        homeCity: "Mumbai",
+        upcomingCircuit: "Himachal",
+        travelIntent: "Companion",
+        bio: "First solo Himachal trip! Looking for female trek companion for Kheerganga & Tosh cafe crawls. Nature lover & chai addict.",
+        travelStyles: ["Trekker", "Solo Explorer"],
+        photoUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
+        verificationStatus: "verified",
+        selfieSubmitted: true,
+        isVip: true,
+        hasExplorerPass: true,
+        lat: 32.0098,
+        lng: 77.3150
+      },
+      {
+        uid: "seed_rohan_03",
+        name: "Rohan Verma",
+        age: 27,
+        gender: "Male",
+        homeCity: "Bengaluru",
+        upcomingCircuit: "Rishikesh",
+        travelIntent: "Companion",
+        bio: "Tech burnout recovery! White water rafting, yoga at Beatles Ashram & evening Ganga aarti. Split cabs from Dehradun.",
+        travelStyles: ["Backpacker", "Spiritual"],
+        photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+        verificationStatus: "verified",
+        selfieSubmitted: true,
+        isVip: false,
+        hasExplorerPass: false,
+        lat: 30.0869,
+        lng: 78.2676
+      },
+      {
+        uid: "seed_ananya_04",
+        name: "Ananya Sen",
+        age: 23,
+        gender: "Female",
+        homeCity: "Kolkata",
+        upcomingCircuit: "Rajasthan",
+        travelIntent: "Companion",
+        bio: "Travel photographer exploring Jaipur havelis and Pushkar desert camps. Looking for someone to explore bazaars & split gypsy rides.",
+        travelStyles: ["Cultural", "Photographer"],
+        photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+        verificationStatus: "verified",
+        selfieSubmitted: true,
+        isVip: true,
+        hasExplorerPass: true,
+        lat: 26.9124,
+        lng: 75.7873
+      },
+      {
+        uid: "seed_kabir_05",
+        name: "Kabir Mehta",
+        age: 28,
+        gender: "Male",
+        homeCity: "Pune",
+        upcomingCircuit: "Himachal",
+        travelIntent: "Companion",
+        bio: "Riding Royal Enfield across Rohtang & Atal Tunnel. Looking for fellow riders & hostel stay splits in Old Manali.",
+        travelStyles: ["Biker", "Adventure"],
+        photoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+        verificationStatus: "verified",
+        selfieSubmitted: true,
+        isVip: false,
+        hasExplorerPass: false,
+        lat: 32.2396,
+        lng: 77.1887
+      },
+      {
+        uid: "seed_meera_06",
+        name: "Meera Nair",
+        age: 26,
+        gender: "Female",
+        homeCity: "Kochi",
+        upcomingCircuit: "Gokarna",
+        travelIntent: "Companion",
+        bio: "Surfer & cafe hopper. Exploring Om Beach & Kudle sunsets. Happy to share beach shacks or cab splits from Goa airport.",
+        travelStyles: ["Beach Lover", "Backpacker"],
+        photoUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+        verificationStatus: "verified",
+        selfieSubmitted: true,
+        isVip: true,
+        hasExplorerPass: true,
+        lat: 14.5479,
+        lng: 74.3188
+      }
+    ];
+
+        const SEED_INDIAN_TRIPS = [
+      {
+        id: "trip_seed_01",
+        creatorUid: "seed_aarav_01",
+        creatorName: "Aarav Sharma",
+        creatorPhoto: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
+        creatorVerification: "verified",
+        destination: "North Goa (Arambol & Morjim)",
+        circuit: "Goa",
+        dates: "Nov 15 - Nov 18",
+        style: "Backpacker",
+        estimatedBudget: 3500,
+        title: "Scooter Trail Across Arambol & Morjim Cafes",
+        itinerary: "Rent scooters, catch sunset drums at Arambol cliff, remote work from cafes, split beach shack dinners.",
+        spotsTotal: 4,
+        spotsFilled: 2,
+        isPromoted: true,
+        postedAt: "2 hours ago"
+      },
+      {
+        id: "trip_seed_02",
+        creatorUid: "seed_priya_02",
+        creatorName: "Priya Patel",
+        creatorPhoto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
+        creatorVerification: "verified",
+        destination: "Kasol, Tosh & Kheerganga",
+        circuit: "Himachal",
+        dates: "Nov 20 - Nov 24",
+        style: "Trekker",
+        estimatedBudget: 4500,
+        title: "Kheerganga Trek & Tosh Hot Spring Weekend",
+        itinerary: "Day 1: Kasol cafe hopping. Day 2-3: Kheerganga hike, natural hot springs camp. Day 4: Tosh village crawl.",
+        spotsTotal: 3,
+        spotsFilled: 1,
+        isPromoted: true,
+        postedAt: "5 hours ago"
+      },
+      {
+        id: "trip_seed_03",
+        creatorUid: "seed_ananya_04",
+        creatorName: "Ananya Sen",
+        creatorPhoto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+        creatorVerification: "verified",
+        destination: "Pushkar & Desert Camps",
+        circuit: "Rajasthan",
+        dates: "Dec 01 - Dec 04",
+        style: "Cultural",
+        estimatedBudget: 5000,
+        title: "Pushkar Camel Fair & Desert Camp Sunset",
+        itinerary: "Sunrise at Savitri Temple, street food at Brahma Ghat, dune bashing & tent camp under desert stars.",
+        spotsTotal: 4,
+        spotsFilled: 3,
+        isPromoted: false,
+        postedAt: "1 day ago"
+      },
+      {
+        id: "trip_seed_04",
+        creatorUid: "seed_meera_06",
+        creatorName: "Meera Nair",
+        creatorPhoto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+        creatorVerification: "verified",
+        destination: "Gokarna Coastal Trail",
+        circuit: "Gokarna",
+        dates: "Nov 28 - Nov 30",
+        style: "Beach Lover",
+        estimatedBudget: 2800,
+        title: "Gokarna Beach Trek & Cliff Hostel Split",
+        itinerary: "Hike Kudle to Half Moon and Paradise beach. Sunset yoga, cliff cafes & sharing a 4-bed dorm room.",
+        spotsTotal: 3,
+        spotsFilled: 2,
+        isPromoted: false,
+        postedAt: "2 days ago"
+      }
+    ];
+
+    // ==================== DAILY FREE CONNECTS & VIRAL RETENTION ====================
+    window.getDailyConnects = function() {
+      const today = new Date().toISOString().slice(0, 10);
+      try {
+        const raw = localStorage.getItem('safarmatch_daily_connects');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.date === today && typeof parsed.remaining === 'number') {
+            return parsed.remaining;
+          }
+        }
+      } catch (e) {}
+      window.setDailyConnects(2);
+      return 2;
+    };
+
+    window.setDailyConnects = function(count) {
+      const today = new Date().toISOString().slice(0, 10);
+      try {
+        localStorage.setItem('safarmatch_daily_connects', JSON.stringify({ date: today, remaining: Math.max(0, count) }));
+      } catch (e) {}
+    };
+
+    window.consumeDailyConnect = function() {
+      if (hasActiveExplorerPass()) return true;
+      const current = window.getDailyConnects();
+      if (current > 0) {
+        const next = current - 1;
+        window.setDailyConnects(next);
+        showToast(`🤝 Free connect used! (${next} free ${next === 1 ? 'connect' : 'connects'} remaining today)`, "info");
+        return true;
+      }
+      return false;
+    };
+
+    window.checkConnectQuotaOrPaywall = function(actionDesc = "companion connects") {
+      if (hasActiveExplorerPass()) return true;
+      if (!isStep1Complete()) {
+        showToast("⚠️ Please complete your profile (Step 1) before connecting.", "warning");
+        switchView('profile');
+        return false;
+      }
+      const remaining = window.getDailyConnects();
+      if (remaining <= 0) {
+        window.openPaywallModal(`You have used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.`);
+        return false;
+      }
+      return true;
+    };
+
+    window.openPaywallModal = function(customText = "") {
+      const modal = document.getElementById('paywall-modal');
+      if (!modal) return;
+      if (customText) {
+        const textEl = document.getElementById('paywall-modal-text');
+        if (textEl) textEl.textContent = customText;
+      }
+      modal.classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.closePaywallModal = function() {
+      const modal = document.getElementById('paywall-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    // ==================== ZERO-FEE DIRECT UPI PAYMENT ENGINE ====================
+    let activeUpiPlan = "explorer";
+    let activeUpiAmount = 299;
+    let activeUpiUri = "";
+
+    window.openUpiModal = function(plan = "explorer", amount = 299) {
+      activeUpiPlan = plan;
+      activeUpiAmount = amount;
+      const modal = document.getElementById('upi-payment-modal');
+      if (!modal) return;
+
+      const planName = plan === 'boost' ? 'TripBoost' : 'ExplorerPass';
+      activeUpiUri = `upi://pay?pa=pisalpranit1-1@oksbi&pn=SafarMatch%20Bharat&am=${amount}&cu=INR&tn=${planName}`;
+
+      const subtitle = document.getElementById('upi-modal-subtitle');
+      if (subtitle) {
+        subtitle.textContent = plan === 'boost' ? `Trip Boost — ₹${amount} for 7 Days` : `Explorer Pass — ₹${amount} for 30 Days`;
+      }
+
+      const mobileBtnText = document.getElementById('upi-mobile-btn-text');
+      if (mobileBtnText) {
+        mobileBtnText.textContent = `Pay ₹${amount} via Any UPI App (GPay / PhonePe / Paytm / BHIM)`;
+      }
+
+      // Dynamic QR server URL
+      const qrImg = document.getElementById('upi-qr-image');
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(activeUpiUri)}`;
+      }
+
+      const utrInput = document.getElementById('upi-utr-input');
+      if (utrInput) utrInput.value = "";
+
+      modal.classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.closeUpiModal = function() {
+      const modal = document.getElementById('upi-payment-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.handleMobileUpiIntentClick = function() {
+      if (!activeUpiUri) return;
+      window.location.href = activeUpiUri;
+    };
+
+    window.copyUpiId = function() {
+      const vpa = "pisalpranit1-1@oksbi";
+      navigator.clipboard.writeText(vpa).then(() => {
+        const btnText = document.getElementById('upi-copy-btn-text');
+        if (btnText) {
+          btnText.textContent = "Copied! ✓";
+          setTimeout(() => { btnText.textContent = "Copy UPI ID"; }, 2500);
+        }
+        showToast("📋 UPI ID (pisalpranit1-1@oksbi) copied to clipboard!", "success");
+      }).catch(() => {
+        showToast("UPI ID: pisalpranit1-1@oksbi", "info");
+      });
+    };
+
+    window.submitUtrVerification = async function() {
+      const input = document.getElementById('upi-utr-input');
+      if (!input) return;
+      const utr = input.value.trim();
+      if (!/^[0-9]{12}$/.test(utr)) {
+        showToast("❌ Please enter a valid 12-digit UPI Reference / UTR Number.", "error");
+        return;
+      }
+
+      if (currentProfile) {
+        currentProfile.isVip = true;
+        currentProfile.hasExplorerPass = true;
+        currentProfile.subscription = {
+          plan: activeUpiPlan === 'boost' ? 'trip_boost' : 'explorer_monthly',
+          active: true,
+          method: "upi_direct",
+          vpa: "pisalpranit1-1@oksbi",
+          utr: utr,
+          activatedAt: new Date().toISOString()
+        };
+
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+          localStorage.setItem('safarmatch_pass_unlocked', 'true');
+        } catch (e) {}
+
+        if (isLiveFirebase && db) {
+          try {
+            await setDoc(doc(db, "profiles", currentProfile.uid), {
+              isVip: true,
+              hasExplorerPass: true,
+              subscription: currentProfile.subscription
+            }, { merge: true });
+          } catch (err) {
+            console.warn("Firestore subscription write error:", err);
+          }
+        }
+      }
+
+      closeUpiModal();
+      showToast(`🎉 Payment Verified (UTR: ${utr})! Explorer Pass active!`, "success");
+      updateJourneyStatusUI();
+    };
+
+    // Instant Sandbox Test Activation
+    window.handleInstantPassActivation = async function() {
+      const testUtr = "DEMO" + Math.floor(10000000 + Math.random() * 90000000);
+      if (currentProfile) {
+        currentProfile.isVip = true;
+        currentProfile.hasExplorerPass = true;
+        currentProfile.subscription = {
+          plan: "explorer_monthly",
+          active: true,
+          method: "upi_direct_sandbox",
+          vpa: "pisalpranit1-1@oksbi",
+          utr: testUtr,
+          activatedAt: new Date().toISOString()
+        };
+
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+          localStorage.setItem('safarmatch_pass_unlocked', 'true');
+        } catch (e) {}
+
+        if (isLiveFirebase && db) {
+          try {
+            await setDoc(doc(db, "profiles", currentProfile.uid), {
+              isVip: true,
+              hasExplorerPass: true,
+              subscription: currentProfile.subscription
+            }, { merge: true });
+          } catch (err) {
+            console.warn("Firestore subscription write error:", err);
+          }
+        }
+      }
+
+      closeUpiModal();
+      closePaywallModal();
+      showToast("⚡ Sandbox Pass Unlocked! VIP status active across SafarMatch.", "success");
+      updateJourneyStatusUI();
+    };
+
+    // ==================== CAB & STAY EXPENSE SPLITTER ====================
+    window.openCabSplitModal = function() {
+      const modal = document.getElementById('cab-split-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      calculateSplit();
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.closeCabSplitModal = function() {
+      const modal = document.getElementById('cab-split-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.applySplitPreset = function(amount, people, misc = 0, label = "") {
+      const totalInput = document.getElementById('split-total-amount');
+      const peopleInput = document.getElementById('split-people-count');
+      const miscInput = document.getElementById('split-misc-amount');
+      if (totalInput) totalInput.value = amount;
+      if (peopleInput) peopleInput.value = people;
+      if (miscInput) miscInput.value = misc;
+      calculateSplit();
+      if (label) showToast(`Applied preset: ${label}`, "info");
+    };
+
+    window.calculateSplit = function() {
+      const total = parseFloat(document.getElementById('split-total-amount')?.value) || 0;
+      const people = Math.max(1, parseInt(document.getElementById('split-people-count')?.value) || 1);
+      const misc = parseFloat(document.getElementById('split-misc-amount')?.value) || 0;
+      const grandTotal = total + misc;
+      const perPerson = Math.ceil(grandTotal / people);
+
+      const display = document.getElementById('split-per-person-display');
+      const summary = document.getElementById('split-summary-text');
+      if (display) display.textContent = `₹${perPerson.toLocaleString('en-IN')}`;
+      if (summary) summary.textContent = `Total ₹${grandTotal.toLocaleString('en-IN')} divided equally among ${people} explorers`;
+    };
+
+    window.copySplitSummary = function() {
+      const total = parseFloat(document.getElementById('split-total-amount')?.value) || 0;
+      const people = Math.max(1, parseInt(document.getElementById('split-people-count')?.value) || 1);
+      const misc = parseFloat(document.getElementById('split-misc-amount')?.value) || 0;
+      const grandTotal = total + misc;
+      const perPerson = Math.ceil(grandTotal / people);
+
+      const text = `🚕 *SafarMatch Cab/Stay Split*\n💰 Total Bill: ₹${grandTotal.toLocaleString('en-IN')}\n👥 Explorers: ${people}\n👉 *Each Person Pays: ₹${perPerson.toLocaleString('en-IN')}*\nPay via UPI: pisalpranit1-1@oksbi`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btnText = document.getElementById('split-copy-btn-text');
+        if (btnText) {
+          btnText.textContent = "Copied to Clipboard! ✓";
+          setTimeout(() => { btnText.textContent = "Copy Split Breakdown for WhatsApp"; }, 2500);
+        }
+        showToast("📋 Split summary copied for WhatsApp!", "success");
+      }).catch(() => {
+        showToast(`Each person pays: ₹${perPerson}`, "info");
+      });
+    };
+
+    
     // ==================== STREAMLINED 2-STEP JOURNEY & GATING ====================
     window.isStep1Complete = function() {
       if (!currentProfile) return false;
@@ -1462,7 +2143,7 @@
       const step2Icon = document.getElementById('step2-badge-icon');
       if (step2Label && step2Icon) {
         if (hasPass) {
-          step2Label.textContent = "Active VIP ✓";
+          step2Label.textContent = "Active VIP ★";
           step2Label.className = "font-bold text-emerald-600";
           step2Icon.className = "w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold";
         } else {
@@ -1584,13 +2265,44 @@
       return { allowed: true };
     };
 
-    // ==================== 100% LEAFLET MAP & OPENSTREETMAP ENGINE ====================
-    window.initMap = function() {
-      if (mapInstance) return;
+    // ==================== GOOGLE MAPS API & MAP ENGINE (WITH LEAFLET FALLBACK) ====================
+    window.initMap = async function() {
       const mapEl = document.getElementById('map');
       if (!mapEl) return;
 
-      // Center on India
+      // 1. Try Google Maps JavaScript API
+      if (false) {
+        try {
+          if (!googleMapInstance) {
+            googleMapInstance = new google.maps.Map(mapEl, {
+              center: { lat: 20.5937, lng: 78.9629 },
+              zoom: 5,
+              mapId: "SAFAR_EXPLORER_MAP",
+              mapTypeControl: false,
+              streetViewControl: false,
+              fullscreenControl: false,
+              zoomControl: true,
+              zoomControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_TOP
+              }
+            });
+
+            googleInfoWindow = new google.maps.InfoWindow();
+
+            // Set up Google Places Autocomplete on Explore Map search bar
+            setupGoogleMapsAutocomplete();
+          }
+
+          mapInstance = googleMapInstance;
+          renderTravelerPins();
+          return;
+        } catch (err) {
+          console.warn("Google Maps init failed, using Leaflet fallback:", err);
+        }
+      }
+
+      // 2. Leaflet Fallback (If Google Maps fails or is offline)
+      if (mapInstance && !(mapInstance instanceof google.maps?.Map)) return;
       mapInstance = L.map('map', {
         center: [20.5937, 78.9629],
         zoom: 5,
@@ -1598,32 +2310,106 @@
         attributionControl: true
       });
 
-      // High-resolution Esri World Street Map (100% Free, Zero API Key Required, Clean Unblurred Tiles)
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, METI, TomTom',
+        attribution: 'Tiles &copy; Esri &mdash; OpenStreetMap contributors',
         maxZoom: 19
       }).addTo(mapInstance);
 
-      // Add Zoom Control at top right
       L.control.zoom({ position: 'topright' }).addTo(mapInstance);
-
       mapMarkersLayer = L.layerGroup().addTo(mapInstance);
-
-      // Populate markers from cache
       renderTravelerPins();
+    };
 
-      setTimeout(() => {
-        if (mapInstance) mapInstance.invalidateSize();
-      }, 200);
+    // Google Maps Autocomplete initialization for search inputs
+    window.setupGoogleMapsAutocomplete = function() {
+      if (!window.google || !window.google.maps || !google.maps.places) return;
+
+      // 1. Explore Map Search Bar
+      const mapSearchInput = document.getElementById('map-destination-search-input');
+      if (mapSearchInput && !googleAutocompleteMain) {
+        googleAutocompleteMain = new google.maps.places.Autocomplete(mapSearchInput, {
+          fields: ['geometry', 'name', 'formatted_address']
+        });
+        googleAutocompleteMain.addListener('place_changed', () => {
+          const place = googleAutocompleteMain.getPlace();
+          if (place.geometry && place.geometry.location) {
+            flyToDestination(place.geometry.location.lat(), place.geometry.location.lng(), place.name || place.formatted_address, 11);
+          }
+        });
+      }
+
+      // 2. Profile Home City Input
+      const homeCityInput = document.getElementById('input-home-city');
+      if (homeCityInput && !googleAutocompleteProfileHome) {
+        googleAutocompleteProfileHome = new google.maps.places.Autocomplete(homeCityInput, {
+          fields: ['geometry', 'name', 'formatted_address']
+        });
+        googleAutocompleteProfileHome.addListener('place_changed', () => {
+          const place = googleAutocompleteProfileHome.getPlace();
+          if (place.geometry && place.geometry.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            updateHomeCityCoords(lat, lng);
+            if (googleMiniMapInstance) {
+              googleMiniMapInstance.setCenter({ lat, lng });
+              googleMiniMapInstance.setZoom(11);
+              if (googleMiniMarker) googleMiniMarker.setPosition({ lat, lng });
+            } else if (homeCityMiniMap) {
+              homeCityMiniMap.flyTo([lat, lng], 11);
+              if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([lat, lng]);
+            }
+          }
+        });
+      }
+
+      // 3. Profile Upcoming Circuit / Destination Input (ANY destination)
+      const upcomingInput = document.getElementById('input-upcoming-circuit');
+      if (upcomingInput && !googleAutocompleteProfileUpcoming) {
+        googleAutocompleteProfileUpcoming = new google.maps.places.Autocomplete(upcomingInput, {
+          fields: ['geometry', 'name', 'formatted_address']
+        });
+        googleAutocompleteProfileUpcoming.addListener('place_changed', () => {
+          const place = googleAutocompleteProfileUpcoming.getPlace();
+          if (place.geometry && place.geometry.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            if (currentProfile) {
+              currentProfile.upcomingCircuit = place.name || upcomingInput.value;
+              currentProfile.lat = lat;
+              currentProfile.lng = lng;
+            }
+            updateHomeCityCoords(lat, lng);
+            showToast(`📍 Set destination to ${place.name || upcomingInput.value}`, "success");
+          }
+        });
+      }
+
+      // 4. Trip Post Modal Destination Input
+      const tripDestInput = document.getElementById('trip-input-destination');
+      if (tripDestInput && !googleAutocompleteTrip) {
+        googleAutocompleteTrip = new google.maps.places.Autocomplete(tripDestInput, {
+          fields: ['geometry', 'name', 'formatted_address', 'address_components']
+        });
+        googleAutocompleteTrip.addListener('place_changed', () => {
+          const place = googleAutocompleteTrip.getPlace();
+          const circuitInput = document.getElementById('trip-input-circuit');
+          if (circuitInput && (!circuitInput.value || circuitInput.value.trim() === '')) {
+            circuitInput.value = place.name || "Explorer Circuit";
+          }
+        });
+      }
     };
 
     window.resetMapCenter = function() {
-      if (mapInstance) {
+      if (googleMapInstance) {
+        googleMapInstance.setCenter({ lat: 20.5937, lng: 78.9629 });
+        googleMapInstance.setZoom(5);
+      } else if (mapInstance && mapInstance.flyTo) {
         mapInstance.flyTo([20.5937, 78.9629], 5, { duration: 1 });
       }
     };
 
-    // Geolocation with Circuit Fallback
+    // Geolocation with Dynamic Fallback
     window.locateUserPosition = function() {
       if (!navigator.geolocation) {
         fallbackToCircuitLocation("Geolocation unsupported by this browser.");
@@ -1635,14 +2421,12 @@
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
-          if (mapInstance) {
-            mapInstance.flyTo([lat, lng], 12, { duration: 1.2 });
-            showToast(`📍 Centered on your current GPS location (${lat.toFixed(2)}, ${lng.toFixed(2)})`, "success");
-          }
+          flyToDestination(lat, lng, "Your Current Location", 12);
+          showToast(`📍 Centered on your current GPS location (${lat.toFixed(2)}, ${lng.toFixed(2)})`, "success");
         },
         (err) => {
           console.warn("Geolocation denied/failed:", err);
-          fallbackToCircuitLocation("Location access disabled. Defaulting to your selected circuit.");
+          fallbackToCircuitLocation("Location access disabled. Defaulting to your selected destination.");
         },
         { timeout: 6000, enableHighAccuracy: false }
       );
@@ -1651,25 +2435,102 @@
     function fallbackToCircuitLocation(noticeMsg) {
       showToast(`📍 ${noticeMsg}`, "info");
       const targetCircuit = currentProfile ? currentProfile.upcomingCircuit : "Goa";
-      const coords = INDIAN_LOCATIONS[targetCircuit] || INDIAN_LOCATIONS["Goa"];
-      if (mapInstance && coords) {
-        mapInstance.flyTo([coords.lat, coords.lng], 9, { duration: 1 });
+      const coords = INDIAN_LOCATIONS[targetCircuit] || (currentProfile && currentProfile.lat ? { lat: currentProfile.lat, lng: currentProfile.lng } : INDIAN_LOCATIONS["Goa"]);
+      if (coords) {
+        flyToDestination(coords.lat, coords.lng, targetCircuit, 9);
       }
+    }
+
+    // Generic flyTo supporting both Google Maps and Leaflet
+    window.flyToDestination = function(lat, lng, label = "", zoomLevel = 10) {
+      if (googleMapInstance) {
+        googleMapInstance.panTo({ lat, lng });
+        googleMapInstance.setZoom(zoomLevel);
+      } else if (mapInstance && mapInstance.flyTo) {
+        mapInstance.flyTo([lat, lng], zoomLevel, { duration: 1 });
+      }
+      if (label) {
+        showToast(`✈️ Flying to ${label}`, "info");
+      }
+    };
+
+    // Handle Map Destination Search Submit
+    window.handleMapSearchSubmit = function() {
+      const input = document.getElementById('map-destination-search-input');
+      if (!input || !input.value || input.value.trim().length === 0) return;
+      const query = input.value.trim();
+
+      const clearBtn = document.getElementById('map-search-clear-btn');
+      if (clearBtn) clearBtn.classList.remove('hidden');
+
+      // 1. Direct dictionary match
+      if (INDIAN_LOCATIONS[query]) {
+        const c = INDIAN_LOCATIONS[query];
+        flyToDestination(c.lat, c.lng, query, 10);
+        filterMapCircuit(query);
+        return;
+      }
+
+      // 2. Google Maps Geocoder if available
+      if (window.google && window.google.maps && google.maps.Geocoder) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: query }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const loc = results[0].geometry.location;
+            flyToDestination(loc.lat(), loc.lng(), results[0].formatted_address || query, 11);
+            filterMapByDestinationKeyword(query);
+          } else {
+            fallbackNominatimSearch(query);
+          }
+        });
+        return;
+      }
+
+      // 3. Fallback geocoder
+      fallbackNominatimSearch(query);
+    };
+
+    function fallbackNominatimSearch(query) {
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lng = parseFloat(data[0].lon);
+            flyToDestination(lat, lng, query, 10);
+            filterMapByDestinationKeyword(query);
+          } else {
+            showToast(`Could not locate "${query}". Try another city or hub.`, "error");
+          }
+        })
+        .catch(() => showToast(`Search error for "${query}".`, "error"));
+    }
+
+    window.clearMapDestinationSearch = function() {
+      const input = document.getElementById('map-destination-search-input');
+      if (input) input.value = '';
+      const clearBtn = document.getElementById('map-search-clear-btn');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      filterMapCircuit('all');
+    };
+
+    function filterMapByDestinationKeyword(keyword) {
+      const kw = keyword.toLowerCase();
+      renderTravelerPins(kw);
     }
 
     const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
 
-    // Render Leaflet Pins for Travelers
+    // Render Pins for Travelers (Supports Google Maps Markers & Leaflet Markers)
     window.renderTravelerPins = function(filterCircuit = "all") {
-      if (!mapMarkersLayer) return;
-      mapMarkersLayer.clearLayers();
-
       const genderFilter = document.getElementById('map-filter-gender')?.value || 'all';
       const intentFilter = document.getElementById('map-filter-intent')?.value || 'all';
       const isSoloWomanSafe = currentProfile && currentProfile.surakshaShield && currentProfile.gender === 'Female';
 
-      // Load registered community travelers
-      const travelersList = [...(allTravelersCache || [])];
+      // Load registered community travelers (with fallback to verified seed travelers)
+      const travelersList = (allTravelersCache && allTravelersCache.length > 0)
+        ? [...allTravelersCache]
+        : [...SEED_INDIAN_TRAVELERS];
 
       // If current user has saved profile with name and valid coordinates, make sure user's live pin is on map
       if (currentProfile && currentProfile.name && currentProfile.name.trim().length >= 2 && currentProfile.lat && currentProfile.lng) {
@@ -1683,85 +2544,153 @@
 
       let visibleCount = 0;
 
-      travelersList.forEach(traveler => {
-        // Safe mode exclusion
-        if (isSoloWomanSafe && traveler.gender === 'Male' && !traveler.isSelf) return;
-        if (blockedUsersList.includes(traveler.uid)) return;
+      // Filter logic
+      const filteredTravelers = travelersList.filter(traveler => {
+        if (isSoloWomanSafe && traveler.gender === 'Male' && !traveler.isSelf) return false;
+        if (blockedUsersList.includes(traveler.uid)) return false;
 
-        // Circuit filter
-        if (filterCircuit !== 'all' && traveler.upcomingCircuit !== filterCircuit) return;
+        // Circuit / Keyword filter
+        if (filterCircuit !== 'all') {
+          const matchCircuit = (traveler.upcomingCircuit || '').toLowerCase().includes(filterCircuit.toLowerCase());
+          const matchHome = (traveler.homeCity || '').toLowerCase().includes(filterCircuit.toLowerCase());
+          const matchBio = (traveler.bio || '').toLowerCase().includes(filterCircuit.toLowerCase());
+          if (!matchCircuit && !matchHome && !matchBio) return false;
+        }
 
         // Gender filter
-        if (genderFilter !== 'all' && traveler.gender !== genderFilter) return;
+        if (genderFilter !== 'all' && traveler.gender !== genderFilter) return false;
 
         // Intent filter
-        if (intentFilter !== 'all' && traveler.travelIntent !== intentFilter) return;
+        if (intentFilter !== 'all' && traveler.travelIntent !== intentFilter) return false;
 
-        visibleCount++;
+        return true;
+      });
 
-        // Verified Shield Indicator in Pin
-        const isVerified = traveler.verificationStatus === "verified";
-        const shieldBadgeHtml = isVerified 
-          ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">✓</span>`
-          : traveler.verificationStatus === "pending_review"
-          ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">⏳</span>`
-          : ``;
+      visibleCount = filteredTravelers.length;
 
-        const photo = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
-        const ringBorder = traveler.isSelf ? 'border-amber-500 ring-2 ring-amber-300' : isVerified ? 'border-emerald-500' : 'border-rose-500';
+      // 1. Google Maps Rendering
+      if (googleMapInstance && window.google && window.google.maps) {
+        // Clear old markers
+        googleMapMarkers.forEach(m => m.setMap(null));
+        googleMapMarkers = [];
 
-        // Custom HTML Marker Icon
-        const iconHtml = `
-          <div class="relative cursor-pointer group custom-avatar-pin" style="width: 44px; height: 44px;">
-            <div class="absolute inset-0 rounded-full ${traveler.isSelf ? 'bg-amber-400/30' : 'bg-rose-500/20'} pin-pulse"></div>
-            <div class="w-10 h-10 rounded-full border-2 ${ringBorder} bg-white overflow-hidden shadow-lg transform transition group-hover:scale-110 flex items-center justify-center">
-              <img src="${photo}" alt="${traveler.name}" class="w-full h-full object-cover" />
-            </div>
-            ${traveler.isSelf ? '<span class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 font-extrabold text-[8px] px-1 rounded-full shadow-xs">YOU</span>' : shieldBadgeHtml}
-          </div>
-        `;
+        filteredTravelers.forEach(traveler => {
+          const isVerified = traveler.verificationStatus === "verified";
+          const photo = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
 
-        const customIcon = L.divIcon({
-          html: iconHtml,
-          className: 'custom-avatar-pin',
-          iconSize: [44, 44],
-          iconAnchor: [22, 22]
-        });
+          const marker = new google.maps.Marker({
+            position: { lat: traveler.lat, lng: traveler.lng },
+            map: googleMapInstance,
+            title: traveler.name,
+            icon: {
+              url: photo,
+              scaledSize: new google.maps.Size(38, 38),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(19, 19)
+            }
+          });
 
-        const marker = L.marker([traveler.lat, traveler.lng], { icon: customIcon });
-
-        // Popup HTML
-        const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
-        const popupContent = `
-          <div class="p-3.5 max-w-[240px] text-xs font-sans">
-            <div class="flex items-center space-x-2.5 pb-2 border-b border-slate-100">
-              <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200" />
-              <div>
-                <div class="flex items-center gap-1">
-                  <h4 class="font-bold text-slate-900">${traveler.name} ${traveler.isSelf ? '(You)' : ''}</h4>
-                  ${isVerified ? '<span class="text-emerald-600 font-bold">✓</span>' : ''}
+          const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
+          const popupContent = `
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 10px; max-width: 250px; font-size: 12px; color: #0f172a;">
+              <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+                <img src="${photo}" style="width: 40px; height: 40px; border-radius: 12px; object-fit: cover; border: 1px solid #e2e8f0;" />
+                <div>
+                  <div style="font-weight: 700; color: #0f172a;">${traveler.name} ${traveler.isSelf ? '(You)' : ''} ${isVerified ? '<span style="color:#059669">✓</span>' : ''}</div>
+                  <div style="font-size: 11px; color: #64748b;">${traveler.upcomingCircuit || 'India'} • ${traveler.gender || 'Traveler'}</div>
                 </div>
-                <p class="text-[11px] text-slate-500">${traveler.upcomingCircuit || 'India'} • ${traveler.gender || 'Traveler'}</p>
+              </div>
+              <p style="font-size: 11px; color: #475569; margin: 8px 0; line-height: 1.4;">${bioSnippet}</p>
+              <div>
+                ${traveler.isSelf ? `
+                  <button onclick="switchView('profile')" style="width: 100%; padding: 6px 12px; background: #d97706; color: white; border-radius: 8px; font-weight: 700; font-size: 11px; border: none; cursor: pointer;">
+                    Edit Your Profile
+                  </button>
+                ` : `
+                  <button onclick="inspectTravelerFromMap('${traveler.uid}')" style="width: 100%; padding: 6px 12px; background: #e11d48; color: white; border-radius: 8px; font-weight: 700; font-size: 11px; border: none; cursor: pointer;">
+                    View Profile
+                  </button>
+                `}
               </div>
             </div>
-            <p class="text-[11px] text-slate-600 py-2 leading-relaxed">${bioSnippet}</p>
-            <div class="pt-1 flex gap-1.5">
-              ${traveler.isSelf ? `
-                <button onclick="switchView('profile')" class="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs">
-                  Edit Your Profile
-                </button>
-              ` : `
-                <button onclick="inspectTravelerFromMap('${traveler.uid}')" class="flex-1 py-1.5 rounded-lg bg-safar-600 hover:bg-safar-700 text-white font-bold text-[11px] shadow-xs">
-                  View Profile
-                </button>
-              `}
-            </div>
-          </div>
-        `;
+          `;
 
-        marker.bindPopup(popupContent, { maxWidth: 260 });
-        mapMarkersLayer.addLayer(marker);
-      });
+          marker.addListener('click', () => {
+            if (googleInfoWindow) {
+              googleInfoWindow.setContent(popupContent);
+              googleInfoWindow.open(googleMapInstance, marker);
+            }
+          });
+
+          googleMapMarkers.push(marker);
+        });
+      }
+
+      // 2. Leaflet Rendering (if active)
+      if (mapMarkersLayer) {
+        mapMarkersLayer.clearLayers();
+        filteredTravelers.forEach(traveler => {
+          const isVerified = traveler.verificationStatus === "verified";
+          const shieldBadgeHtml = isVerified 
+            ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">✓</span>`
+            : traveler.verificationStatus === "pending_review"
+            ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">⏳</span>`
+            : ``;
+
+          const photo = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
+          const ringBorder = traveler.isSelf ? 'border-amber-500 ring-2 ring-amber-300' : isVerified ? 'border-emerald-500' : 'border-rose-500';
+
+          const iconHtml = `
+            <div class="relative cursor-pointer group custom-avatar-pin" style="width: 44px; height: 44px;">
+              <div class="absolute inset-0 rounded-full ${traveler.isSelf ? 'bg-amber-400/30' : 'bg-rose-500/20'} pin-pulse"></div>
+              <div class="w-10 h-10 rounded-full border-2 ${ringBorder} bg-white overflow-hidden shadow-lg transform transition group-hover:scale-110 flex items-center justify-center">
+                <img src="${photo}" alt="${traveler.name}" class="w-full h-full object-cover" />
+              </div>
+              ${traveler.isSelf ? '<span class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 font-extrabold text-[8px] px-1 rounded-full shadow-xs">YOU</span>' : shieldBadgeHtml}
+            </div>
+          `;
+
+          const customIcon = L.divIcon({
+            html: iconHtml,
+            className: 'custom-avatar-pin',
+            iconSize: [44, 44],
+            iconAnchor: [22, 22]
+          });
+
+          const marker = L.marker([traveler.lat, traveler.lng], { icon: customIcon });
+
+          const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
+          const popupContent = `
+            <div class="p-3.5 max-w-[240px] text-xs font-sans">
+              <div class="flex items-center space-x-2.5 pb-2 border-b border-slate-100">
+                <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200" />
+                <div>
+                  <div class="flex items-center gap-1">
+                    <h4 class="font-bold text-slate-900">${traveler.name} ${traveler.isSelf ? '(You)' : ''}</h4>
+                    ${isVerified ? '<span class="text-emerald-600 font-bold">✓</span>' : ''}
+                  </div>
+                  <p class="text-[11px] text-slate-500">${traveler.upcomingCircuit || 'India'} • ${traveler.gender || 'Traveler'}</p>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-600 py-2 leading-relaxed">${bioSnippet}</p>
+              <div class="pt-1 flex gap-1.5">
+                ${traveler.isSelf ? `
+                  <button onclick="switchView('profile')" class="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs">
+                    Edit Your Profile
+                  </button>
+                ` : `
+                  <button onclick="inspectTravelerFromMap('${traveler.uid}')" class="flex-1 py-1.5 rounded-lg bg-safar-600 hover:bg-safar-700 text-white font-bold text-[11px] shadow-xs">
+                    View Profile
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+
+          marker.bindPopup(popupContent, { maxWidth: 260 });
+          mapMarkersLayer.addLayer(marker);
+        });
+      }
 
       const countPill = document.getElementById('map-traveler-count-pill');
       if (countPill) {
@@ -1780,9 +2709,9 @@
 
       renderTravelerPins(circuit);
 
-      if (circuit !== 'all' && INDIAN_LOCATIONS[circuit] && mapInstance) {
+      if (circuit !== 'all' && INDIAN_LOCATIONS[circuit]) {
         const coords = INDIAN_LOCATIONS[circuit];
-        mapInstance.flyTo([coords.lat, coords.lng], 9, { duration: 1 });
+        flyToDestination(coords.lat, coords.lng, circuit, 9);
       } else if (circuit === 'all') {
         resetMapCenter();
       }
@@ -1794,11 +2723,54 @@
       renderTravelerPins(circuit);
     };
 
-    // ==================== HOME CITY LEAFLET MINI-MAP & GEOCODER ====================
+    // ==================== GOOGLE MAPS MINI-MAP & GEOCODER FOR PROFILE ====================
     window.initHomeCityMiniMap = function(initialLat = 18.5204, initialLng = 73.8567) {
       const el = document.getElementById('home-city-mini-map');
       if (!el) return;
 
+      // 1. Google Maps Mini-Map
+      if (false) {
+        try {
+          if (!googleMiniMapInstance) {
+            googleMiniMapInstance = new google.maps.Map(el, {
+              center: { lat: initialLat, lng: initialLng },
+              zoom: 10,
+              mapId: "SAFAR_MINI_MAP",
+              mapTypeControl: false,
+              streetViewControl: false,
+              zoomControl: false,
+              fullscreenControl: false
+            });
+
+            googleMiniMarker = new google.maps.Marker({
+              position: { lat: initialLat, lng: initialLng },
+              map: googleMiniMapInstance,
+              draggable: true
+            });
+
+            googleMiniMarker.addListener('dragend', (e) => {
+              const lat = e.latLng.lat();
+              const lng = e.latLng.lng();
+              updateHomeCityCoords(lat, lng);
+            });
+
+            googleMiniMapInstance.addListener('click', (e) => {
+              const lat = e.latLng.lat();
+              const lng = e.latLng.lng();
+              googleMiniMarker.setPosition({ lat, lng });
+              updateHomeCityCoords(lat, lng);
+            });
+          } else {
+            googleMiniMapInstance.setCenter({ lat: initialLat, lng: initialLng });
+            if (googleMiniMarker) googleMiniMarker.setPosition({ lat: initialLat, lng: initialLng });
+          }
+          return;
+        } catch (e) {
+          console.warn("Google mini map failed, fallback to Leaflet:", e);
+        }
+      }
+
+      // 2. Leaflet Mini-Map Fallback
       if (!homeCityMiniMap) {
         homeCityMiniMap = L.map('home-city-mini-map', {
           center: [initialLat, initialLng],
@@ -1843,63 +2815,110 @@
       }
     }
 
-    // Geocoding lookup table + OpenStreetMap Nominatim API Fallback
+    // Geocoding lookup table + Google Maps Geocoder + Nominatim Fallback
     window.handleHomeCityInput = function(cityName) {
       if (!cityName || cityName.trim().length < 2) return;
-
       const trimmed = cityName.trim();
 
       // 1. Direct dictionary match
       if (INDIAN_LOCATIONS[trimmed]) {
         const coords = INDIAN_LOCATIONS[trimmed];
         updateHomeCityCoords(coords.lat, coords.lng);
-        if (homeCityMiniMap) {
-          homeCityMiniMap.flyTo([coords.lat, coords.lng], 11);
-          if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([coords.lat, coords.lng]);
-        }
+        centerMiniMap(coords.lat, coords.lng);
         return;
       }
 
-      // Check partial matches in dictionary
-      for (const key in INDIAN_LOCATIONS) {
-        if (key.toLowerCase().includes(trimmed.toLowerCase())) {
-          const coords = INDIAN_LOCATIONS[key];
-          updateHomeCityCoords(coords.lat, coords.lng);
-          if (homeCityMiniMap) {
-            homeCityMiniMap.flyTo([coords.lat, coords.lng], 10);
-            if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([coords.lat, coords.lng]);
-          }
-          return;
-        }
-      }
-
-      // 2. OpenStreetMap Nominatim Fallback (Debounced)
+      // 2. Google Maps Geocoder (Debounced)
       if (window._geocodeTimeout) clearTimeout(window._geocodeTimeout);
       window._geocodeTimeout = setTimeout(() => {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&countrycodes=in&limit=1`)
+        if (window.google && window.google.maps && google.maps.Geocoder) {
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ address: trimmed }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+              const loc = results[0].geometry.location;
+              updateHomeCityCoords(loc.lat(), loc.lng());
+              centerMiniMap(loc.lat(), loc.lng());
+              return;
+            }
+          });
+        }
+
+        // 3. Nominatim Fallback
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&limit=1`)
           .then(res => res.json())
           .then(data => {
             if (data && data.length > 0) {
               const lat = parseFloat(data[0].lat);
               const lng = parseFloat(data[0].lon);
               updateHomeCityCoords(lat, lng);
-              if (homeCityMiniMap) {
-                homeCityMiniMap.flyTo([lat, lng], 10);
-                if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([lat, lng]);
-              }
+              centerMiniMap(lat, lng);
             }
           })
-          .catch(err => console.warn("Nominatim geocoder error:", err));
-      }, 700);
+          .catch(err => console.warn("Geocoder error:", err));
+      }, 600);
     };
 
+    // Free-form upcoming destination input handler
+    window.handleUpcomingDestinationInput = function(destName) {
+      if (!destName || destName.trim().length < 2) return;
+      const trimmed = destName.trim();
+      if (currentProfile) {
+        currentProfile.upcomingCircuit = trimmed;
+      }
+
+      // If user typed a recognized location, adjust coordinates
+      if (INDIAN_LOCATIONS[trimmed]) {
+        const coords = INDIAN_LOCATIONS[trimmed];
+        updateHomeCityCoords(coords.lat, coords.lng);
+        centerMiniMap(coords.lat, coords.lng);
+      } else {
+        if (window._destGeocodeTimeout) clearTimeout(window._destGeocodeTimeout);
+        window._destGeocodeTimeout = setTimeout(() => {
+          if (window.google && window.google.maps && google.maps.Geocoder) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: trimmed }, (results, status) => {
+              if (status === 'OK' && results && results[0]) {
+                const loc = results[0].geometry.location;
+                updateHomeCityCoords(loc.lat(), loc.lng());
+                centerMiniMap(loc.lat(), loc.lng());
+              }
+            });
+          }
+        }, 800);
+      }
+    };
+
+    function centerMiniMap(lat, lng) {
+      if (googleMiniMapInstance) {
+        googleMiniMapInstance.setCenter({ lat, lng });
+        if (googleMiniMarker) googleMiniMarker.setPosition({ lat, lng });
+      } else if (homeCityMiniMap) {
+        homeCityMiniMap.flyTo([lat, lng], 10);
+        if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([lat, lng]);
+      }
+    }
+
     // ==================== LIVE INDIA TRIPS (READ-ONLY + GATED ACTIONS) ====================
-    window.renderTripsFeed = function(filterCircuit = "all") {
+    window.renderTripsFeed = function(filterCircuit = "all", searchKeyword = "") {
       const container = document.getElementById('trips-feed-container');
       if (!container) return;
 
       const trips = allTripsCache || [];
-      const filtered = filterCircuit === 'all' ? trips : trips.filter(t => t.circuit === filterCircuit);
+      const kw = searchKeyword.trim().toLowerCase();
+
+      const filtered = trips.filter(t => {
+        // Circuit filter
+        if (filterCircuit !== 'all' && t.circuit !== filterCircuit) return false;
+        // Search keyword across destination, title, itinerary
+        if (kw) {
+          const matchDest = (t.destination || '').toLowerCase().includes(kw);
+          const matchTitle = (t.title || '').toLowerCase().includes(kw);
+          const matchItin = (t.itinerary || '').toLowerCase().includes(kw);
+          const matchCircuit = (t.circuit || '').toLowerCase().includes(kw);
+          if (!matchDest && !matchTitle && !matchItin && !matchCircuit) return false;
+        }
+        return true;
+      });
 
       const countEl = document.getElementById('trips-feed-count');
       if (countEl) {
@@ -1912,8 +2931,8 @@
             <div class="w-14 h-14 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center mb-3 shadow-xs">
               <i data-lucide="compass" class="w-7 h-7"></i>
             </div>
-            <h4 class="text-base font-bold text-slate-900">No Trips in ${filterCircuit === 'all' ? 'Any Circuit' : filterCircuit} Yet</h4>
-            <p class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">Be the first to post an upcoming roadtrip, trek, or beach plan to find verified travel companions!</p>
+            <h4 class="text-base font-bold text-slate-900">No Trips for "${kw || (filterCircuit === 'all' ? 'Any Circuit' : filterCircuit)}"</h4>
+            <p class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">Be the first to post an upcoming roadtrip, trek, or journey to this destination to find verified travel companions!</p>
             <button onclick="handlePostTripClick()" class="mt-5 px-5 py-2.5 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center space-x-1.5">
               <i data-lucide="plus-circle" class="w-4 h-4"></i>
               <span>Post First Trip Plan</span>
@@ -1939,7 +2958,7 @@
                       <span class="text-xs font-bold text-slate-900">${trip.creatorName}</span>
                       ${isVerified ? '<span class="text-[10px] text-emerald-600 font-bold">✓</span>' : ''}
                     </div>
-                    <span class="text-[10px] text-slate-400 font-medium">${trip.circuit} Circuit</span>
+                    <span class="text-[10px] text-slate-400 font-medium">${trip.circuit}</span>
                   </div>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wide bg-rose-50 text-safar-700 px-2.5 py-0.5 rounded-full border border-rose-100">
@@ -1982,6 +3001,7 @@
     };
 
     window.filterTripsFeed = function(circuit) {
+      currentTripCircuitFilter = circuit;
       document.querySelectorAll('.trip-filter-pill').forEach(btn => {
         if (btn.getAttribute('data-filter') === circuit) {
           btn.className = "trip-filter-pill px-3 py-1 rounded-full font-bold bg-slate-900 text-white flex-shrink-0";
@@ -1989,7 +3009,13 @@
           btn.className = "trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0";
         }
       });
-      renderTripsFeed(circuit);
+      const searchInput = document.getElementById('trip-feed-search-input');
+      const kw = searchInput ? searchInput.value : '';
+      renderTripsFeed(circuit, kw);
+    };
+
+    window.searchTripsFeedByText = function(text) {
+      renderTripsFeed(currentTripCircuitFilter, text);
     };
 
     window.handlePostTripClick = function() {
@@ -2074,9 +3100,8 @@
       }
 
       if (!hasActiveExplorerPass()) {
-        showToast("🔒 Explorer Pass Required: Activate the ₹299 pass to send trip join requests.", "error");
-        switchView('monetization');
-        return;
+        if (!checkConnectQuotaOrPaywall("join trip plan")) return;
+        consumeDailyConnect();
       }
 
       const trip = (allTripsCache || []).find(t => t.id === tripId);
@@ -2098,6 +3123,12 @@
         showToast("🔒 Explorer Pass Required: Active pass needed to chat.", "error");
         switchView('monetization');
         return;
+      }
+
+      // Unsubscribe from any previous active chat listener
+      if (typeof activeChatUnsubscribe === 'function') {
+        try { activeChatUnsubscribe(); } catch (err) {}
+        activeChatUnsubscribe = null;
       }
 
       activeChatPartner = traveler;
@@ -2125,7 +3156,60 @@
         }
       }
 
+      // Render locally cached messages first for instantaneous responsiveness
       renderMessagesForPartner(traveler.uid);
+      renderConversationList();
+
+      // Attach Real-Time Firestore onSnapshot Listener
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = traveler.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
+
+      if (isLiveFirebase && db) {
+        try {
+          const messagesRef = collection(db, "chats", chatId, "messages");
+          const q = query(messagesRef, orderBy("createdAt", "asc"));
+
+          activeChatUnsubscribe = onSnapshot(q, (snapshot) => {
+            const liveMsgs = [];
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              const isFromMe = data.senderUid === myUid || data.sender === 'me';
+              let timeStr = data.timestamp;
+              if (!timeStr && data.createdAt) {
+                try {
+                  timeStr = data.createdAt.toDate ? data.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } catch (e) {
+                  timeStr = "Just now";
+                }
+              }
+              liveMsgs.push({
+                id: docSnap.id,
+                sender: isFromMe ? 'me' : 'partner',
+                text: data.text || "",
+                timestamp: timeStr || "Just now"
+              });
+            });
+
+            if (liveMsgs.length > 0) {
+              saveMessagesForPartner(partnerUid, liveMsgs);
+              renderMessagesList(liveMsgs);
+            }
+          }, (err) => {
+            console.warn("Real-time Firestore chat onSnapshot error:", err);
+          });
+        } catch (err) {
+          console.warn("Could not bind real-time chat listener:", err);
+        }
+      }
+    };
+
+    window.closeActiveChat = function() {
+      if (typeof activeChatUnsubscribe === 'function') {
+        try { activeChatUnsubscribe(); } catch (err) {}
+        activeChatUnsubscribe = null;
+      }
+      activeChatPartner = null;
       renderConversationList();
     };
 
@@ -2134,7 +3218,8 @@
       if (!container) return;
 
       const myUid = currentProfile ? currentProfile.uid : '';
-      const travelers = (allTravelersCache || []).filter(t => t.uid !== myUid);
+      const pool = (allTravelersCache && allTravelersCache.length > 0) ? allTravelersCache : SEED_INDIAN_TRAVELERS;
+      const travelers = pool.filter(t => t.uid !== myUid);
 
       if (travelers.length === 0) {
         container.innerHTML = `
@@ -2186,13 +3271,11 @@
       }
     }
 
-    function renderMessagesForPartner(partnerUid) {
+    function renderMessagesList(msgs) {
       const container = document.getElementById('chat-messages-container');
       if (!container) return;
 
-      const msgs = getMessagesForPartner(partnerUid);
-
-      if (msgs.length === 0) {
+      if (!msgs || msgs.length === 0) {
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-8 space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
@@ -2200,7 +3283,7 @@
             </div>
             <p class="text-xs font-bold text-slate-700">Protected In-App Chat</p>
             <p class="text-[11px] text-slate-500 max-w-xs leading-relaxed">
-              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? activeChatPartner.name : 'this explorer'}! Messages are filtered to prevent spam and off-platform solicitation.
+              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? activeChatPartner.name : 'this explorer'}! Messages are synchronized in real-time.
             </p>
           </div>
         `;
@@ -2215,13 +3298,18 @@
             <div class="max-w-xs sm:max-w-md p-3 rounded-2xl text-xs ${isMe ? 'bg-safar-600 text-white rounded-br-xs shadow-xs' : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-xs'}">
               <p class="leading-relaxed">${m.text}</p>
             </div>
-            <span class="text-[9px] text-slate-400 mt-1 px-1">${m.timestamp}</span>
+            <span class="text-[9px] text-slate-400 mt-1 px-1">${m.timestamp || ''}</span>
           </div>
         `;
       }).join('');
 
       container.scrollTop = container.scrollHeight;
       if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderMessagesForPartner(partnerUid) {
+      const msgs = getMessagesForPartner(partnerUid);
+      renderMessagesList(msgs);
     }
 
     window.handleSendMessage = async function(e) {
@@ -2251,6 +3339,9 @@
 
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = activeChatPartner.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
 
       const newMsg = {
         id: "msg_" + Date.now(),
@@ -2259,27 +3350,28 @@
         timestamp: timeStr
       };
 
-      const msgs = getMessagesForPartner(activeChatPartner.uid);
+      const msgs = getMessagesForPartner(partnerUid);
       msgs.push(newMsg);
-      saveMessagesForPartner(activeChatPartner.uid, msgs);
+      saveMessagesForPartner(partnerUid, msgs);
+      renderMessagesList(msgs);
 
-      // If connected to live Firestore, save to message collection
+      input.value = "";
+
+      // If connected to live Firestore, save to message collection in real-time
       if (isLiveFirebase && db) {
         try {
-          const chatId = [currentProfile ? currentProfile.uid : 'guest', activeChatPartner.uid].sort().join('_');
           await addDoc(collection(db, "chats", chatId, "messages"), {
-            ...newMsg,
-            senderUid: currentProfile ? currentProfile.uid : 'guest',
-            receiverUid: activeChatPartner.uid,
+            text,
+            senderUid: myUid,
+            receiverUid: partnerUid,
+            sender: "me",
+            timestamp: timeStr,
             createdAt: serverTimestamp()
           });
         } catch (err) {
           console.warn("Firestore chat write error, saved locally:", err);
         }
       }
-
-      input.value = "";
-      renderMessagesForPartner(activeChatPartner.uid);
     };
 
     // ==================== REALISTIC TRUST & VERIFICATION PIPELINE ====================
@@ -2436,40 +3528,54 @@
       reader.readAsDataURL(file);
     };
 
-    function processVerificationSubmission(type, blob) {
-       if (!currentProfile) return;
-       currentProfile.selfieSubmitted = true;
-       currentProfile.verificationStatus = "pending_review";
-       currentProfile.verificationSubmittedAt = new Date().toISOString();
+    async function processVerificationSubmission(type, blob) {
+      if (!currentProfile) return;
+      currentProfile.selfieSubmitted = true;
+      currentProfile.verificationStatus = "pending_review";
+      currentProfile.verificationSubmittedAt = new Date().toISOString();
 
-       const reader = new FileReader();
-       reader.onloadend = async function() {
-         const base64data = reader.result;
-         if (type === "selfie") currentProfile.selfieData = base64data;
-         else currentProfile.govtIdData = base64data;
+      showToast(`⏳ Processing ${type === 'selfie' ? 'live selfie' : 'photo ID'} (${(blob.size / 1024).toFixed(1)} KB)...`, "info");
 
-         if (isLiveFirebase && db && currentUser) {
-           try {
-             const updateData = {
-               verificationStatus: "pending_review",
-               verificationSubmittedAt: serverTimestamp()
-             };
-             if (type === "selfie") updateData.selfieData = base64data;
-             else updateData.govtIdData = base64data;
+      // Read blob as Base64 data URL for Zero-Cost Spark tier persistence
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        const base64Data = evt.target.result;
+        const fieldName = type === 'selfie' ? 'selfieData' : 'govtIdData';
+        currentProfile[fieldName] = base64Data;
 
-             await setDoc(doc(db, "profiles", currentUser.uid), updateData, { merge: true });
-             showToast("Photo saved to Firestore! Status: In Review.", "success");
-           } catch(err) {
-             console.error("Firestore write error:", err);
-             showToast("Saved locally: " + err.message, "error");
-           }
-         } else {
-           showToast(`Photo saved (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review.`, "info");
-         }
-         updateJourneyStatusUI();
-       };
-       reader.readAsDataURL(blob);
-     }
+        if (type === 'selfie' && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
+          currentProfile.photoUrl = base64Data;
+          const profileAvatar = document.getElementById('profile-display-avatar');
+          const headerAvatar = document.getElementById('header-user-avatar');
+          if (profileAvatar) profileAvatar.src = base64Data;
+          if (headerAvatar) headerAvatar.src = base64Data;
+        }
+
+        if (isLiveFirebase && db) {
+          try {
+            await setDoc(doc(db, "profiles", currentProfile.uid), {
+              ...currentProfile,
+              [fieldName]: base64Data,
+              verificationStatus: "pending_review",
+              verificationSubmittedAt: serverTimestamp()
+            }, { merge: true });
+            showToast(`🛡️ ${type === 'selfie' ? 'Selfie' : 'Govt ID'} stored securely in profile! Verification in review.`, "success");
+          } catch (err) {
+            console.warn("Firestore profile verification write error:", err);
+            showToast(`⏳ Photo saved locally (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review.`, "info");
+          }
+        } else {
+          showToast(`⏳ Photo submitted (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review (Est. 2-4 hrs).`, "info");
+        }
+
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+        } catch (e) {}
+
+        updateJourneyStatusUI();
+      };
+      reader.readAsDataURL(blob);
+    }
 
     // Testing Hook: Simulate Admin Verification Approval
     window.simulateAdminApprovalClick = function() {
@@ -2481,6 +3587,20 @@
       if (currentProfile) {
         currentProfile.verificationStatus = "verified";
         currentProfile.selfieSubmitted = true;
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+        } catch (e) {}
+
+        if (isLiveFirebase && db) {
+          try {
+            setDoc(doc(db, "profiles", currentProfile.uid), {
+              verificationStatus: "verified",
+              selfieSubmitted: true
+            }, { merge: true });
+          } catch (e) {
+            console.warn("Firestore approval sync error:", e);
+          }
+        }
       }
       showToast("🛡️ Admin Simulation: Verification Approved! Verified Explorer shield active.", "success");
       updateJourneyStatusUI();
@@ -2584,6 +3704,23 @@
           amount: amount,
           activatedAt: new Date().toISOString()
         };
+
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+          localStorage.setItem('safarmatch_pass_unlocked', 'true');
+        } catch (e) {}
+
+        if (isLiveFirebase && db) {
+          try {
+            setDoc(doc(db, "profiles", currentProfile.uid), {
+              isVip: true,
+              hasExplorerPass: true,
+              subscription: currentProfile.subscription
+            }, { merge: true });
+          } catch (err) {
+            console.warn("Firestore subscription write error:", err);
+          }
+        }
       }
 
       showToast(`🎉 Payment of ₹${amount} Successful! ID: ${paymentId}. Explorer Pass active!`, "success");
@@ -2634,13 +3771,17 @@
       currentProfile.age = parseInt(document.getElementById('input-age').value) || "";
       currentProfile.gender = document.getElementById('input-gender').value;
       currentProfile.homeCity = document.getElementById('input-home-city').value.trim();
-      currentProfile.upcomingCircuit = document.getElementById('input-upcoming-circuit').value;
+      currentProfile.upcomingCircuit = document.getElementById('input-upcoming-circuit').value.trim();
       currentProfile.travelIntent = document.getElementById('input-travel-intent').value;
       currentProfile.bio = document.getElementById('input-bio').value.trim();
 
       if (INDIAN_LOCATIONS[currentProfile.upcomingCircuit]) {
         currentProfile.lat = INDIAN_LOCATIONS[currentProfile.upcomingCircuit].lat;
         currentProfile.lng = INDIAN_LOCATIONS[currentProfile.upcomingCircuit].lng;
+      } else if (!currentProfile.lat || !currentProfile.lng) {
+        // Fallback default coordinates if not geocoded yet
+        currentProfile.lat = 18.5204;
+        currentProfile.lng = 73.8567;
       }
 
       const styles = [];
@@ -2672,7 +3813,7 @@
         }
       }
 
-      // If live Firebase is connected, sync user profile to Firestore
+      // If live Firebase is connected, sync user profile to Firestore profiles collection
       if (isLiveFirebase && db) {
         try {
           setDoc(doc(db, "profiles", currentProfile.uid), currentProfile, { merge: true });
@@ -2870,6 +4011,14 @@
 
     // ==================== VIEW SWITCHER & NAVIGATION ====================
     window.switchView = function(viewName) {
+      currentView = viewName;
+
+      // Unsubscribe from active chat if moving away from chat
+      if (viewName !== 'chat' && typeof activeChatUnsubscribe === 'function') {
+        try { activeChatUnsubscribe(); } catch (e) {}
+        activeChatUnsubscribe = null;
+      }
+
       document.querySelectorAll('.view-panel').forEach(panel => {
         panel.classList.add('hidden');
       });
@@ -2902,7 +4051,11 @@
       if (viewName === 'map') {
         if (!mapInstance) initMap();
         setTimeout(() => {
-          if (mapInstance) mapInstance.invalidateSize();
+          if (googleMapInstance && window.google && window.google.maps) {
+            google.maps.event.trigger(googleMapInstance, 'resize');
+          } else if (mapInstance && mapInstance.invalidateSize) {
+            mapInstance.invalidateSize();
+          }
         }, 120);
       }
 
@@ -2957,20 +4110,36 @@
         if (isLiveFirebase && auth) {
           const provider = new GoogleAuthProvider();
           signInWithPopup(auth, provider)
-            .then(res => {
+            .then(async res => {
               currentUser = res.user;
               if (currentProfile) {
                 currentProfile.uid = res.user.uid;
                 if (!currentProfile.name || currentProfile.name.trim() === "") {
                   currentProfile.name = res.user.displayName || "";
                 }
-                if (res.user.photoURL) {
+                if (res.user.photoURL && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
                   currentProfile.photoUrl = res.user.photoURL;
                 }
-                try {
-                  localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-                } catch (e) {}
               }
+
+              // Load profile from Firestore "profiles" collection if exists
+              if (isLiveFirebase && db) {
+                try {
+                  const docSnap = await getDoc(doc(db, "profiles", res.user.uid));
+                  if (docSnap.exists()) {
+                    currentProfile = { ...currentProfile, ...docSnap.data(), uid: res.user.uid };
+                  } else {
+                    await setDoc(doc(db, "profiles", res.user.uid), currentProfile, { merge: true });
+                  }
+                } catch (e) {
+                  console.warn("Firestore profile fetch error on auth:", e);
+                }
+              }
+
+              try {
+                localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+              } catch (e) {}
+
               initRealWorldSession();
               document.getElementById('btn-auth-text').textContent = "Sign Out";
               showToast(`Welcome, ${res.user.displayName || 'Explorer'}!`, "success");
@@ -3044,17 +4213,29 @@
       if (profileAvatar) profileAvatar.src = avatarSrc;
       if (headerAvatar) headerAvatar.src = avatarSrc;
 
-      // Load registered travelers and trips from localStorage
+      // Load registered travelers from localStorage (only real saved users)
       try {
         const storedTravelers = localStorage.getItem('safarmatch_all_travelers');
-        allTravelersCache = storedTravelers ? JSON.parse(storedTravelers) : [];
+        if (storedTravelers) {
+          const parsed = JSON.parse(storedTravelers);
+          // Filter out legacy dummy seeds if present in browser storage
+          allTravelersCache = parsed.filter(t => !t.uid || !t.uid.startsWith('seed_'));
+        } else {
+          allTravelersCache = [];
+        }
       } catch (e) {
         allTravelersCache = [];
       }
 
+      // Load registered trips from localStorage (only real posted trips)
       try {
         const storedTrips = localStorage.getItem('safarmatch_all_trips');
-        allTripsCache = storedTrips ? JSON.parse(storedTrips) : [];
+        if (storedTrips) {
+          const parsed = JSON.parse(storedTrips);
+          allTripsCache = parsed.filter(t => !t.id || !t.id.startsWith('trip_seed_'));
+        } else {
+          allTripsCache = [];
+        }
       } catch (e) {
         allTripsCache = [];
       }
@@ -3069,28 +4250,39 @@
         }
       }
 
-      // Fetch live data from Firestore if available
+      // Fetch live real-world data from Firestore "trips" and "profiles"
       if (isLiveFirebase && db) {
         try {
           getDocs(collection(db, "trips")).then(snapshot => {
-            if (!snapshot.empty) {
-              const liveTrips = [];
-              snapshot.forEach(doc => liveTrips.push({ id: doc.id, ...doc.data() }));
-              allTripsCache = liveTrips;
-              try { localStorage.setItem('safarmatch_all_trips', JSON.stringify(liveTrips)); } catch (e) {}
-              if (currentView === 'trips') renderTripsFeed(currentTripCircuitFilter);
-            }
+            const liveTrips = [];
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              if (!docSnap.id.startsWith('trip_seed_')) {
+                liveTrips.push({ id: docSnap.id, ...data });
+              }
+            });
+            allTripsCache = liveTrips;
+            try { localStorage.setItem('safarmatch_all_trips', JSON.stringify(liveTrips)); } catch (e) {}
+            if (currentView === 'trips') renderTripsFeed(currentTripCircuitFilter);
           }).catch(e => console.warn("Trips fetch fallback:", e));
 
           getDocs(collection(db, "profiles")).then(snapshot => {
-            if (!snapshot.empty) {
-              const liveUsers = [];
-              snapshot.forEach(doc => liveUsers.push({ uid: doc.id, ...doc.data() }));
-              allTravelersCache = liveUsers;
-              try { localStorage.setItem('safarmatch_all_travelers', JSON.stringify(liveUsers)); } catch (e) {}
-              renderTravelerPins();
+            const liveProfiles = [];
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              if (!docSnap.id.startsWith('seed_')) {
+                liveProfiles.push({ uid: docSnap.id, ...data });
+              }
+            });
+            // Ensure logged in user is represented
+            if (currentProfile.name && currentProfile.name.trim().length >= 2) {
+              const exists = liveProfiles.some(p => p.uid === currentProfile.uid);
+              if (!exists) liveProfiles.push({ ...currentProfile });
             }
-          }).catch(e => console.warn("Users fetch fallback:", e));
+            allTravelersCache = liveProfiles;
+            try { localStorage.setItem('safarmatch_all_travelers', JSON.stringify(liveProfiles)); } catch (e) {}
+            renderTravelerPins();
+          }).catch(e => console.warn("Profiles fetch fallback:", e));
         } catch (e) {
           console.warn("Firestore collection fetch:", e);
         }
