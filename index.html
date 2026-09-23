@@ -2845,7 +2845,7 @@
     };
 
     // ==================== PROFILE COMPLETION & VERIFICATION UI ====================
-    window.updateProfileCompletionUI = function() {
+    window.updateProfileCompletionUI = function updateProfileCompletionUI() {
       if (!currentProfile) return;
       let score = 0;
       if (currentProfile.name && currentProfile.name.trim().length >= 2) score += 15;
@@ -2974,13 +2974,9 @@
       
     };
 
-    function updateProfileCompletionUI() {
-      if (typeof window.updateProfileCompletionUI === 'function') {
-        window.updateProfileCompletionUI();
-      }
-    }
 
-    window.updateJourneyStatusUI = function() {
+
+    window.updateJourneyStatusUI = function updateJourneyStatusUI() {
       const step1Done = isStep1Complete();
       const hasPass = hasActiveExplorerPass();
 
@@ -4304,7 +4300,7 @@
       if (metaEl) metaEl.textContent = `${traveler.upcomingCircuit || 'India'} Circuit • Online`;
       if (badgeEl) {
         if (traveler.verificationStatus === 'verified') {
-          badgeEl.textContent = "🛡️ Verified Explorer ✓";
+          badgeEl.textContent = "Verified Explorer ✓";
           badgeEl.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
         } else if (traveler.verificationStatus === 'pending_review') {
           badgeEl.textContent = "⏳ In Review";
@@ -4855,7 +4851,7 @@
       if (badgeEl) {
         if (traveler.verificationStatus === 'verified') {
           badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex-shrink-0";
-          badgeEl.textContent = "✓ Verified Explorer";
+          badgeEl.textContent = "Verified Explorer ✓";
         } else {
           badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0";
           badgeEl.textContent = "⚪ Unverified";
