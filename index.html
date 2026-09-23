@@ -2390,6 +2390,12 @@
         return;
       }
       if (currentProfile) {
+        if (currentProfile.uid) {
+          resetNotificationSeen('payment', currentProfile.uid);
+          try {
+            localStorage.setItem('safarmatch_awaiting_payment_' + currentProfile.uid, 'true');
+          } catch (e) {}
+        }
         currentProfile.subscription = {
           status: "pending_review",
           utr: utr,
@@ -2504,28 +2510,80 @@
     };
 
     // ==================== REAL-TIME NOTIFICATION & VERIFICATION MODAL CONTROLLERS ====================
-    window.showVerificationApprovedCelebration = function() {
+    // Notification deduplication engine: ensures approval & rejection notifications trigger strictly ONE TIME
+    function getNotificationSeenKey(type, uid, status, extra = '') {
+      const safeUid = uid || (currentProfile ? currentProfile.uid : 'guest');
+      const safeExtra = extra ? '_' + String(extra).slice(0, 30).replace(/[^a-zA-Z0-9]/g, '') : '';
+      return 'safarmatch_notif_seen_' + type + '_' + safeUid + '_' + status + safeExtra;
+    }
+
+    function isNotificationSeen(type, uid, status, extra = '') {
+      try {
+        const key = getNotificationSeenKey(type, uid, status, extra);
+        return localStorage.getItem(key) === 'true';
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function markNotificationSeen(type, uid, status, extra = '') {
+      try {
+        const key = getNotificationSeenKey(type, uid, status, extra);
+        localStorage.setItem(key, 'true');
+      } catch (e) {}
+    }
+
+    function resetNotificationSeen(type, uid) {
+      try {
+        const safeUid = uid || (currentProfile ? currentProfile.uid : 'guest');
+        const prefix = 'safarmatch_notif_seen_' + type + '_' + safeUid + '_';
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(prefix)) {
+            localStorage.removeItem(k);
+          }
+        }
+      } catch (e) {}
+    }
+
+    window.showVerificationApprovedCelebration = function(force = false) {
+      const uid = currentProfile ? currentProfile.uid : null;
+      if (!force && isNotificationSeen('verification', uid, 'verified')) {
+        return; // Shown once already
+      }
       const modal = document.getElementById('verification-approved-modal');
       if (modal) modal.classList.remove('hidden');
       showToast("🎉 Identity Verified! Your profile has been reviewed and awarded the Verified Explorer Shield.", "success");
+      markNotificationSeen('verification', uid, 'verified');
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     };
 
     window.closeVerificationApprovedModal = function() {
+      const uid = currentProfile ? currentProfile.uid : null;
+      markNotificationSeen('verification', uid, 'verified');
       const modal = document.getElementById('verification-approved-modal');
       if (modal) modal.classList.add('hidden');
     };
 
-    window.showVerificationRejectedModal = function(reason) {
+    window.showVerificationRejectedModal = function(reason, force = false) {
+      const uid = currentProfile ? currentProfile.uid : null;
+      const reasonText = reason || (currentProfile && currentProfile.verificationRejectionReason) || "Document photo is blurry, unreadable, or cut off.";
+      if (!force && isNotificationSeen('verification', uid, 'rejected', reasonText)) {
+        return; // Shown once already
+      }
       const modal = document.getElementById('verification-rejected-modal');
       const reasonEl = document.getElementById('verification-rejection-reason-text');
-      if (reasonEl) reasonEl.textContent = reason || "Document photo is blurry, unreadable, or cut off.";
+      if (reasonEl) reasonEl.textContent = reasonText;
       if (modal) modal.classList.remove('hidden');
       showToast("⚠️ Identity verification requires attention.", "error");
+      markNotificationSeen('verification', uid, 'rejected', reasonText);
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     };
 
     window.closeVerificationRejectedModal = function() {
+      const uid = currentProfile ? currentProfile.uid : null;
+      const reasonText = (currentProfile && currentProfile.verificationRejectionReason) || "default";
+      markNotificationSeen('verification', uid, 'rejected', reasonText);
       const modal = document.getElementById('verification-rejected-modal');
       if (modal) modal.classList.add('hidden');
     };
@@ -2538,28 +2596,44 @@
       }, 250);
     };
 
-    window.showPaymentApprovedCelebration = function() {
+    window.showPaymentApprovedCelebration = function(force = false) {
+      const uid = currentProfile ? currentProfile.uid : null;
+      if (!force && isNotificationSeen('payment', uid, 'active')) {
+        return; // Shown once already
+      }
       const modal = document.getElementById('payment-approved-modal');
       if (modal) modal.classList.remove('hidden');
       showToast("🎉 Explorer Pass Activated! Unlimited chats and live trip board access are unlocked.", "success");
+      markNotificationSeen('payment', uid, 'active');
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     };
 
     window.closePaymentApprovedModal = function() {
+      const uid = currentProfile ? currentProfile.uid : null;
+      markNotificationSeen('payment', uid, 'active');
       const modal = document.getElementById('payment-approved-modal');
       if (modal) modal.classList.add('hidden');
     };
 
-    window.showPaymentRejectedModal = function(reason) {
+    window.showPaymentRejectedModal = function(reason, force = false) {
+      const uid = currentProfile ? currentProfile.uid : null;
+      const reasonText = reason || (currentProfile && currentProfile.subscription && currentProfile.subscription.rejectionReason) || "12-digit UTR was not found in SBI bank account credits.";
+      if (!force && isNotificationSeen('payment', uid, 'rejected', reasonText)) {
+        return; // Shown once already
+      }
       const modal = document.getElementById('payment-rejected-modal');
       const reasonEl = document.getElementById('payment-rejection-reason-text');
-      if (reasonEl) reasonEl.textContent = reason || "12-digit UTR was not found in SBI bank account credits.";
+      if (reasonEl) reasonEl.textContent = reasonText;
       if (modal) modal.classList.remove('hidden');
       showToast("⚠️ Payment not verified. Please check your 12-digit UTR.", "error");
+      markNotificationSeen('payment', uid, 'rejected', reasonText);
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     };
 
     window.closePaymentRejectedModal = function() {
+      const uid = currentProfile ? currentProfile.uid : null;
+      const reasonText = (currentProfile && currentProfile.subscription && currentProfile.subscription.rejectionReason) || "default";
+      markNotificationSeen('payment', uid, 'rejected', reasonText);
       const modal = document.getElementById('payment-rejected-modal');
       if (modal) modal.classList.add('hidden');
     };
@@ -2581,35 +2655,35 @@
           hBadge.onclick = null;
         } else if (currentStatus === 'pending_review' || (currentProfile && (currentProfile.selfieSubmitted || currentProfile.selfieData || currentProfile.govtIdData) && currentStatus !== 'rejected')) {
           hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
-          hBadge.innerHTML = '<i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i><span id="header-verification-text">Review Pending ⌛</span>';
+          hBadge.innerHTML = '<i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i><span id="header-verification-text">Verification In Review ⏳</span>';
           hBadge.onclick = null;
         } else if (currentStatus === 'rejected') {
-          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 cursor-pointer";
-          hBadge.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-600"></i><span id="header-verification-text">Verification Rejected ⚠️</span>';
-          hBadge.onclick = () => showVerificationRejectedModal(currentProfile && currentProfile.verificationRejectionReason);
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 cursor-pointer hover:bg-rose-200 transition";
+          hBadge.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-600"></i><span id="header-verification-text">Action Required: Re-upload ⚠️</span>';
+          hBadge.onclick = () => showVerificationRejectedModal(currentProfile && currentProfile.verificationRejectionReason, true);
         } else {
-          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200";
-          hBadge.innerHTML = '<i data-lucide="shield-alert" class="w-3.5 h-3.5 text-slate-500"></i><span id="header-verification-text">Unverified</span>';
-          hBadge.onclick = null;
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition cursor-pointer";
+          hBadge.innerHTML = '<i data-lucide="shield" class="w-3.5 h-3.5 text-slate-500"></i><span id="header-verification-text">Get Verified Shield</span>';
+          hBadge.onclick = () => switchView('profile');
         }
       }
 
       if (pPill) {
         if (currentStatus === 'verified') {
-          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center space-x-1";
-          pPill.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Verified Explorer ✓</span>';
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+          pPill.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5 inline mr-1"></i><span id="profile-verification-label">Verified Explorer ✓</span>';
           pPill.onclick = null;
         } else if (currentStatus === 'pending_review' || (currentProfile && (currentProfile.selfieSubmitted || currentProfile.selfieData || currentProfile.govtIdData) && currentStatus !== 'rejected')) {
-          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center space-x-1";
-          pPill.innerHTML = '<i data-lucide="clock" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Review Pending ⌛</span>';
+          pPill.className = "text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+          pPill.innerHTML = '<i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1"></i><span id="profile-verification-label">Verification In Review ⏳</span>';
           pPill.onclick = null;
         } else if (currentStatus === 'rejected') {
-          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 flex items-center space-x-1 cursor-pointer";
-          pPill.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Action Required: Re-upload ⚠️</span>';
-          pPill.onclick = () => showVerificationRejectedModal(currentProfile && currentProfile.verificationRejectionReason);
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 cursor-pointer hover:bg-rose-200 transition";
+          pPill.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5 inline mr-1"></i><span id="profile-verification-label">Action Required: Re-upload ⚠️</span>';
+          pPill.onclick = () => showVerificationRejectedModal(currentProfile && currentProfile.verificationRejectionReason, true);
         } else {
-          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center space-x-1";
-          pPill.innerHTML = '<i data-lucide="shield-alert" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Unverified</span>';
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200";
+          pPill.innerHTML = '<span id="profile-verification-label">⚪ Unverified Explorer</span>';
           pPill.onclick = null;
         }
       }
@@ -2619,18 +2693,15 @@
 
     window.attachProfileRealtimeListener = function(uid) {
       if (!uid || !isLiveFirebase || !db) return;
-
       if (profileSnapshotUnsubscribe) {
         try { profileSnapshotUnsubscribe(); } catch (e) {}
         profileSnapshotUnsubscribe = null;
       }
-
       try {
         const profileRef = doc(db, "profiles", uid);
         profileSnapshotUnsubscribe = onSnapshot(profileRef, (docSnap) => {
           if (!docSnap.exists()) return;
           const data = docSnap.data();
-
           const newVerificationStatus = data.verificationStatus || "unsubmitted";
           const rejectionReason = data.verificationRejectionReason || "Verification document requires re-upload.";
           const sub = data.subscription || {};
@@ -2646,6 +2717,7 @@
             if (data.isVip !== undefined) currentProfile.isVip = data.isVip;
             if (data.hasExplorerPass !== undefined) currentProfile.hasExplorerPass = data.hasExplorerPass;
             currentProfile.subscription = sub;
+
             try {
               localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
               if (data.isVip || data.hasExplorerPass) {
@@ -2656,35 +2728,79 @@
             } catch (e) {}
           }
 
-          // 1. Verification transitions
+          // 1. Verification transitions (Notify strictly ONE TIME)
           if (lastKnownVerificationStatus !== null && lastKnownVerificationStatus !== newVerificationStatus) {
+            // Real-time status change detected!
             if (newVerificationStatus === "verified") {
-              showVerificationApprovedCelebration();
+              if (!isNotificationSeen('verification', uid, 'verified')) {
+                showVerificationApprovedCelebration();
+              }
             } else if (newVerificationStatus === "rejected") {
-              showVerificationRejectedModal(rejectionReason);
+              const rKey = rejectionReason.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '');
+              if (!isNotificationSeen('verification', uid, 'rejected', rKey)) {
+                showVerificationRejectedModal(rejectionReason);
+              }
             }
           } else if (lastKnownVerificationStatus === null) {
-            if (newVerificationStatus === "rejected") {
-              showVerificationRejectedModal(rejectionReason);
+            // Initial snapshot on boot / page refresh:
+            // Only trigger if traveler had actively submitted and never acknowledged this verdict
+            const wasAwaiting = localStorage.getItem('safarmatch_awaiting_verification_' + uid) === 'true';
+            if (newVerificationStatus === "verified") {
+              if (wasAwaiting && !isNotificationSeen('verification', uid, 'verified')) {
+                showVerificationApprovedCelebration();
+              } else {
+                markNotificationSeen('verification', uid, 'verified');
+              }
+              localStorage.removeItem('safarmatch_awaiting_verification_' + uid);
+            } else if (newVerificationStatus === "rejected") {
+              const rKey = rejectionReason.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '');
+              if (wasAwaiting && !isNotificationSeen('verification', uid, 'rejected', rKey)) {
+                showVerificationRejectedModal(rejectionReason);
+              } else {
+                markNotificationSeen('verification', uid, 'rejected', rKey);
+              }
+              localStorage.removeItem('safarmatch_awaiting_verification_' + uid);
             }
           }
           lastKnownVerificationStatus = newVerificationStatus;
 
-          // 2. Subscription transitions
+          // 2. Subscription transitions (Notify strictly ONE TIME)
           if (lastKnownSubscriptionStatus !== null && lastKnownSubscriptionStatus !== newSubStatus) {
+            // Real-time status change detected!
             if (newSubStatus === "active") {
-              showPaymentApprovedCelebration();
+              if (!isNotificationSeen('payment', uid, 'active')) {
+                showPaymentApprovedCelebration();
+              }
             } else if (newSubStatus === "rejected") {
-              showPaymentRejectedModal(paymentRejectionReason);
+              const prKey = paymentRejectionReason.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '');
+              if (!isNotificationSeen('payment', uid, 'rejected', prKey)) {
+                showPaymentRejectedModal(paymentRejectionReason);
+              }
             }
           } else if (lastKnownSubscriptionStatus === null) {
-            if (newSubStatus === "rejected") {
-              showPaymentRejectedModal(paymentRejectionReason);
+            // Initial snapshot on boot / page refresh:
+            // Only trigger if traveler had actively submitted payment and never acknowledged this verdict
+            const wasAwaitingPay = localStorage.getItem('safarmatch_awaiting_payment_' + uid) === 'true';
+            if (newSubStatus === "active") {
+              if (wasAwaitingPay && !isNotificationSeen('payment', uid, 'active')) {
+                showPaymentApprovedCelebration();
+              } else {
+                markNotificationSeen('payment', uid, 'active');
+              }
+              localStorage.removeItem('safarmatch_awaiting_payment_' + uid);
+            } else if (newSubStatus === "rejected") {
+              const prKey = paymentRejectionReason.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '');
+              if (wasAwaitingPay && !isNotificationSeen('payment', uid, 'rejected', prKey)) {
+                showPaymentRejectedModal(paymentRejectionReason);
+              } else {
+                markNotificationSeen('payment', uid, 'rejected', prKey);
+              }
+              localStorage.removeItem('safarmatch_awaiting_payment_' + uid);
             }
           }
           lastKnownSubscriptionStatus = newSubStatus;
 
-          // Update UI displays
+          // Update UI displays silently
           updateVerificationBadgeUI(newVerificationStatus);
           updateJourneyStatusUI();
         }, (err) => {
@@ -3155,11 +3271,17 @@
 
     // Generic flyTo supporting both Google Maps and Leaflet
     window.flyToDestination = function(lat, lng, label = "", zoomLevel = 10) {
+      const safeLat = Number(lat);
+      const safeLng = Number(lng);
+      if (isNaN(safeLat) || isNaN(safeLng) || !isFinite(safeLat) || !isFinite(safeLng)) {
+        console.warn("Invalid coordinates provided to flyToDestination:", lat, lng);
+        return;
+      }
       if (googleMapInstance) {
-        googleMapInstance.panTo({ lat, lng });
+        googleMapInstance.panTo({ lat: safeLat, lng: safeLng });
         googleMapInstance.setZoom(zoomLevel);
       } else if (mapInstance && mapInstance.flyTo) {
-        mapInstance.flyTo([lat, lng], zoomLevel, { duration: 1 });
+        mapInstance.flyTo([safeLat, safeLng], zoomLevel, { duration: 1 });
       }
       if (label) {
         showToast(`✈️ Flying to ${label}`, "info");
@@ -3258,6 +3380,23 @@
 
       // Filter logic
       const filteredTravelers = travelersList.filter(traveler => {
+        if (!traveler) return false;
+
+        // Validate and guarantee finite numeric coordinates
+        let lat = Number(traveler.lat);
+        let lng = Number(traveler.lng);
+        if (isNaN(lat) || isNaN(lng) || !isFinite(lat) || !isFinite(lng)) {
+          const fallback = INDIAN_LOCATIONS[traveler.upcomingCircuit] || INDIAN_LOCATIONS[traveler.homeCity] || INDIAN_LOCATIONS["Goa"];
+          if (fallback && typeof fallback.lat === 'number' && typeof fallback.lng === 'number') {
+            traveler.lat = fallback.lat;
+            traveler.lng = fallback.lng;
+            lat = fallback.lat;
+            lng = fallback.lng;
+          } else {
+            return false;
+          }
+        }
+
         if (isSoloWomanSafe && traveler.gender === 'Male' && !traveler.isSelf) return false;
         if (blockedUsersList.includes(traveler.uid)) return false;
 
@@ -3290,8 +3429,11 @@
           const isVerified = traveler.verificationStatus === "verified";
           const photo = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
 
+          const gLat = Number(traveler.lat);
+          const gLng = Number(traveler.lng);
+          if (isNaN(gLat) || isNaN(gLng) || !isFinite(gLat) || !isFinite(gLng)) return;
           const marker = new google.maps.Marker({
-            position: { lat: traveler.lat, lng: traveler.lng },
+            position: { lat: gLat, lng: gLng },
             map: googleMapInstance,
             title: traveler.name,
             icon: {
@@ -3369,7 +3511,10 @@
             iconAnchor: [22, 22]
           });
 
-          const marker = L.marker([traveler.lat, traveler.lng], { icon: customIcon });
+          const tLat = Number(traveler.lat);
+          const tLng = Number(traveler.lng);
+          if (isNaN(tLat) || isNaN(tLng) || !isFinite(tLat) || !isFinite(tLng)) return;
+          const marker = L.marker([tLat, tLng], { icon: customIcon });
 
           const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
           const popupContent = `
@@ -3436,9 +3581,18 @@
     };
 
     // ==================== GOOGLE MAPS MINI-MAP & GEOCODER FOR PROFILE ====================
-    window.initHomeCityMiniMap = function(initialLat = 18.5204, initialLng = 73.8567) {
+    window.initHomeCityMiniMap = function(initialLat, initialLng) {
       const el = document.getElementById('home-city-mini-map');
       if (!el) return;
+
+      let safeLat = Number(initialLat);
+      let safeLng = Number(initialLng);
+      if (isNaN(safeLat) || !isFinite(safeLat)) {
+        safeLat = (currentProfile && currentProfile.lat != null && !isNaN(Number(currentProfile.lat))) ? Number(currentProfile.lat) : 18.5204;
+      }
+      if (isNaN(safeLng) || !isFinite(safeLng)) {
+        safeLng = (currentProfile && currentProfile.lng != null && !isNaN(Number(currentProfile.lng))) ? Number(currentProfile.lng) : 73.8567;
+      }
 
       // 1. Google Maps Mini-Map
       if (false) {
@@ -3485,7 +3639,7 @@
       // 2. Leaflet Mini-Map Fallback
       if (!homeCityMiniMap) {
         homeCityMiniMap = L.map('home-city-mini-map', {
-          center: [initialLat, initialLng],
+          center: [safeLat, safeLng],
           zoom: 10,
           zoomControl: false,
           attributionControl: false
@@ -3496,7 +3650,7 @@
           attribution: 'Tiles &copy; Esri'
         }).addTo(homeCityMiniMap);
 
-        homeCityMiniMarker = L.marker([initialLat, initialLng], { draggable: true }).addTo(homeCityMiniMap);
+        homeCityMiniMarker = L.marker([safeLat, safeLng], { draggable: true }).addTo(homeCityMiniMap);
 
         homeCityMiniMarker.on('dragend', function(e) {
           const pos = e.target.getLatLng();
@@ -3511,8 +3665,8 @@
         });
       } else {
         homeCityMiniMap.invalidateSize();
-        homeCityMiniMap.setView([initialLat, initialLng], 10);
-        if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([initialLat, initialLng]);
+        homeCityMiniMap.setView([safeLat, safeLng], 10);
+        if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([safeLat, safeLng]);
       }
     };
 
@@ -3601,12 +3755,17 @@
     };
 
     function centerMiniMap(lat, lng) {
+      const safeLat = Number(lat);
+      const safeLng = Number(lng);
+      if (isNaN(safeLat) || isNaN(safeLng) || !isFinite(safeLat) || !isFinite(safeLng)) {
+        return;
+      }
       if (googleMiniMapInstance) {
-        googleMiniMapInstance.setCenter({ lat, lng });
-        if (googleMiniMarker) googleMiniMarker.setPosition({ lat, lng });
+        googleMiniMapInstance.setCenter({ lat: safeLat, lng: safeLng });
+        if (googleMiniMarker) googleMiniMarker.setPosition({ lat: safeLat, lng: safeLng });
       } else if (homeCityMiniMap) {
-        homeCityMiniMap.flyTo([lat, lng], 10);
-        if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([lat, lng]);
+        homeCityMiniMap.flyTo([safeLat, safeLng], 10);
+        if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([safeLat, safeLng]);
       }
     }
 
@@ -4279,6 +4438,12 @@
       if (!currentProfile) return;
       currentProfile.selfieSubmitted = true;
       currentProfile.verificationStatus = "pending_review";
+      if (currentProfile.uid) {
+        resetNotificationSeen('verification', currentProfile.uid);
+        try {
+          localStorage.setItem('safarmatch_awaiting_verification_' + currentProfile.uid, 'true');
+        } catch (e) {}
+      }
       currentProfile.verificationSubmittedAt = new Date().toISOString();
 
       showToast(`⏳ Processing ${type === 'selfie' ? 'live selfie' : 'photo ID'} (${(blob.size / 1024).toFixed(1)} KB)...`, "info");
@@ -4857,6 +5022,12 @@
 
       if (savedProfile) {
         currentProfile = savedProfile;
+        if (currentProfile.lat == null || isNaN(Number(currentProfile.lat)) || !isFinite(Number(currentProfile.lat))) {
+          currentProfile.lat = 18.5204;
+        }
+        if (currentProfile.lng == null || isNaN(Number(currentProfile.lng)) || !isFinite(Number(currentProfile.lng))) {
+          currentProfile.lng = 73.8567;
+        }
       } else {
         currentProfile = {
           uid: "usr_" + Math.random().toString(36).substr(2, 9),
@@ -4998,7 +5169,15 @@
             snapshot.forEach(docSnap => {
               const data = docSnap.data();
               if (!docSnap.id.startsWith('seed_')) {
-                liveProfiles.push({ uid: docSnap.id, ...data });
+                const profileObj = { uid: docSnap.id, ...data };
+                if (profileObj.lat == null || isNaN(Number(profileObj.lat)) || !isFinite(Number(profileObj.lat))) {
+                  const fallback = INDIAN_LOCATIONS[profileObj.upcomingCircuit] || INDIAN_LOCATIONS[profileObj.homeCity] || INDIAN_LOCATIONS["Goa"];
+                  if (fallback) {
+                    profileObj.lat = fallback.lat;
+                    profileObj.lng = fallback.lng;
+                  }
+                }
+                liveProfiles.push(profileObj);
               }
             });
             // Ensure logged in user is represented
