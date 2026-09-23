@@ -48,18 +48,28 @@ SCRIPTS_CORE = """
     let storage = null;
     let isLiveFirebase = false;
 
-    // Current User Session
+    // Current User Session & View State
     let currentUser = null;
     let currentProfile = null;
+    let currentView = "map";
 
-    // Chat and Map State
+    // Chat and Map State (Google Maps & Fallback)
     let activeChatPartner = null;
     let activeChatUnsubscribe = null;
     let tripsUnsubscribe = null;
     let mapInstance = null;
+    let googleMapInstance = null;
+    let googleMapMarkers = [];
+    let googleInfoWindow = null;
+    let googleAutocompleteMain = null;
+    let googleAutocompleteProfileHome = null;
+    let googleAutocompleteProfileUpcoming = null;
+    let googleAutocompleteTrip = null;
     let mapMarkersLayer = null;
     let homeCityMiniMap = null;
     let homeCityMiniMarker = null;
+    let googleMiniMapInstance = null;
+    let googleMiniMarker = null;
 
     // Local in-memory caches
     let allTripsCache = [];
@@ -144,7 +154,11 @@ SCRIPTS_CORE = """
       "North East": { lat: 25.5788, lng: 91.8933 }
     };
 
-    // Real-world dynamic data stores (Zero dummy data, clean production runtime)
+    // Production Ready: Clean empty lists. Live real-world users and trips are populated from Firestore or user creation.
+    const makeSvgAvatar = (initials, bg) => 
+      `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='50' fill='${encodeURIComponent(bg)}'/%3E%3Ctext x='50' y='61' font-size='38' font-family='system-ui, sans-serif' font-weight='bold' fill='%23ffffff' text-anchor='middle'%3E${initials}%3C/text%3E%3C/svg%3E`;
+
     const SEED_INDIAN_TRAVELERS = [];
+
     const SEED_INDIAN_TRIPS = [];
 """

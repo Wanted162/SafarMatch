@@ -154,7 +154,7 @@ VIEW_PROFILE = """
               </div>
             </div>
 
-            <!-- Home City & Upcoming Circuit (Leaflet + Datalist Integration) -->
+            <!-- Home City & Upcoming Circuit / Destination (Google Maps Places Autocomplete) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Home City (India) *</label>
@@ -162,40 +162,44 @@ VIEW_PROFILE = """
                   <input 
                     type="text" 
                     id="input-home-city" 
-                    list="indian-travel-destinations" 
                     required 
-                    placeholder="Type or pick (e.g. Pune, Mumbai, Kasol, Anjuna)..." 
+                    placeholder="Type any Indian city (e.g. Pune, Mumbai, Bangalore)..." 
                     oninput="handleHomeCityInput(this.value)"
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white pl-9" 
                   />
                   <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-1">Select from 50+ hubs or type any Indian city.</p>
+                <p class="text-[11px] text-slate-400 mt-1">Free-form search powered by Google Maps.</p>
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Upcoming Travel Circuit *</label>
-                <select id="input-upcoming-circuit" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white">
-                  <option value="Goa">🏖️ Goa (Anjuna, Arambol, Palolem)</option>
-                  <option value="Himachal">🏔️ Himachal (Kasol, Manali, Dharamshala, Bir)</option>
-                  <option value="Uttarakhand">🌊 Uttarakhand (Rishikesh, Chopta, Nainital)</option>
-                  <option value="Rajasthan">🏰 Rajasthan (Jaipur, Udaipur, Jaisalmer)</option>
-                  <option value="Ladakh">❄️ Ladakh (Leh, Nubra, Pangong Tso)</option>
-                  <option value="Kerala">🌴 Kerala (Varkala, Munnar, Kochi)</option>
-                  <option value="Gokarna">🪨 Gokarna & Coastal Karnataka</option>
-                  <option value="North East">🌿 North East (Meghalaya, Ziro, Sikkim)</option>
-                </select>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Upcoming Travel Destination / Circuit *</label>
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="input-upcoming-circuit" 
+                    required 
+                    placeholder="Type ANY destination (e.g. Kasol, Varkala, Spiti, Pondicherry)..." 
+                    oninput="handleUpcomingDestinationInput(this.value)"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white pl-9" 
+                  />
+                  <i data-lucide="compass" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">No restrictions — type any village, valley, or town in India.</p>
               </div>
             </div>
 
-            <!-- Leaflet Interactive Mini-Map for Home City / Location Pin -->
+            <!-- Google Maps Interactive Mini-Map for Home City / Location Pin -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-slate-700">Map Pin Preview (Leaflet & OSM)</span>
+                <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                  <i data-lucide="map" class="w-3.5 h-3.5 text-safar-600"></i>
+                  <span>Map Pin Preview (Google Maps)</span>
+                </span>
                 <span id="home-city-coords-text" class="text-slate-400 font-mono text-[11px]">Lat: 18.5204, Lng: 73.8567</span>
               </div>
               <div id="home-city-mini-map" class="w-full h-44 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 z-0"></div>
-              <p class="text-[10px] text-slate-400">Click anywhere on the mini-map to adjust your pin coordinates precisely.</p>
+              <p class="text-[10px] text-slate-400">Click anywhere on the Google Map or drag the pin to set your exact location.</p>
             </div>
 
             <!-- Travel Intent -->

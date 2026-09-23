@@ -46,7 +46,7 @@ SCRIPTS_APP = """
       const step2Icon = document.getElementById('step2-badge-icon');
       if (step2Label && step2Icon) {
         if (hasPass) {
-          step2Label.textContent = "Active VIP ✓";
+          step2Label.textContent = "Active VIP ★";
           step2Label.className = "font-bold text-emerald-600";
           step2Icon.className = "w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold";
         } else {
@@ -168,13 +168,44 @@ SCRIPTS_APP = """
       return { allowed: true };
     };
 
-    // ==================== 100% LEAFLET MAP & OPENSTREETMAP ENGINE ====================
-    window.initMap = function() {
-      if (mapInstance) return;
+    // ==================== GOOGLE MAPS API & MAP ENGINE (WITH LEAFLET FALLBACK) ====================
+    window.initMap = async function() {
       const mapEl = document.getElementById('map');
       if (!mapEl) return;
 
-      // Center on India
+      // 1. Try Google Maps JavaScript API
+      if (window.google && window.google.maps) {
+        try {
+          if (!googleMapInstance) {
+            googleMapInstance = new google.maps.Map(mapEl, {
+              center: { lat: 20.5937, lng: 78.9629 },
+              zoom: 5,
+              mapId: "SAFAR_EXPLORER_MAP",
+              mapTypeControl: false,
+              streetViewControl: false,
+              fullscreenControl: false,
+              zoomControl: true,
+              zoomControlOptions: {
+                position: google.maps.ControlPosition.RIGHT_TOP
+              }
+            });
+
+            googleInfoWindow = new google.maps.InfoWindow();
+
+            // Set up Google Places Autocomplete on Explore Map search bar
+            setupGoogleMapsAutocomplete();
+          }
+
+          mapInstance = googleMapInstance;
+          renderTravelerPins();
+          return;
+        } catch (err) {
+          console.warn("Google Maps init failed, using Leaflet fallback:", err);
+        }
+      }
+
+      // 2. Leaflet Fallback (If Google Maps fails or is offline)
+      if (mapInstance && !(mapInstance instanceof google.maps?.Map)) return;
       mapInstance = L.map('map', {
         center: [20.5937, 78.9629],
         zoom: 5,
@@ -182,32 +213,106 @@ SCRIPTS_APP = """
         attributionControl: true
       });
 
-      // High-resolution Esri World Street Map (100% Free, Zero API Key Required, Clean Unblurred Tiles)
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, METI, TomTom',
+        attribution: 'Tiles &copy; Esri &mdash; OpenStreetMap contributors',
         maxZoom: 19
       }).addTo(mapInstance);
 
-      // Add Zoom Control at top right
       L.control.zoom({ position: 'topright' }).addTo(mapInstance);
-
       mapMarkersLayer = L.layerGroup().addTo(mapInstance);
-
-      // Populate markers from cache
       renderTravelerPins();
+    };
 
-      setTimeout(() => {
-        if (mapInstance) mapInstance.invalidateSize();
-      }, 200);
+    // Google Maps Autocomplete initialization for search inputs
+    window.setupGoogleMapsAutocomplete = function() {
+      if (!window.google || !window.google.maps || !google.maps.places) return;
+
+      // 1. Explore Map Search Bar
+      const mapSearchInput = document.getElementById('map-destination-search-input');
+      if (mapSearchInput && !googleAutocompleteMain) {
+        googleAutocompleteMain = new google.maps.places.Autocomplete(mapSearchInput, {
+          fields: ['geometry', 'name', 'formatted_address']
+        });
+        googleAutocompleteMain.addListener('place_changed', () => {
+          const place = googleAutocompleteMain.getPlace();
+          if (place.geometry && place.geometry.location) {
+            flyToDestination(place.geometry.location.lat(), place.geometry.location.lng(), place.name || place.formatted_address, 11);
+          }
+        });
+      }
+
+      // 2. Profile Home City Input
+      const homeCityInput = document.getElementById('input-home-city');
+      if (homeCityInput && !googleAutocompleteProfileHome) {
+        googleAutocompleteProfileHome = new google.maps.places.Autocomplete(homeCityInput, {
+          fields: ['geometry', 'name', 'formatted_address']
+        });
+        googleAutocompleteProfileHome.addListener('place_changed', () => {
+          const place = googleAutocompleteProfileHome.getPlace();
+          if (place.geometry && place.geometry.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            updateHomeCityCoords(lat, lng);
+            if (googleMiniMapInstance) {
+              googleMiniMapInstance.setCenter({ lat, lng });
+              googleMiniMapInstance.setZoom(11);
+              if (googleMiniMarker) googleMiniMarker.setPosition({ lat, lng });
+            } else if (homeCityMiniMap) {
+              homeCityMiniMap.flyTo([lat, lng], 11);
+              if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([lat, lng]);
+            }
+          }
+        });
+      }
+
+      // 3. Profile Upcoming Circuit / Destination Input (ANY destination)
+      const upcomingInput = document.getElementById('input-upcoming-circuit');
+      if (upcomingInput && !googleAutocompleteProfileUpcoming) {
+        googleAutocompleteProfileUpcoming = new google.maps.places.Autocomplete(upcomingInput, {
+          fields: ['geometry', 'name', 'formatted_address']
+        });
+        googleAutocompleteProfileUpcoming.addListener('place_changed', () => {
+          const place = googleAutocompleteProfileUpcoming.getPlace();
+          if (place.geometry && place.geometry.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            if (currentProfile) {
+              currentProfile.upcomingCircuit = place.name || upcomingInput.value;
+              currentProfile.lat = lat;
+              currentProfile.lng = lng;
+            }
+            updateHomeCityCoords(lat, lng);
+            showToast(`📍 Set destination to ${place.name || upcomingInput.value}`, "success");
+          }
+        });
+      }
+
+      // 4. Trip Post Modal Destination Input
+      const tripDestInput = document.getElementById('trip-input-destination');
+      if (tripDestInput && !googleAutocompleteTrip) {
+        googleAutocompleteTrip = new google.maps.places.Autocomplete(tripDestInput, {
+          fields: ['geometry', 'name', 'formatted_address', 'address_components']
+        });
+        googleAutocompleteTrip.addListener('place_changed', () => {
+          const place = googleAutocompleteTrip.getPlace();
+          const circuitInput = document.getElementById('trip-input-circuit');
+          if (circuitInput && (!circuitInput.value || circuitInput.value.trim() === '')) {
+            circuitInput.value = place.name || "Explorer Circuit";
+          }
+        });
+      }
     };
 
     window.resetMapCenter = function() {
-      if (mapInstance) {
+      if (googleMapInstance) {
+        googleMapInstance.setCenter({ lat: 20.5937, lng: 78.9629 });
+        googleMapInstance.setZoom(5);
+      } else if (mapInstance && mapInstance.flyTo) {
         mapInstance.flyTo([20.5937, 78.9629], 5, { duration: 1 });
       }
     };
 
-    // Geolocation with Circuit Fallback
+    // Geolocation with Dynamic Fallback
     window.locateUserPosition = function() {
       if (!navigator.geolocation) {
         fallbackToCircuitLocation("Geolocation unsupported by this browser.");
@@ -219,14 +324,12 @@ SCRIPTS_APP = """
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
-          if (mapInstance) {
-            mapInstance.flyTo([lat, lng], 12, { duration: 1.2 });
-            showToast(`📍 Centered on your current GPS location (${lat.toFixed(2)}, ${lng.toFixed(2)})`, "success");
-          }
+          flyToDestination(lat, lng, "Your Current Location", 12);
+          showToast(`📍 Centered on your current GPS location (${lat.toFixed(2)}, ${lng.toFixed(2)})`, "success");
         },
         (err) => {
           console.warn("Geolocation denied/failed:", err);
-          fallbackToCircuitLocation("Location access disabled. Defaulting to your selected circuit.");
+          fallbackToCircuitLocation("Location access disabled. Defaulting to your selected destination.");
         },
         { timeout: 6000, enableHighAccuracy: false }
       );
@@ -235,25 +338,102 @@ SCRIPTS_APP = """
     function fallbackToCircuitLocation(noticeMsg) {
       showToast(`📍 ${noticeMsg}`, "info");
       const targetCircuit = currentProfile ? currentProfile.upcomingCircuit : "Goa";
-      const coords = INDIAN_LOCATIONS[targetCircuit] || INDIAN_LOCATIONS["Goa"];
-      if (mapInstance && coords) {
-        mapInstance.flyTo([coords.lat, coords.lng], 9, { duration: 1 });
+      const coords = INDIAN_LOCATIONS[targetCircuit] || (currentProfile && currentProfile.lat ? { lat: currentProfile.lat, lng: currentProfile.lng } : INDIAN_LOCATIONS["Goa"]);
+      if (coords) {
+        flyToDestination(coords.lat, coords.lng, targetCircuit, 9);
       }
+    }
+
+    // Generic flyTo supporting both Google Maps and Leaflet
+    window.flyToDestination = function(lat, lng, label = "", zoomLevel = 10) {
+      if (googleMapInstance) {
+        googleMapInstance.panTo({ lat, lng });
+        googleMapInstance.setZoom(zoomLevel);
+      } else if (mapInstance && mapInstance.flyTo) {
+        mapInstance.flyTo([lat, lng], zoomLevel, { duration: 1 });
+      }
+      if (label) {
+        showToast(`✈️ Flying to ${label}`, "info");
+      }
+    };
+
+    // Handle Map Destination Search Submit
+    window.handleMapSearchSubmit = function() {
+      const input = document.getElementById('map-destination-search-input');
+      if (!input || !input.value || input.value.trim().length === 0) return;
+      const query = input.value.trim();
+
+      const clearBtn = document.getElementById('map-search-clear-btn');
+      if (clearBtn) clearBtn.classList.remove('hidden');
+
+      // 1. Direct dictionary match
+      if (INDIAN_LOCATIONS[query]) {
+        const c = INDIAN_LOCATIONS[query];
+        flyToDestination(c.lat, c.lng, query, 10);
+        filterMapCircuit(query);
+        return;
+      }
+
+      // 2. Google Maps Geocoder if available
+      if (window.google && window.google.maps && google.maps.Geocoder) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: query }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const loc = results[0].geometry.location;
+            flyToDestination(loc.lat(), loc.lng(), results[0].formatted_address || query, 11);
+            filterMapByDestinationKeyword(query);
+          } else {
+            fallbackNominatimSearch(query);
+          }
+        });
+        return;
+      }
+
+      // 3. Fallback geocoder
+      fallbackNominatimSearch(query);
+    };
+
+    function fallbackNominatimSearch(query) {
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lng = parseFloat(data[0].lon);
+            flyToDestination(lat, lng, query, 10);
+            filterMapByDestinationKeyword(query);
+          } else {
+            showToast(`Could not locate "${query}". Try another city or hub.`, "error");
+          }
+        })
+        .catch(() => showToast(`Search error for "${query}".`, "error"));
+    }
+
+    window.clearMapDestinationSearch = function() {
+      const input = document.getElementById('map-destination-search-input');
+      if (input) input.value = '';
+      const clearBtn = document.getElementById('map-search-clear-btn');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      filterMapCircuit('all');
+    };
+
+    function filterMapByDestinationKeyword(keyword) {
+      const kw = keyword.toLowerCase();
+      renderTravelerPins(kw);
     }
 
     const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
 
-    // Render Leaflet Pins for Travelers
+    // Render Pins for Travelers (Supports Google Maps Markers & Leaflet Markers)
     window.renderTravelerPins = function(filterCircuit = "all") {
-      if (!mapMarkersLayer) return;
-      mapMarkersLayer.clearLayers();
-
       const genderFilter = document.getElementById('map-filter-gender')?.value || 'all';
       const intentFilter = document.getElementById('map-filter-intent')?.value || 'all';
       const isSoloWomanSafe = currentProfile && currentProfile.surakshaShield && currentProfile.gender === 'Female';
 
-      // Load registered community travelers
-      const travelersList = [...(allTravelersCache || [])];
+      // Load registered community travelers (with fallback to verified seed travelers)
+      const travelersList = (allTravelersCache && allTravelersCache.length > 0)
+        ? [...allTravelersCache]
+        : [...SEED_INDIAN_TRAVELERS];
 
       // If current user has saved profile with name and valid coordinates, make sure user's live pin is on map
       if (currentProfile && currentProfile.name && currentProfile.name.trim().length >= 2 && currentProfile.lat && currentProfile.lng) {
@@ -267,85 +447,153 @@ SCRIPTS_APP = """
 
       let visibleCount = 0;
 
-      travelersList.forEach(traveler => {
-        // Safe mode exclusion
-        if (isSoloWomanSafe && traveler.gender === 'Male' && !traveler.isSelf) return;
-        if (blockedUsersList.includes(traveler.uid)) return;
+      // Filter logic
+      const filteredTravelers = travelersList.filter(traveler => {
+        if (isSoloWomanSafe && traveler.gender === 'Male' && !traveler.isSelf) return false;
+        if (blockedUsersList.includes(traveler.uid)) return false;
 
-        // Circuit filter
-        if (filterCircuit !== 'all' && traveler.upcomingCircuit !== filterCircuit) return;
+        // Circuit / Keyword filter
+        if (filterCircuit !== 'all') {
+          const matchCircuit = (traveler.upcomingCircuit || '').toLowerCase().includes(filterCircuit.toLowerCase());
+          const matchHome = (traveler.homeCity || '').toLowerCase().includes(filterCircuit.toLowerCase());
+          const matchBio = (traveler.bio || '').toLowerCase().includes(filterCircuit.toLowerCase());
+          if (!matchCircuit && !matchHome && !matchBio) return false;
+        }
 
         // Gender filter
-        if (genderFilter !== 'all' && traveler.gender !== genderFilter) return;
+        if (genderFilter !== 'all' && traveler.gender !== genderFilter) return false;
 
         // Intent filter
-        if (intentFilter !== 'all' && traveler.travelIntent !== intentFilter) return;
+        if (intentFilter !== 'all' && traveler.travelIntent !== intentFilter) return false;
 
-        visibleCount++;
+        return true;
+      });
 
-        // Verified Shield Indicator in Pin
-        const isVerified = traveler.verificationStatus === "verified";
-        const shieldBadgeHtml = isVerified 
-          ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">✓</span>`
-          : traveler.verificationStatus === "pending_review"
-          ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">⏳</span>`
-          : ``;
+      visibleCount = filteredTravelers.length;
 
-        const photo = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
-        const ringBorder = traveler.isSelf ? 'border-amber-500 ring-2 ring-amber-300' : isVerified ? 'border-emerald-500' : 'border-rose-500';
+      // 1. Google Maps Rendering
+      if (googleMapInstance && window.google && window.google.maps) {
+        // Clear old markers
+        googleMapMarkers.forEach(m => m.setMap(null));
+        googleMapMarkers = [];
 
-        // Custom HTML Marker Icon
-        const iconHtml = `
-          <div class="relative cursor-pointer group custom-avatar-pin" style="width: 44px; height: 44px;">
-            <div class="absolute inset-0 rounded-full ${traveler.isSelf ? 'bg-amber-400/30' : 'bg-rose-500/20'} pin-pulse"></div>
-            <div class="w-10 h-10 rounded-full border-2 ${ringBorder} bg-white overflow-hidden shadow-lg transform transition group-hover:scale-110 flex items-center justify-center">
-              <img src="${photo}" alt="${traveler.name}" class="w-full h-full object-cover" />
-            </div>
-            ${traveler.isSelf ? '<span class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 font-extrabold text-[8px] px-1 rounded-full shadow-xs">YOU</span>' : shieldBadgeHtml}
-          </div>
-        `;
+        filteredTravelers.forEach(traveler => {
+          const isVerified = traveler.verificationStatus === "verified";
+          const photo = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
 
-        const customIcon = L.divIcon({
-          html: iconHtml,
-          className: 'custom-avatar-pin',
-          iconSize: [44, 44],
-          iconAnchor: [22, 22]
-        });
+          const marker = new google.maps.Marker({
+            position: { lat: traveler.lat, lng: traveler.lng },
+            map: googleMapInstance,
+            title: traveler.name,
+            icon: {
+              url: photo,
+              scaledSize: new google.maps.Size(38, 38),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(19, 19)
+            }
+          });
 
-        const marker = L.marker([traveler.lat, traveler.lng], { icon: customIcon });
-
-        // Popup HTML
-        const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
-        const popupContent = `
-          <div class="p-3.5 max-w-[240px] text-xs font-sans">
-            <div class="flex items-center space-x-2.5 pb-2 border-b border-slate-100">
-              <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200" />
-              <div>
-                <div class="flex items-center gap-1">
-                  <h4 class="font-bold text-slate-900">${traveler.name} ${traveler.isSelf ? '(You)' : ''}</h4>
-                  ${isVerified ? '<span class="text-emerald-600 font-bold">✓</span>' : ''}
+          const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
+          const popupContent = `
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 10px; max-width: 250px; font-size: 12px; color: #0f172a;">
+              <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+                <img src="${photo}" style="width: 40px; height: 40px; border-radius: 12px; object-fit: cover; border: 1px solid #e2e8f0;" />
+                <div>
+                  <div style="font-weight: 700; color: #0f172a;">${traveler.name} ${traveler.isSelf ? '(You)' : ''} ${isVerified ? '<span style="color:#059669">✓</span>' : ''}</div>
+                  <div style="font-size: 11px; color: #64748b;">${traveler.upcomingCircuit || 'India'} • ${traveler.gender || 'Traveler'}</div>
                 </div>
-                <p class="text-[11px] text-slate-500">${traveler.upcomingCircuit || 'India'} • ${traveler.gender || 'Traveler'}</p>
+              </div>
+              <p style="font-size: 11px; color: #475569; margin: 8px 0; line-height: 1.4;">${bioSnippet}</p>
+              <div>
+                ${traveler.isSelf ? `
+                  <button onclick="switchView('profile')" style="width: 100%; padding: 6px 12px; background: #d97706; color: white; border-radius: 8px; font-weight: 700; font-size: 11px; border: none; cursor: pointer;">
+                    Edit Your Profile
+                  </button>
+                ` : `
+                  <button onclick="inspectTravelerFromMap('${traveler.uid}')" style="width: 100%; padding: 6px 12px; background: #e11d48; color: white; border-radius: 8px; font-weight: 700; font-size: 11px; border: none; cursor: pointer;">
+                    View Profile
+                  </button>
+                `}
               </div>
             </div>
-            <p class="text-[11px] text-slate-600 py-2 leading-relaxed">${bioSnippet}</p>
-            <div class="pt-1 flex gap-1.5">
-              ${traveler.isSelf ? `
-                <button onclick="switchView('profile')" class="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs">
-                  Edit Your Profile
-                </button>
-              ` : `
-                <button onclick="inspectTravelerFromMap('${traveler.uid}')" class="flex-1 py-1.5 rounded-lg bg-safar-600 hover:bg-safar-700 text-white font-bold text-[11px] shadow-xs">
-                  View Profile
-                </button>
-              `}
-            </div>
-          </div>
-        `;
+          `;
 
-        marker.bindPopup(popupContent, { maxWidth: 260 });
-        mapMarkersLayer.addLayer(marker);
-      });
+          marker.addListener('click', () => {
+            if (googleInfoWindow) {
+              googleInfoWindow.setContent(popupContent);
+              googleInfoWindow.open(googleMapInstance, marker);
+            }
+          });
+
+          googleMapMarkers.push(marker);
+        });
+      }
+
+      // 2. Leaflet Rendering (if active)
+      if (mapMarkersLayer) {
+        mapMarkersLayer.clearLayers();
+        filteredTravelers.forEach(traveler => {
+          const isVerified = traveler.verificationStatus === "verified";
+          const shieldBadgeHtml = isVerified 
+            ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">✓</span>`
+            : traveler.verificationStatus === "pending_review"
+            ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">⏳</span>`
+            : ``;
+
+          const photo = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
+          const ringBorder = traveler.isSelf ? 'border-amber-500 ring-2 ring-amber-300' : isVerified ? 'border-emerald-500' : 'border-rose-500';
+
+          const iconHtml = `
+            <div class="relative cursor-pointer group custom-avatar-pin" style="width: 44px; height: 44px;">
+              <div class="absolute inset-0 rounded-full ${traveler.isSelf ? 'bg-amber-400/30' : 'bg-rose-500/20'} pin-pulse"></div>
+              <div class="w-10 h-10 rounded-full border-2 ${ringBorder} bg-white overflow-hidden shadow-lg transform transition group-hover:scale-110 flex items-center justify-center">
+                <img src="${photo}" alt="${traveler.name}" class="w-full h-full object-cover" />
+              </div>
+              ${traveler.isSelf ? '<span class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 font-extrabold text-[8px] px-1 rounded-full shadow-xs">YOU</span>' : shieldBadgeHtml}
+            </div>
+          `;
+
+          const customIcon = L.divIcon({
+            html: iconHtml,
+            className: 'custom-avatar-pin',
+            iconSize: [44, 44],
+            iconAnchor: [22, 22]
+          });
+
+          const marker = L.marker([traveler.lat, traveler.lng], { icon: customIcon });
+
+          const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
+          const popupContent = `
+            <div class="p-3.5 max-w-[240px] text-xs font-sans">
+              <div class="flex items-center space-x-2.5 pb-2 border-b border-slate-100">
+                <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200" />
+                <div>
+                  <div class="flex items-center gap-1">
+                    <h4 class="font-bold text-slate-900">${traveler.name} ${traveler.isSelf ? '(You)' : ''}</h4>
+                    ${isVerified ? '<span class="text-emerald-600 font-bold">✓</span>' : ''}
+                  </div>
+                  <p class="text-[11px] text-slate-500">${traveler.upcomingCircuit || 'India'} • ${traveler.gender || 'Traveler'}</p>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-600 py-2 leading-relaxed">${bioSnippet}</p>
+              <div class="pt-1 flex gap-1.5">
+                ${traveler.isSelf ? `
+                  <button onclick="switchView('profile')" class="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs">
+                    Edit Your Profile
+                  </button>
+                ` : `
+                  <button onclick="inspectTravelerFromMap('${traveler.uid}')" class="flex-1 py-1.5 rounded-lg bg-safar-600 hover:bg-safar-700 text-white font-bold text-[11px] shadow-xs">
+                    View Profile
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+
+          marker.bindPopup(popupContent, { maxWidth: 260 });
+          mapMarkersLayer.addLayer(marker);
+        });
+      }
 
       const countPill = document.getElementById('map-traveler-count-pill');
       if (countPill) {
@@ -364,9 +612,9 @@ SCRIPTS_APP = """
 
       renderTravelerPins(circuit);
 
-      if (circuit !== 'all' && INDIAN_LOCATIONS[circuit] && mapInstance) {
+      if (circuit !== 'all' && INDIAN_LOCATIONS[circuit]) {
         const coords = INDIAN_LOCATIONS[circuit];
-        mapInstance.flyTo([coords.lat, coords.lng], 9, { duration: 1 });
+        flyToDestination(coords.lat, coords.lng, circuit, 9);
       } else if (circuit === 'all') {
         resetMapCenter();
       }
@@ -378,11 +626,54 @@ SCRIPTS_APP = """
       renderTravelerPins(circuit);
     };
 
-    // ==================== HOME CITY LEAFLET MINI-MAP & GEOCODER ====================
+    // ==================== GOOGLE MAPS MINI-MAP & GEOCODER FOR PROFILE ====================
     window.initHomeCityMiniMap = function(initialLat = 18.5204, initialLng = 73.8567) {
       const el = document.getElementById('home-city-mini-map');
       if (!el) return;
 
+      // 1. Google Maps Mini-Map
+      if (window.google && window.google.maps) {
+        try {
+          if (!googleMiniMapInstance) {
+            googleMiniMapInstance = new google.maps.Map(el, {
+              center: { lat: initialLat, lng: initialLng },
+              zoom: 10,
+              mapId: "SAFAR_MINI_MAP",
+              mapTypeControl: false,
+              streetViewControl: false,
+              zoomControl: false,
+              fullscreenControl: false
+            });
+
+            googleMiniMarker = new google.maps.Marker({
+              position: { lat: initialLat, lng: initialLng },
+              map: googleMiniMapInstance,
+              draggable: true
+            });
+
+            googleMiniMarker.addListener('dragend', (e) => {
+              const lat = e.latLng.lat();
+              const lng = e.latLng.lng();
+              updateHomeCityCoords(lat, lng);
+            });
+
+            googleMiniMapInstance.addListener('click', (e) => {
+              const lat = e.latLng.lat();
+              const lng = e.latLng.lng();
+              googleMiniMarker.setPosition({ lat, lng });
+              updateHomeCityCoords(lat, lng);
+            });
+          } else {
+            googleMiniMapInstance.setCenter({ lat: initialLat, lng: initialLng });
+            if (googleMiniMarker) googleMiniMarker.setPosition({ lat: initialLat, lng: initialLng });
+          }
+          return;
+        } catch (e) {
+          console.warn("Google mini map failed, fallback to Leaflet:", e);
+        }
+      }
+
+      // 2. Leaflet Mini-Map Fallback
       if (!homeCityMiniMap) {
         homeCityMiniMap = L.map('home-city-mini-map', {
           center: [initialLat, initialLng],
@@ -427,63 +718,110 @@ SCRIPTS_APP = """
       }
     }
 
-    // Geocoding lookup table + OpenStreetMap Nominatim API Fallback
+    // Geocoding lookup table + Google Maps Geocoder + Nominatim Fallback
     window.handleHomeCityInput = function(cityName) {
       if (!cityName || cityName.trim().length < 2) return;
-
       const trimmed = cityName.trim();
 
       // 1. Direct dictionary match
       if (INDIAN_LOCATIONS[trimmed]) {
         const coords = INDIAN_LOCATIONS[trimmed];
         updateHomeCityCoords(coords.lat, coords.lng);
-        if (homeCityMiniMap) {
-          homeCityMiniMap.flyTo([coords.lat, coords.lng], 11);
-          if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([coords.lat, coords.lng]);
-        }
+        centerMiniMap(coords.lat, coords.lng);
         return;
       }
 
-      // Check partial matches in dictionary
-      for (const key in INDIAN_LOCATIONS) {
-        if (key.toLowerCase().includes(trimmed.toLowerCase())) {
-          const coords = INDIAN_LOCATIONS[key];
-          updateHomeCityCoords(coords.lat, coords.lng);
-          if (homeCityMiniMap) {
-            homeCityMiniMap.flyTo([coords.lat, coords.lng], 10);
-            if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([coords.lat, coords.lng]);
-          }
-          return;
-        }
-      }
-
-      // 2. OpenStreetMap Nominatim Fallback (Debounced)
+      // 2. Google Maps Geocoder (Debounced)
       if (window._geocodeTimeout) clearTimeout(window._geocodeTimeout);
       window._geocodeTimeout = setTimeout(() => {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&countrycodes=in&limit=1`)
+        if (window.google && window.google.maps && google.maps.Geocoder) {
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ address: trimmed }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+              const loc = results[0].geometry.location;
+              updateHomeCityCoords(loc.lat(), loc.lng());
+              centerMiniMap(loc.lat(), loc.lng());
+              return;
+            }
+          });
+        }
+
+        // 3. Nominatim Fallback
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&limit=1`)
           .then(res => res.json())
           .then(data => {
             if (data && data.length > 0) {
               const lat = parseFloat(data[0].lat);
               const lng = parseFloat(data[0].lon);
               updateHomeCityCoords(lat, lng);
-              if (homeCityMiniMap) {
-                homeCityMiniMap.flyTo([lat, lng], 10);
-                if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([lat, lng]);
-              }
+              centerMiniMap(lat, lng);
             }
           })
-          .catch(err => console.warn("Nominatim geocoder error:", err));
-      }, 700);
+          .catch(err => console.warn("Geocoder error:", err));
+      }, 600);
     };
 
+    // Free-form upcoming destination input handler
+    window.handleUpcomingDestinationInput = function(destName) {
+      if (!destName || destName.trim().length < 2) return;
+      const trimmed = destName.trim();
+      if (currentProfile) {
+        currentProfile.upcomingCircuit = trimmed;
+      }
+
+      // If user typed a recognized location, adjust coordinates
+      if (INDIAN_LOCATIONS[trimmed]) {
+        const coords = INDIAN_LOCATIONS[trimmed];
+        updateHomeCityCoords(coords.lat, coords.lng);
+        centerMiniMap(coords.lat, coords.lng);
+      } else {
+        if (window._destGeocodeTimeout) clearTimeout(window._destGeocodeTimeout);
+        window._destGeocodeTimeout = setTimeout(() => {
+          if (window.google && window.google.maps && google.maps.Geocoder) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: trimmed }, (results, status) => {
+              if (status === 'OK' && results && results[0]) {
+                const loc = results[0].geometry.location;
+                updateHomeCityCoords(loc.lat(), loc.lng());
+                centerMiniMap(loc.lat(), loc.lng());
+              }
+            });
+          }
+        }, 800);
+      }
+    };
+
+    function centerMiniMap(lat, lng) {
+      if (googleMiniMapInstance) {
+        googleMiniMapInstance.setCenter({ lat, lng });
+        if (googleMiniMarker) googleMiniMarker.setPosition({ lat, lng });
+      } else if (homeCityMiniMap) {
+        homeCityMiniMap.flyTo([lat, lng], 10);
+        if (homeCityMiniMarker) homeCityMiniMarker.setLatLng([lat, lng]);
+      }
+    }
+
     // ==================== LIVE INDIA TRIPS (READ-ONLY + GATED ACTIONS) ====================
-    window.renderTripsFeed = function(filterCircuit = "all") {
+    window.renderTripsFeed = function(filterCircuit = "all", searchKeyword = "") {
       const container = document.getElementById('trips-feed-container');
       if (!container) return;
 
       const trips = allTripsCache || [];
-      const filtered = filterCircuit === 'all' ? trips : trips.filter(t => t.circuit === filterCircuit);
+      const kw = searchKeyword.trim().toLowerCase();
+
+      const filtered = trips.filter(t => {
+        // Circuit filter
+        if (filterCircuit !== 'all' && t.circuit !== filterCircuit) return false;
+        // Search keyword across destination, title, itinerary
+        if (kw) {
+          const matchDest = (t.destination || '').toLowerCase().includes(kw);
+          const matchTitle = (t.title || '').toLowerCase().includes(kw);
+          const matchItin = (t.itinerary || '').toLowerCase().includes(kw);
+          const matchCircuit = (t.circuit || '').toLowerCase().includes(kw);
+          if (!matchDest && !matchTitle && !matchItin && !matchCircuit) return false;
+        }
+        return true;
+      });
 
       const countEl = document.getElementById('trips-feed-count');
       if (countEl) {
@@ -496,8 +834,8 @@ SCRIPTS_APP = """
             <div class="w-14 h-14 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center mb-3 shadow-xs">
               <i data-lucide="compass" class="w-7 h-7"></i>
             </div>
-            <h4 class="text-base font-bold text-slate-900">No Trips in ${filterCircuit === 'all' ? 'Any Circuit' : filterCircuit} Yet</h4>
-            <p class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">Be the first to post an upcoming roadtrip, trek, or beach plan to find verified travel companions!</p>
+            <h4 class="text-base font-bold text-slate-900">No Trips for "${kw || (filterCircuit === 'all' ? 'Any Circuit' : filterCircuit)}"</h4>
+            <p class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">Be the first to post an upcoming roadtrip, trek, or journey to this destination to find verified travel companions!</p>
             <button onclick="handlePostTripClick()" class="mt-5 px-5 py-2.5 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center space-x-1.5">
               <i data-lucide="plus-circle" class="w-4 h-4"></i>
               <span>Post First Trip Plan</span>
@@ -523,7 +861,7 @@ SCRIPTS_APP = """
                       <span class="text-xs font-bold text-slate-900">${trip.creatorName}</span>
                       ${isVerified ? '<span class="text-[10px] text-emerald-600 font-bold">✓</span>' : ''}
                     </div>
-                    <span class="text-[10px] text-slate-400 font-medium">${trip.circuit} Circuit</span>
+                    <span class="text-[10px] text-slate-400 font-medium">${trip.circuit}</span>
                   </div>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wide bg-rose-50 text-safar-700 px-2.5 py-0.5 rounded-full border border-rose-100">
@@ -566,6 +904,7 @@ SCRIPTS_APP = """
     };
 
     window.filterTripsFeed = function(circuit) {
+      currentTripCircuitFilter = circuit;
       document.querySelectorAll('.trip-filter-pill').forEach(btn => {
         if (btn.getAttribute('data-filter') === circuit) {
           btn.className = "trip-filter-pill px-3 py-1 rounded-full font-bold bg-slate-900 text-white flex-shrink-0";
@@ -573,7 +912,13 @@ SCRIPTS_APP = """
           btn.className = "trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0";
         }
       });
-      renderTripsFeed(circuit);
+      const searchInput = document.getElementById('trip-feed-search-input');
+      const kw = searchInput ? searchInput.value : '';
+      renderTripsFeed(circuit, kw);
+    };
+
+    window.searchTripsFeedByText = function(text) {
+      renderTripsFeed(currentTripCircuitFilter, text);
     };
 
     window.handlePostTripClick = function() {
@@ -684,6 +1029,12 @@ SCRIPTS_APP = """
         return;
       }
 
+      // Unsubscribe from any previous active chat listener
+      if (typeof activeChatUnsubscribe === 'function') {
+        try { activeChatUnsubscribe(); } catch (err) {}
+        activeChatUnsubscribe = null;
+      }
+
       activeChatPartner = traveler;
       switchView('chat');
 
@@ -709,7 +1060,60 @@ SCRIPTS_APP = """
         }
       }
 
+      // Render locally cached messages first for instantaneous responsiveness
       renderMessagesForPartner(traveler.uid);
+      renderConversationList();
+
+      // Attach Real-Time Firestore onSnapshot Listener
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = traveler.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
+
+      if (isLiveFirebase && db) {
+        try {
+          const messagesRef = collection(db, "chats", chatId, "messages");
+          const q = query(messagesRef, orderBy("createdAt", "asc"));
+
+          activeChatUnsubscribe = onSnapshot(q, (snapshot) => {
+            const liveMsgs = [];
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              const isFromMe = data.senderUid === myUid || data.sender === 'me';
+              let timeStr = data.timestamp;
+              if (!timeStr && data.createdAt) {
+                try {
+                  timeStr = data.createdAt.toDate ? data.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } catch (e) {
+                  timeStr = "Just now";
+                }
+              }
+              liveMsgs.push({
+                id: docSnap.id,
+                sender: isFromMe ? 'me' : 'partner',
+                text: data.text || "",
+                timestamp: timeStr || "Just now"
+              });
+            });
+
+            if (liveMsgs.length > 0) {
+              saveMessagesForPartner(partnerUid, liveMsgs);
+              renderMessagesList(liveMsgs);
+            }
+          }, (err) => {
+            console.warn("Real-time Firestore chat onSnapshot error:", err);
+          });
+        } catch (err) {
+          console.warn("Could not bind real-time chat listener:", err);
+        }
+      }
+    };
+
+    window.closeActiveChat = function() {
+      if (typeof activeChatUnsubscribe === 'function') {
+        try { activeChatUnsubscribe(); } catch (err) {}
+        activeChatUnsubscribe = null;
+      }
+      activeChatPartner = null;
       renderConversationList();
     };
 
@@ -718,7 +1122,8 @@ SCRIPTS_APP = """
       if (!container) return;
 
       const myUid = currentProfile ? currentProfile.uid : '';
-      const travelers = (allTravelersCache || []).filter(t => t.uid !== myUid);
+      const pool = (allTravelersCache && allTravelersCache.length > 0) ? allTravelersCache : SEED_INDIAN_TRAVELERS;
+      const travelers = pool.filter(t => t.uid !== myUid);
 
       if (travelers.length === 0) {
         container.innerHTML = `
@@ -770,13 +1175,11 @@ SCRIPTS_APP = """
       }
     }
 
-    function renderMessagesForPartner(partnerUid) {
+    function renderMessagesList(msgs) {
       const container = document.getElementById('chat-messages-container');
       if (!container) return;
 
-      const msgs = getMessagesForPartner(partnerUid);
-
-      if (msgs.length === 0) {
+      if (!msgs || msgs.length === 0) {
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-8 space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
@@ -784,7 +1187,7 @@ SCRIPTS_APP = """
             </div>
             <p class="text-xs font-bold text-slate-700">Protected In-App Chat</p>
             <p class="text-[11px] text-slate-500 max-w-xs leading-relaxed">
-              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? activeChatPartner.name : 'this explorer'}! Messages are filtered to prevent spam and off-platform solicitation.
+              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? activeChatPartner.name : 'this explorer'}! Messages are synchronized in real-time.
             </p>
           </div>
         `;
@@ -799,13 +1202,18 @@ SCRIPTS_APP = """
             <div class="max-w-xs sm:max-w-md p-3 rounded-2xl text-xs ${isMe ? 'bg-safar-600 text-white rounded-br-xs shadow-xs' : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-xs'}">
               <p class="leading-relaxed">${m.text}</p>
             </div>
-            <span class="text-[9px] text-slate-400 mt-1 px-1">${m.timestamp}</span>
+            <span class="text-[9px] text-slate-400 mt-1 px-1">${m.timestamp || ''}</span>
           </div>
         `;
       }).join('');
 
       container.scrollTop = container.scrollHeight;
       if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderMessagesForPartner(partnerUid) {
+      const msgs = getMessagesForPartner(partnerUid);
+      renderMessagesList(msgs);
     }
 
     window.handleSendMessage = async function(e) {
@@ -835,6 +1243,9 @@ SCRIPTS_APP = """
 
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = activeChatPartner.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
 
       const newMsg = {
         id: "msg_" + Date.now(),
@@ -843,27 +1254,28 @@ SCRIPTS_APP = """
         timestamp: timeStr
       };
 
-      const msgs = getMessagesForPartner(activeChatPartner.uid);
+      const msgs = getMessagesForPartner(partnerUid);
       msgs.push(newMsg);
-      saveMessagesForPartner(activeChatPartner.uid, msgs);
+      saveMessagesForPartner(partnerUid, msgs);
+      renderMessagesList(msgs);
 
-      // If connected to live Firestore, save to message collection
+      input.value = "";
+
+      // If connected to live Firestore, save to message collection in real-time
       if (isLiveFirebase && db) {
         try {
-          const chatId = [currentProfile ? currentProfile.uid : 'guest', activeChatPartner.uid].sort().join('_');
           await addDoc(collection(db, "chats", chatId, "messages"), {
-            ...newMsg,
-            senderUid: currentProfile ? currentProfile.uid : 'guest',
-            receiverUid: activeChatPartner.uid,
+            text,
+            senderUid: myUid,
+            receiverUid: partnerUid,
+            sender: "me",
+            timestamp: timeStr,
             createdAt: serverTimestamp()
           });
         } catch (err) {
           console.warn("Firestore chat write error, saved locally:", err);
         }
       }
-
-      input.value = "";
-      renderMessagesForPartner(activeChatPartner.uid);
     };
 
     // ==================== REALISTIC TRUST & VERIFICATION PIPELINE ====================
@@ -1020,14 +1432,53 @@ SCRIPTS_APP = """
       reader.readAsDataURL(file);
     };
 
-    function processVerificationSubmission(type, blob) {
+    async function processVerificationSubmission(type, blob) {
       if (!currentProfile) return;
       currentProfile.selfieSubmitted = true;
       currentProfile.verificationStatus = "pending_review";
       currentProfile.verificationSubmittedAt = new Date().toISOString();
 
-      showToast(`⏳ Photo submitted (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review (Est. 2-4 hrs).`, "info");
-      updateJourneyStatusUI();
+      showToast(`⏳ Processing ${type === 'selfie' ? 'live selfie' : 'photo ID'} (${(blob.size / 1024).toFixed(1)} KB)...`, "info");
+
+      // Read blob as Base64 data URL for Zero-Cost Spark tier persistence
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        const base64Data = evt.target.result;
+        const fieldName = type === 'selfie' ? 'selfieData' : 'govtIdData';
+        currentProfile[fieldName] = base64Data;
+
+        if (type === 'selfie' && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
+          currentProfile.photoUrl = base64Data;
+          const profileAvatar = document.getElementById('profile-display-avatar');
+          const headerAvatar = document.getElementById('header-user-avatar');
+          if (profileAvatar) profileAvatar.src = base64Data;
+          if (headerAvatar) headerAvatar.src = base64Data;
+        }
+
+        if (isLiveFirebase && db) {
+          try {
+            await setDoc(doc(db, "profiles", currentProfile.uid), {
+              ...currentProfile,
+              [fieldName]: base64Data,
+              verificationStatus: "pending_review",
+              verificationSubmittedAt: serverTimestamp()
+            }, { merge: true });
+            showToast(`🛡️ ${type === 'selfie' ? 'Selfie' : 'Govt ID'} stored securely in profile! Verification in review.`, "success");
+          } catch (err) {
+            console.warn("Firestore profile verification write error:", err);
+            showToast(`⏳ Photo saved locally (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review.`, "info");
+          }
+        } else {
+          showToast(`⏳ Photo submitted (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review (Est. 2-4 hrs).`, "info");
+        }
+
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+        } catch (e) {}
+
+        updateJourneyStatusUI();
+      };
+      reader.readAsDataURL(blob);
     }
 
     // Testing Hook: Simulate Admin Verification Approval
@@ -1040,6 +1491,20 @@ SCRIPTS_APP = """
       if (currentProfile) {
         currentProfile.verificationStatus = "verified";
         currentProfile.selfieSubmitted = true;
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+        } catch (e) {}
+
+        if (isLiveFirebase && db) {
+          try {
+            setDoc(doc(db, "profiles", currentProfile.uid), {
+              verificationStatus: "verified",
+              selfieSubmitted: true
+            }, { merge: true });
+          } catch (e) {
+            console.warn("Firestore approval sync error:", e);
+          }
+        }
       }
       showToast("🛡️ Admin Simulation: Verification Approved! Verified Explorer shield active.", "success");
       updateJourneyStatusUI();
@@ -1143,6 +1608,23 @@ SCRIPTS_APP = """
           amount: amount,
           activatedAt: new Date().toISOString()
         };
+
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+          localStorage.setItem('safarmatch_pass_unlocked', 'true');
+        } catch (e) {}
+
+        if (isLiveFirebase && db) {
+          try {
+            setDoc(doc(db, "profiles", currentProfile.uid), {
+              isVip: true,
+              hasExplorerPass: true,
+              subscription: currentProfile.subscription
+            }, { merge: true });
+          } catch (err) {
+            console.warn("Firestore subscription write error:", err);
+          }
+        }
       }
 
       showToast(`🎉 Payment of ₹${amount} Successful! ID: ${paymentId}. Explorer Pass active!`, "success");
@@ -1193,13 +1675,17 @@ SCRIPTS_APP = """
       currentProfile.age = parseInt(document.getElementById('input-age').value) || "";
       currentProfile.gender = document.getElementById('input-gender').value;
       currentProfile.homeCity = document.getElementById('input-home-city').value.trim();
-      currentProfile.upcomingCircuit = document.getElementById('input-upcoming-circuit').value;
+      currentProfile.upcomingCircuit = document.getElementById('input-upcoming-circuit').value.trim();
       currentProfile.travelIntent = document.getElementById('input-travel-intent').value;
       currentProfile.bio = document.getElementById('input-bio').value.trim();
 
       if (INDIAN_LOCATIONS[currentProfile.upcomingCircuit]) {
         currentProfile.lat = INDIAN_LOCATIONS[currentProfile.upcomingCircuit].lat;
         currentProfile.lng = INDIAN_LOCATIONS[currentProfile.upcomingCircuit].lng;
+      } else if (!currentProfile.lat || !currentProfile.lng) {
+        // Fallback default coordinates if not geocoded yet
+        currentProfile.lat = 18.5204;
+        currentProfile.lng = 73.8567;
       }
 
       const styles = [];
@@ -1231,10 +1717,10 @@ SCRIPTS_APP = """
         }
       }
 
-      // If live Firebase is connected, sync user profile to Firestore
+      // If live Firebase is connected, sync user profile to Firestore profiles collection
       if (isLiveFirebase && db) {
         try {
-          setDoc(doc(db, "users", currentProfile.uid), currentProfile, { merge: true });
+          setDoc(doc(db, "profiles", currentProfile.uid), currentProfile, { merge: true });
         } catch (err) {
           console.warn("Firestore sync error:", err);
         }
@@ -1429,6 +1915,14 @@ SCRIPTS_APP = """
 
     // ==================== VIEW SWITCHER & NAVIGATION ====================
     window.switchView = function(viewName) {
+      currentView = viewName;
+
+      // Unsubscribe from active chat if moving away from chat
+      if (viewName !== 'chat' && typeof activeChatUnsubscribe === 'function') {
+        try { activeChatUnsubscribe(); } catch (e) {}
+        activeChatUnsubscribe = null;
+      }
+
       document.querySelectorAll('.view-panel').forEach(panel => {
         panel.classList.add('hidden');
       });
@@ -1461,7 +1955,11 @@ SCRIPTS_APP = """
       if (viewName === 'map') {
         if (!mapInstance) initMap();
         setTimeout(() => {
-          if (mapInstance) mapInstance.invalidateSize();
+          if (googleMapInstance && window.google && window.google.maps) {
+            google.maps.event.trigger(googleMapInstance, 'resize');
+          } else if (mapInstance && mapInstance.invalidateSize) {
+            mapInstance.invalidateSize();
+          }
         }, 120);
       }
 
@@ -1516,20 +2014,36 @@ SCRIPTS_APP = """
         if (isLiveFirebase && auth) {
           const provider = new GoogleAuthProvider();
           signInWithPopup(auth, provider)
-            .then(res => {
+            .then(async res => {
               currentUser = res.user;
               if (currentProfile) {
                 currentProfile.uid = res.user.uid;
                 if (!currentProfile.name || currentProfile.name.trim() === "") {
                   currentProfile.name = res.user.displayName || "";
                 }
-                if (res.user.photoURL) {
+                if (res.user.photoURL && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
                   currentProfile.photoUrl = res.user.photoURL;
                 }
-                try {
-                  localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-                } catch (e) {}
               }
+
+              // Load profile from Firestore "profiles" collection if exists
+              if (isLiveFirebase && db) {
+                try {
+                  const docSnap = await getDoc(doc(db, "profiles", res.user.uid));
+                  if (docSnap.exists()) {
+                    currentProfile = { ...currentProfile, ...docSnap.data(), uid: res.user.uid };
+                  } else {
+                    await setDoc(doc(db, "profiles", res.user.uid), currentProfile, { merge: true });
+                  }
+                } catch (e) {
+                  console.warn("Firestore profile fetch error on auth:", e);
+                }
+              }
+
+              try {
+                localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+              } catch (e) {}
+
               initRealWorldSession();
               document.getElementById('btn-auth-text').textContent = "Sign Out";
               showToast(`Welcome, ${res.user.displayName || 'Explorer'}!`, "success");
@@ -1603,17 +2117,29 @@ SCRIPTS_APP = """
       if (profileAvatar) profileAvatar.src = avatarSrc;
       if (headerAvatar) headerAvatar.src = avatarSrc;
 
-      // Load registered travelers and trips from localStorage
+      // Load registered travelers from localStorage (only real saved users)
       try {
         const storedTravelers = localStorage.getItem('safarmatch_all_travelers');
-        allTravelersCache = storedTravelers ? JSON.parse(storedTravelers) : [];
+        if (storedTravelers) {
+          const parsed = JSON.parse(storedTravelers);
+          // Filter out legacy dummy seeds if present in browser storage
+          allTravelersCache = parsed.filter(t => !t.uid || !t.uid.startsWith('seed_'));
+        } else {
+          allTravelersCache = [];
+        }
       } catch (e) {
         allTravelersCache = [];
       }
 
+      // Load registered trips from localStorage (only real posted trips)
       try {
         const storedTrips = localStorage.getItem('safarmatch_all_trips');
-        allTripsCache = storedTrips ? JSON.parse(storedTrips) : [];
+        if (storedTrips) {
+          const parsed = JSON.parse(storedTrips);
+          allTripsCache = parsed.filter(t => !t.id || !t.id.startsWith('trip_seed_'));
+        } else {
+          allTripsCache = [];
+        }
       } catch (e) {
         allTripsCache = [];
       }
@@ -1628,28 +2154,39 @@ SCRIPTS_APP = """
         }
       }
 
-      // Fetch live data from Firestore if available
+      // Fetch live real-world data from Firestore "trips" and "profiles"
       if (isLiveFirebase && db) {
         try {
           getDocs(collection(db, "trips")).then(snapshot => {
-            if (!snapshot.empty) {
-              const liveTrips = [];
-              snapshot.forEach(doc => liveTrips.push({ id: doc.id, ...doc.data() }));
-              allTripsCache = liveTrips;
-              try { localStorage.setItem('safarmatch_all_trips', JSON.stringify(liveTrips)); } catch (e) {}
-              if (currentView === 'trips') renderTripsFeed(currentTripCircuitFilter);
-            }
+            const liveTrips = [];
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              if (!docSnap.id.startsWith('trip_seed_')) {
+                liveTrips.push({ id: docSnap.id, ...data });
+              }
+            });
+            allTripsCache = liveTrips;
+            try { localStorage.setItem('safarmatch_all_trips', JSON.stringify(liveTrips)); } catch (e) {}
+            if (currentView === 'trips') renderTripsFeed(currentTripCircuitFilter);
           }).catch(e => console.warn("Trips fetch fallback:", e));
 
-          getDocs(collection(db, "users")).then(snapshot => {
-            if (!snapshot.empty) {
-              const liveUsers = [];
-              snapshot.forEach(doc => liveUsers.push({ uid: doc.id, ...doc.data() }));
-              allTravelersCache = liveUsers;
-              try { localStorage.setItem('safarmatch_all_travelers', JSON.stringify(liveUsers)); } catch (e) {}
-              renderTravelerPins();
+          getDocs(collection(db, "profiles")).then(snapshot => {
+            const liveProfiles = [];
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              if (!docSnap.id.startsWith('seed_')) {
+                liveProfiles.push({ uid: docSnap.id, ...data });
+              }
+            });
+            // Ensure logged in user is represented
+            if (currentProfile.name && currentProfile.name.trim().length >= 2) {
+              const exists = liveProfiles.some(p => p.uid === currentProfile.uid);
+              if (!exists) liveProfiles.push({ ...currentProfile });
             }
-          }).catch(e => console.warn("Users fetch fallback:", e));
+            allTravelersCache = liveProfiles;
+            try { localStorage.setItem('safarmatch_all_travelers', JSON.stringify(liveProfiles)); } catch (e) {}
+            renderTravelerPins();
+          }).catch(e => console.warn("Profiles fetch fallback:", e));
         } catch (e) {
           console.warn("Firestore collection fetch:", e);
         }

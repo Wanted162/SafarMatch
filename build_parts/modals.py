@@ -98,7 +98,7 @@ MODALS_AND_DATALISTS = """
   </datalist>
 
   <!-- ==================== MODAL: CREATE A TRIP PLAN ==================== -->
-  <div id="create-trip-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+  <div id="create-trip-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
@@ -116,22 +116,16 @@ MODALS_AND_DATALISTS = """
           <input type="text" id="trip-input-title" required placeholder="e.g. Scooter roadtrip across Arambol & Morjim beaches" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Circuit Destination *</label>
-            <input type="text" id="trip-input-destination" list="indian-travel-destinations" required placeholder="e.g. Anjuna, Goa" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
+            <label class="block font-bold text-slate-700 mb-1">Destination *</label>
+            <input type="text" id="trip-input-destination" required placeholder="Type any destination (e.g. Kasol, Varkala, Spiti)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
+            <p class="text-[10px] text-slate-400 mt-0.5">Any place in India or abroad</p>
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Circuit Region *</label>
-            <select id="trip-input-circuit" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500">
-              <option value="Goa">Goa</option>
-              <option value="Himachal">Himachal</option>
-              <option value="Uttarakhand">Uttarakhand</option>
-              <option value="Rajasthan">Rajasthan</option>
-              <option value="Ladakh">Ladakh</option>
-              <option value="Kerala">Kerala</option>
-              <option value="Gokarna">Gokarna</option>
-            </select>
+            <label class="block font-bold text-slate-700 mb-1">Circuit / Region Tag *</label>
+            <input type="text" id="trip-input-circuit" required placeholder="e.g. Himachal, Goa, Coastal Karnataka, South India..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-safar-500" />
+            <p class="text-[10px] text-slate-400 mt-0.5">Custom tag for community discovery</p>
           </div>
         </div>
 
@@ -180,7 +174,7 @@ MODALS_AND_DATALISTS = """
   </div>
 
   <!-- ==================== MODAL: LIVE WEBCAM SELFIE VERIFICATION ==================== -->
-  <div id="selfie-modal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="selfie-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2">
@@ -267,39 +261,39 @@ MODALS_AND_DATALISTS = """
   </div>
 
   <!-- ==================== MODAL: TRAVELER DETAIL INSPECT MODAL (From Map) ==================== -->
-  <div id="traveler-detail-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-      <div class="flex items-start justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 border-2 border-white shadow-md">
+  <div id="traveler-detail-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 my-auto">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center space-x-3 min-w-0">
+          <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 border-2 border-white shadow-md flex-shrink-0">
             <img id="modal-traveler-avatar" src="" alt="Avatar" class="w-full h-full object-cover" />
           </div>
-          <div>
-            <div class="flex items-center space-x-1.5">
-              <h3 id="modal-traveler-name" class="text-base font-bold text-slate-900">Traveler</h3>
-              <span id="modal-traveler-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">⚪ Unverified</span>
+          <div class="min-w-0">
+            <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+              <h3 id="modal-traveler-name" class="text-base font-bold text-slate-900 truncate">Traveler</h3>
+              <span id="modal-traveler-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0">⚪ Unverified</span>
             </div>
-            <p id="modal-traveler-city" class="text-xs text-slate-500">Goa Circuit</p>
+            <p id="modal-traveler-city" class="text-xs text-slate-500 truncate mt-0.5">Goa Circuit</p>
           </div>
         </div>
-        <button onclick="closeTravelerDetailModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100">
+        <button type="button" onclick="closeTravelerDetailModal()" title="Close Profile" class="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-100 transition flex-shrink-0 -mr-1 -mt-1 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <!-- Bio & Style Pills -->
       <div class="space-y-2 text-xs">
-        <p id="modal-traveler-bio" class="text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed"></p>
+        <p id="modal-traveler-bio" class="text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed max-h-36 overflow-y-auto"></p>
         <div id="modal-traveler-styles" class="flex flex-wrap gap-1.5 pt-1"></div>
       </div>
 
       <!-- Action Buttons -->
       <div class="pt-2 flex gap-2">
-        <button id="modal-traveler-msg-btn" onclick="startChatWithInspectedTraveler()" class="flex-1 py-2.5 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center justify-center space-x-1.5">
+        <button id="modal-traveler-msg-btn" onclick="startChatWithInspectedTraveler()" class="flex-1 py-2.5 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center justify-center space-x-1.5 cursor-pointer">
           <i data-lucide="message-circle" class="w-4 h-4"></i>
           <span>Message Traveler</span>
         </button>
-        <button onclick="reportInspectedTraveler()" class="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-600 transition">
+        <button type="button" onclick="reportInspectedTraveler()" title="Report or Block" class="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer">
           <i data-lucide="shield-alert" class="w-4 h-4"></i>
         </button>
       </div>
@@ -307,7 +301,7 @@ MODALS_AND_DATALISTS = """
   </div>
 
   <!-- ==================== MODAL: REPORT & BLOCK TRAVELER ==================== -->
-  <div id="report-block-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="report-block-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">

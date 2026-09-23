@@ -22,11 +22,11 @@ VIEW_TRIPS = """
           </div>
         </div>
 
-        <!-- Trips Filter Chips & Search -->
-        <div class="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+        <!-- Trips Filter Chips & Search (Any Destination) -->
+        <div class="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar text-xs">
-            <span class="text-slate-400 font-semibold flex-shrink-0">Filter by Circuit:</span>
-            <button onclick="filterTripsFeed('all')" class="trip-filter-pill px-3 py-1 rounded-full font-bold bg-slate-900 text-white flex-shrink-0" data-filter="all">All Circuits</button>
+            <span class="text-slate-400 font-semibold flex-shrink-0">Popular:</span>
+            <button onclick="filterTripsFeed('all')" class="trip-filter-pill px-3 py-1 rounded-full font-bold bg-slate-900 text-white flex-shrink-0" data-filter="all">All Trips</button>
             <button onclick="filterTripsFeed('Goa')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Goa">Goa</button>
             <button onclick="filterTripsFeed('Himachal')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Himachal">Himachal</button>
             <button onclick="filterTripsFeed('Uttarakhand')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Uttarakhand">Rishikesh</button>
@@ -35,8 +35,20 @@ VIEW_TRIPS = """
             <button onclick="filterTripsFeed('Kerala')" class="trip-filter-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0" data-filter="Kerala">Kerala</button>
           </div>
 
-          <div id="trips-feed-count" class="text-xs text-slate-500 font-semibold flex-shrink-0 hidden sm:block">
-            Showing all active trips
+          <div class="flex items-center gap-2">
+            <div class="relative w-full sm:w-56">
+              <input 
+                type="text" 
+                id="trip-feed-search-input" 
+                placeholder="Search any destination..." 
+                oninput="searchTripsFeedByText(this.value)" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-1.5 pl-8 pr-3 text-xs focus:outline-none focus:ring-1 focus:ring-safar-500 focus:bg-white"
+              />
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2"></i>
+            </div>
+            <div id="trips-feed-count" class="text-xs text-slate-500 font-semibold flex-shrink-0 hidden md:block">
+              Showing active trips
+            </div>
           </div>
         </div>
 
