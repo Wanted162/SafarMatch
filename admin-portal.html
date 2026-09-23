@@ -105,7 +105,7 @@
           class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-900/30 transition flex items-center justify-center space-x-2 cursor-pointer"
         >
           <i data-lucide="lock-open" class="w-4 h-4"></i>
-          <span>Authenticate & Unlock Hub</span>
+          <span>Authenticate &amp; Unlock Hub</span>
         </button>
 
         <div class="pt-2 border-t border-slate-800/80 flex items-center justify-center">
@@ -137,7 +137,7 @@
                 Owner Portal
               </span>
             </div>
-            <p class="text-[11px] text-slate-400 hidden sm:block">DevSecOps Control & Manual Settlement Hub</p>
+            <p class="text-[11px] text-slate-400 hidden sm:block">DevSecOps Control &amp; Manual Settlement Hub</p>
           </div>
         </div>
 
@@ -213,7 +213,7 @@
             class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
           >
             <i data-lucide="message-square" class="w-4 h-4"></i>
-            <span>3. Feedback & Bug Hub</span>
+            <span>3. Feedback &amp; Bug Hub</span>
             <span id="badge-count-feedback" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0</span>
           </button>
 
@@ -233,7 +233,7 @@
             <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
               <span>Dual Identity Verification Queue</span>
               <span class="text-xs font-normal text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-0.5 rounded-full">
-                Zero Cloud Storage Cost (Canvas Base64)
+                Encrypted Vault Base64 &lt;80 KB
               </span>
             </h2>
             <p class="text-xs text-slate-400 mt-1">
@@ -295,7 +295,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
           <div>
             <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
-              <span>Traveler Community Feedback & Feature Ideas</span>
+              <span>Traveler Community Feedback &amp; Feature Ideas</span>
               <span class="text-xs font-normal text-blue-400 bg-blue-950/60 border border-blue-800/60 px-2.5 py-0.5 rounded-full">
                 Dispatched to safarmatch@gmail.com
               </span>
@@ -321,9 +321,148 @@
 
     <!-- Minimal Footer -->
     <footer class="bg-slate-900/60 border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
-      SafarMatch Bharat Enterprise Security • Isolated Owner Operations Portal • 256-Bit TLS End-to-End
+      SafarMatch Bharat Enterprise Security • Isolated Owner Operations Portal • 256-Bit Encrypted Vault
     </footer>
 
+  </div>
+
+  <!-- ==================== REJECT VERIFICATION MODAL ==================== -->
+  <div id="reject-verification-modal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4" onclick="closeRejectVerificationModal()">
+    <div class="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-rose-950 border border-rose-800/60 text-rose-400 flex items-center justify-center">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Reject Identity Verification</h3>
+            <p class="text-[11px] text-slate-400">Specify reason to notify traveler</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeRejectVerificationModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Applicant Info -->
+      <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 flex items-center justify-between text-xs">
+        <div>
+          <span class="text-slate-400">Applicant: </span>
+          <strong id="reject-v-traveler-name" class="text-white">Traveler</strong>
+        </div>
+        <div>
+          <span class="text-slate-500 font-mono-code text-[11px]" id="reject-v-traveler-uid">UID</span>
+        </div>
+      </div>
+
+      <!-- Quick Preset Selectors -->
+      <div class="space-y-2">
+        <label class="block text-xs font-semibold text-slate-300">Select Rejection Reason</label>
+        <div class="space-y-2" id="v-reason-presets">
+          <button type="button" onclick="selectVReasonPreset(this, 'Document photo is blurry, unreadable, or cut off.')" class="v-reason-btn w-full text-left p-2.5 rounded-xl border border-rose-500 bg-rose-950/40 text-xs text-slate-200 transition flex items-start space-x-2">
+            <span class="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center mt-0.5 flex-shrink-0"><span class="w-2 h-2 rounded-full bg-rose-500"></span></span>
+            <span>Document photo is blurry, unreadable, or cut off.</span>
+          </button>
+          <button type="button" onclick="selectVReasonPreset(this, 'Live selfie face does not match the photo on the government card.')" class="v-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-rose-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2">
+            <span class="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center mt-0.5 flex-shrink-0"><span class="w-2 h-2 rounded-full bg-transparent"></span></span>
+            <span>Live selfie face does not match the photo on the government card.</span>
+          </button>
+          <button type="button" onclick="selectVReasonPreset(this, 'Document uploaded is invalid, expired, or not a recognized Indian government photo ID.')" class="v-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-rose-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2">
+            <span class="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center mt-0.5 flex-shrink-0"><span class="w-2 h-2 rounded-full bg-transparent"></span></span>
+            <span>Document uploaded is invalid, expired, or not a recognized Indian government photo ID.</span>
+          </button>
+          <button type="button" onclick="selectVReasonPreset(this, 'Name or details on government card do not match traveler profile.')" class="v-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-rose-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2">
+            <span class="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center mt-0.5 flex-shrink-0"><span class="w-2 h-2 rounded-full bg-transparent"></span></span>
+            <span>Name or details on government card do not match traveler profile.</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Instructions Field -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-300">Additional Instructions for Traveler</label>
+        <textarea id="reject-v-custom-instructions" rows="2" placeholder="e.g., Please ensure daylight or good lighting when capturing your Aadhaar card." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 transition"></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end space-x-3 pt-2 border-t border-slate-800">
+        <button type="button" onclick="closeRejectVerificationModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          Cancel
+        </button>
+        <button type="button" onclick="submitRejectVerification()" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-950/50 transition flex items-center space-x-1.5 cursor-pointer">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Confirm Rejection &amp; Notify Traveler</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== REJECT PAYMENT MODAL ==================== -->
+  <div id="reject-payment-modal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4" onclick="closeRejectPaymentModal()">
+    <div class="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-950 border border-amber-800/60 text-amber-400 flex items-center justify-center">
+            <i data-lucide="alert-octagon" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Reject Payment (UTR)</h3>
+            <p class="text-[11px] text-slate-400">Notify traveler why payment was not confirmed</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeRejectPaymentModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Payment Info -->
+      <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 flex items-center justify-between text-xs">
+        <div>
+          <span class="text-slate-400">Traveler: </span>
+          <strong id="reject-p-traveler-name" class="text-white">Traveler</strong>
+        </div>
+        <div>
+          <span class="text-slate-400">Submitted UTR: </span>
+          <span class="text-emerald-400 font-mono-code font-bold" id="reject-p-traveler-utr">000000000000</span>
+        </div>
+      </div>
+
+      <!-- Quick Preset Selectors -->
+      <div class="space-y-2">
+        <label class="block text-xs font-semibold text-slate-300">Select Payment Issue</label>
+        <div class="space-y-2" id="p-reason-presets">
+          <button type="button" onclick="selectPReasonPreset(this, '12-digit UTR was not found in SBI bank account credits.')" class="p-reason-btn w-full text-left p-2.5 rounded-xl border border-amber-500 bg-amber-950/40 text-xs text-slate-200 transition flex items-start space-x-2">
+            <span class="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center mt-0.5 flex-shrink-0"><span class="w-2 h-2 rounded-full bg-amber-500"></span></span>
+            <span>12-digit UTR was not found in SBI bank account credits.</span>
+          </button>
+          <button type="button" onclick="selectPReasonPreset(this, 'Amount received does not match ₹299 for Explorer Pass.')" class="p-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-amber-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2">
+            <span class="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center mt-0.5 flex-shrink-0"><span class="w-2 h-2 rounded-full bg-transparent"></span></span>
+            <span>Amount received does not match ₹299 for Explorer Pass.</span>
+          </button>
+          <button type="button" onclick="selectPReasonPreset(this, 'Duplicate UTR already redeemed by another user.')" class="p-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-amber-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2">
+            <span class="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center mt-0.5 flex-shrink-0"><span class="w-2 h-2 rounded-full bg-transparent"></span></span>
+            <span>Duplicate UTR already redeemed by another user.</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Remarks Field -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-300">Additional Remarks for Traveler</label>
+        <textarea id="reject-p-custom-instructions" rows="2" placeholder="e.g., Please double check the 12-digit UTR from your bank app statement and re-submit." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end space-x-3 pt-2 border-t border-slate-800">
+        <button type="button" onclick="closeRejectPaymentModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          Cancel
+        </button>
+        <button type="button" onclick="submitRejectPayment()" class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg shadow-amber-950/50 transition flex items-center space-x-1.5 cursor-pointer">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>Confirm Payment Rejection</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== PHOTO ZOOM LIGHTBOX MODAL ==================== -->
@@ -331,7 +470,7 @@
     <div class="max-w-3xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-2xl relative" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
         <h3 id="lightbox-title" class="text-sm font-bold text-white">Full Resolution Document Preview</h3>
-        <button type="button" onclick="closeLightbox()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+        <button type="button" onclick="closeLightbox()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -354,10 +493,7 @@
       getDocs, 
       updateDoc, 
       onSnapshot, 
-      serverTimestamp, 
-      query, 
-      orderBy,
-      limit 
+      serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Exact SafarMatch Production Firebase Config
@@ -380,6 +516,12 @@
     let paymentsQueue = [];
     let feedbackList = [];
 
+    // Modal Target References
+    let currentRejectVerificationTarget = null;
+    let currentRejectPaymentTarget = null;
+    let selectedVReason = "Document photo is blurry, unreadable, or cut off.";
+    let selectedPReason = "12-digit UTR was not found in SBI bank account credits.";
+
     // ==================== AUTHENTICATION & PASSCODE GATE ====================
     window.verifyPasscode = function() {
       const input = document.getElementById('admin-passcode-input');
@@ -397,7 +539,7 @@
         if (errorMsg) errorMsg.classList.remove('hidden');
         if (card) {
           card.classList.remove('shake-animation');
-          void card.offsetWidth; // trigger reflow
+          void card.offsetWidth;
           card.classList.add('shake-animation');
         }
         input.value = "";
@@ -440,7 +582,6 @@
 
     // ==================== TABS MANAGEMENT ====================
     window.switchTab = function(tabName) {
-      // Toggle button states
       const tabs = ['verification', 'payments', 'feedback'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
@@ -470,14 +611,12 @@
       } catch (err) {
         console.warn("Firebase live init fallback:", err);
         isLiveFirebase = false;
-        loadLocalFallbacks();
       }
     }
 
     function setupRealtimeListeners() {
       if (!isLiveFirebase || !db) return;
 
-      // Realtime listener for Profiles (Identity Queue & Payments Queue)
       try {
         const profilesCol = collection(db, "profiles");
         onSnapshot(profilesCol, (snapshot) => {
@@ -515,7 +654,6 @@
         console.warn("Error attaching profiles listener:", e);
       }
 
-      // Realtime listener for Feedback Collection
       try {
         const feedbackCol = collection(db, "feedback");
         onSnapshot(feedbackCol, (snapshot) => {
@@ -523,7 +661,6 @@
           snapshot.forEach(docSnap => {
             fList.push({ id: docSnap.id, ...docSnap.data() });
           });
-          // Sort by submittedAt desc
           fList.sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
           feedbackList = fList;
           renderFeedbackQueue();
@@ -570,7 +707,7 @@
           renderPaymentsQueue();
           renderFeedbackQueue();
           updateBadges();
-          showToast("Queues refreshed from live database", "info");
+          showToast("Queues refreshed from database", "info");
         } catch (e) {
           console.warn("Refresh error:", e);
         }
@@ -714,11 +851,11 @@
             <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-3 border-t border-slate-800/80">
               <button 
                 type="button" 
-                onclick="adminRejectIdentity('${traveler.uid}', '${escapeHtml(traveler.name)}')" 
+                onclick="openRejectVerificationModal('${traveler.uid}', '${escapeHtml(traveler.name)}')" 
                 class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-300 text-xs font-bold border border-slate-700 hover:border-rose-800 transition flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <i data-lucide="x" class="w-4 h-4"></i>
-                <span>Reject & Request Re-upload</span>
+                <span>Reject &amp; Request Re-upload</span>
               </button>
 
               <button 
@@ -727,7 +864,7 @@
                 class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-md shadow-emerald-950/40 transition flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <i data-lucide="check" class="w-4 h-4"></i>
-                <span>Approve Identity & Grant Shield ✓</span>
+                <span>Approve Identity &amp; Grant Shield ✓</span>
               </button>
             </div>
 
@@ -738,6 +875,79 @@
       if (window.lucide) window.lucide.createIcons();
     }
 
+    // Modal Control: Reject Identity Verification
+    window.openRejectVerificationModal = function(uid, name) {
+      currentRejectVerificationTarget = { uid, name };
+      document.getElementById('reject-v-traveler-name').textContent = name || 'Traveler';
+      document.getElementById('reject-v-traveler-uid').textContent = uid;
+      document.getElementById('reject-v-custom-instructions').value = "";
+      
+      // Default to first preset
+      selectedVReason = "Document photo is blurry, unreadable, or cut off.";
+      const btns = document.querySelectorAll('.v-reason-btn');
+      btns.forEach((b, i) => {
+        const dot = b.querySelector('span > span');
+        if (i === 0) {
+          b.className = "v-reason-btn w-full text-left p-2.5 rounded-xl border border-rose-500 bg-rose-950/40 text-xs text-slate-200 transition flex items-start space-x-2";
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-500";
+        } else {
+          b.className = "v-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-rose-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2";
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-transparent";
+        }
+      });
+
+      document.getElementById('reject-verification-modal').classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.closeRejectVerificationModal = function() {
+      document.getElementById('reject-verification-modal').classList.add('hidden');
+      currentRejectVerificationTarget = null;
+    };
+
+    window.selectVReasonPreset = function(btn, reason) {
+      selectedVReason = reason;
+      document.querySelectorAll('.v-reason-btn').forEach(b => {
+        b.className = "v-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-rose-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2";
+        const dot = b.querySelector('span > span');
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-transparent";
+      });
+      btn.className = "v-reason-btn w-full text-left p-2.5 rounded-xl border border-rose-500 bg-rose-950/40 text-xs text-slate-200 transition flex items-start space-x-2";
+      const activeDot = btn.querySelector('span > span');
+      if (activeDot) activeDot.className = "w-2 h-2 rounded-full bg-rose-500";
+    };
+
+    window.submitRejectVerification = async function() {
+      if (!currentRejectVerificationTarget) return;
+      const custom = document.getElementById('reject-v-custom-instructions').value.trim();
+      const finalReason = custom ? `${selectedVReason} Note: ${custom}` : selectedVReason;
+      const uid = currentRejectVerificationTarget.uid;
+      const name = currentRejectVerificationTarget.name;
+
+      if (isLiveFirebase && db) {
+        try {
+          await updateDoc(doc(db, "profiles", uid), {
+            verificationStatus: "rejected",
+            verificationRejectionReason: finalReason,
+            selfieSubmitted: false,
+            selfieData: null,
+            govtIdData: null,
+            reviewedAt: serverTimestamp()
+          });
+          showToast(`Rejected ${name}. Rejection reason dispatched to traveler.`, "info");
+        } catch (err) {
+          console.error("Error rejecting verification in Firestore:", err);
+          showToast("Firestore update error: " + err.message, "error");
+        }
+      } else {
+        verificationQueue = verificationQueue.filter(t => t.uid !== uid);
+        renderVerificationQueue();
+        updateBadges();
+        showToast(`Rejected ${name} locally.`, "info");
+      }
+      closeRejectVerificationModal();
+    };
+
     window.adminApproveIdentity = async function(uid, name) {
       if (!confirm(`Are you sure you want to approve identity verification for ${name}?`)) return;
 
@@ -746,7 +956,8 @@
           await updateDoc(doc(db, "profiles", uid), {
             verificationStatus: "verified",
             selfieSubmitted: true,
-            reviewedAt: serverTimestamp()
+            reviewedAt: serverTimestamp(),
+            verificationRejectionReason: null
           });
           showToast(`Approved ${name}! Verified Explorer shield issued.`, "success");
         } catch (err) {
@@ -758,31 +969,6 @@
         renderVerificationQueue();
         updateBadges();
         showToast(`Approved ${name} locally.`, "success");
-      }
-    };
-
-    window.adminRejectIdentity = async function(uid, name) {
-      if (!confirm(`Reject identity for ${name}? They will be required to re-take their live selfie and re-upload their Indian Govt ID.`)) return;
-
-      if (isLiveFirebase && db) {
-        try {
-          await updateDoc(doc(db, "profiles", uid), {
-            verificationStatus: "unsubmitted",
-            selfieSubmitted: false,
-            selfieData: null,
-            govtIdData: null,
-            rejectedAt: serverTimestamp()
-          });
-          showToast(`Rejected ${name}. User prompted to re-submit.`, "info");
-        } catch (err) {
-          console.error("Error rejecting identity:", err);
-          showToast("Failed to reject in Firestore: " + err.message, "error");
-        }
-      } else {
-        verificationQueue = verificationQueue.filter(t => t.uid !== uid);
-        renderVerificationQueue();
-        updateBadges();
-        showToast(`Rejected ${name} locally.`, "info");
       }
     };
 
@@ -871,7 +1057,7 @@
 
               <button 
                 type="button" 
-                onclick="adminRejectPayment('${traveler.uid}', '${escapeHtml(traveler.name)}')" 
+                onclick="openRejectPaymentModal('${traveler.uid}', '${escapeHtml(traveler.name)}', '${escapeHtml(utr)}')" 
                 class="flex-1 md:flex-initial w-full px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-400 text-xs font-bold border border-slate-700 hover:border-rose-800 transition flex items-center justify-center space-x-1.5 cursor-pointer"
               >
                 <i data-lucide="x-circle" class="w-4 h-4"></i>
@@ -886,6 +1072,78 @@
       if (window.lucide) window.lucide.createIcons();
     }
 
+    // Modal Control: Reject Payment
+    window.openRejectPaymentModal = function(uid, name, utr) {
+      currentRejectPaymentTarget = { uid, name, utr };
+      document.getElementById('reject-p-traveler-name').textContent = name || 'Traveler';
+      document.getElementById('reject-p-traveler-utr').textContent = utr || 'N/A';
+      document.getElementById('reject-p-custom-instructions').value = "";
+      
+      // Default to first preset
+      selectedPReason = "12-digit UTR was not found in SBI bank account credits.";
+      const btns = document.querySelectorAll('.p-reason-btn');
+      btns.forEach((b, i) => {
+        const dot = b.querySelector('span > span');
+        if (i === 0) {
+          b.className = "p-reason-btn w-full text-left p-2.5 rounded-xl border border-amber-500 bg-amber-950/40 text-xs text-slate-200 transition flex items-start space-x-2";
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-500";
+        } else {
+          b.className = "p-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-amber-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2";
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-transparent";
+        }
+      });
+
+      document.getElementById('reject-payment-modal').classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.closeRejectPaymentModal = function() {
+      document.getElementById('reject-payment-modal').classList.add('hidden');
+      currentRejectPaymentTarget = null;
+    };
+
+    window.selectPReasonPreset = function(btn, reason) {
+      selectedPReason = reason;
+      document.querySelectorAll('.p-reason-btn').forEach(b => {
+        b.className = "p-reason-btn w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-amber-700/60 text-xs text-slate-300 hover:text-white transition flex items-start space-x-2";
+        const dot = b.querySelector('span > span');
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-transparent";
+      });
+      btn.className = "p-reason-btn w-full text-left p-2.5 rounded-xl border border-amber-500 bg-amber-950/40 text-xs text-slate-200 transition flex items-start space-x-2";
+      const activeDot = btn.querySelector('span > span');
+      if (activeDot) activeDot.className = "w-2 h-2 rounded-full bg-amber-500";
+    };
+
+    window.submitRejectPayment = async function() {
+      if (!currentRejectPaymentTarget) return;
+      const custom = document.getElementById('reject-p-custom-instructions').value.trim();
+      const finalReason = custom ? `${selectedPReason} Note: ${custom}` : selectedPReason;
+      const uid = currentRejectPaymentTarget.uid;
+      const name = currentRejectPaymentTarget.name;
+
+      if (isLiveFirebase && db) {
+        try {
+          await updateDoc(doc(db, "profiles", uid), {
+            isVip: false,
+            hasExplorerPass: false,
+            "subscription.status": "rejected",
+            "subscription.rejectionReason": finalReason,
+            "subscription.reviewedAt": serverTimestamp()
+          });
+          showToast(`Payment rejected for ${name}. Reason logged for traveler.`, "info");
+        } catch (err) {
+          console.error("Error rejecting payment in Firestore:", err);
+          showToast("Firestore error: " + err.message, "error");
+        }
+      } else {
+        paymentsQueue = paymentsQueue.filter(t => t.uid !== uid);
+        renderPaymentsQueue();
+        updateBadges();
+        showToast(`Payment rejected for ${name} locally.`, "info");
+      }
+      closeRejectPaymentModal();
+    };
+
     window.adminConfirmPayment = async function(uid, name, utr, plan) {
       if (!confirm(`Confirm receipt of UPI payment for ${name} (UTR: ${utr})? This will immediately activate the Explorer Pass.`)) return;
 
@@ -899,7 +1157,8 @@
             "subscription.utr": utr,
             "subscription.plan": plan || "explorer_monthly",
             "subscription.approvedAt": serverTimestamp(),
-            "subscription.validUntil": validUntil
+            "subscription.validUntil": validUntil,
+            "subscription.rejectionReason": null
           });
           showToast(`Payment confirmed! Explorer Pass activated for ${name}.`, "success");
         } catch (err) {
@@ -911,30 +1170,6 @@
         renderPaymentsQueue();
         updateBadges();
         showToast(`Payment confirmed for ${name} locally.`, "success");
-      }
-    };
-
-    window.adminRejectPayment = async function(uid, name) {
-      if (!confirm(`Reject payment for ${name}? Explorer pass will remain locked.`)) return;
-
-      if (isLiveFirebase && db) {
-        try {
-          await updateDoc(doc(db, "profiles", uid), {
-            isVip: false,
-            hasExplorerPass: false,
-            "subscription.status": "rejected",
-            "subscription.rejectedAt": serverTimestamp()
-          });
-          showToast(`Payment rejected for ${name}.`, "info");
-        } catch (err) {
-          console.error("Error rejecting payment:", err);
-          showToast("Failed to reject payment in Firestore: " + err.message, "error");
-        }
-      } else {
-        paymentsQueue = paymentsQueue.filter(t => t.uid !== uid);
-        renderPaymentsQueue();
-        updateBadges();
-        showToast(`Payment rejected for ${name} locally.`, "info");
       }
     };
 
@@ -962,7 +1197,6 @@
       container.innerHTML = feedbackList.map(item => {
         const rating = Number(item.rating) || 5;
         const starsHtml = '★'.repeat(rating) + '☆'.repeat(Math.max(0, 5 - rating));
-        const dateStr = item.submittedAt ? new Date(item.submittedAt).toLocaleString('en-IN') : 'Recent';
 
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
@@ -1060,7 +1294,6 @@
 
     // ==================== BOOTSTRAP ON LOAD ====================
     document.addEventListener('DOMContentLoaded', () => {
-      // Check session storage
       if (sessionStorage.getItem('safarmatch_admin_session') === 'authenticated') {
         unlockAdminView();
       } else {

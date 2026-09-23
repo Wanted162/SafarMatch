@@ -1563,6 +1563,141 @@
     </div>
   </div>
 
+  
+  <!-- ==================== MODAL: IDENTITY VERIFICATION APPROVED CELEBRATION ==================== -->
+  <div id="verification-approved-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center space-y-4 my-auto">
+      <div class="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="shield-check" class="w-8 h-8"></i>
+      </div>
+      <div class="space-y-2">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
+          Safar Safety Shield Verified
+        </span>
+        <h3 class="text-xl font-extrabold text-slate-900">🎉 Identity Verified!</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Your profile has been reviewed and awarded the Verified Explorer Shield. Your trust badge is now visible to all travelers across Bharat.
+        </p>
+      </div>
+      <div class="pt-2">
+        <button type="button" onclick="closeVerificationApprovedModal()" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          <span>Start Exploring Bharat</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: IDENTITY VERIFICATION REJECTED ACTION ==================== -->
+  <div id="verification-rejected-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-rose-100 space-y-4 text-center my-auto">
+      <div class="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+      </div>
+      <div class="space-y-1.5">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-800 px-3 py-1 rounded-full">
+          Verification Attention Required
+        </span>
+        <h3 class="text-lg font-extrabold text-slate-900">⚠️ Identity Verification Needs Attention</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Our verification team reviewed your submission and requires you to re-submit your verification documents.
+        </p>
+      </div>
+
+      <!-- Rejection Reason Callout -->
+      <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-left space-y-1">
+        <span class="text-[10px] font-bold text-rose-700 uppercase tracking-wider block">Reason from Verifier</span>
+        <p id="verification-rejection-reason-text" class="text-xs font-semibold text-rose-900 leading-snug">
+          Document photo is blurry, unreadable, or cut off.
+        </p>
+      </div>
+
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Please re-capture your live selfie and re-upload your government photo ID to activate companion matching.
+      </p>
+
+      <div class="space-y-2 pt-1">
+        <button type="button" onclick="handleRetakeVerificationPhotos()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="camera" class="w-4 h-4"></i>
+          <span>Re-take Verification Photos Now</span>
+        </button>
+        <button type="button" onclick="closeVerificationRejectedModal()" class="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          Dismiss for Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: PAYMENT APPROVED CELEBRATION ==================== -->
+  <div id="payment-approved-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center space-y-4 my-auto">
+      <div class="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="crown" class="w-8 h-8"></i>
+      </div>
+      <div class="space-y-2">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-3 py-1 rounded-full">
+          VIP Explorer Pass Active
+        </span>
+        <h3 class="text-xl font-extrabold text-slate-900">🎉 Explorer Pass Activated!</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Unlimited chats and live trip board access are unlocked. Enjoy seamless travel connections across Bharat!
+        </p>
+      </div>
+      <div class="pt-2">
+        <button type="button" onclick="closePaymentApprovedModal()" class="w-full py-3.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Awesome! Let's Go</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: PAYMENT REJECTED WARNING ==================== -->
+  <div id="payment-rejected-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-amber-200 space-y-4 text-center my-auto">
+      <div class="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+      </div>
+      <div class="space-y-1.5">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-3 py-1 rounded-full">
+          Payment Settlement Alert
+        </span>
+        <h3 class="text-lg font-extrabold text-slate-900">⚠️ Payment Not Verified</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Our verification team was unable to confirm your recent UPI transaction.
+        </p>
+      </div>
+
+      <!-- Rejection Reason Callout -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left space-y-1">
+        <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">Reason</span>
+        <p id="payment-rejection-reason-text" class="text-xs font-semibold text-amber-950 leading-snug">
+          12-digit UTR was not found in SBI bank account credits.
+        </p>
+      </div>
+
+      <p class="text-xs text-slate-500 leading-relaxed">
+        If you believe this is an error, please re-submit your 12-digit UTR or contact safarmatch@gmail.com.
+      </p>
+
+      <div class="space-y-2 pt-1">
+        <button type="button" onclick="handleResubmitPaymentUtr()" class="w-full py-3.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+          <i data-lucide="receipt" class="w-4 h-4"></i>
+          <span>Re-submit 12-Digit UTR</span>
+        </button>
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <button type="button" onclick="closePaymentRejectedModal()" class="flex-1 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+            Dismiss
+          </button>
+          <a href="mailto:safarmatch@gmail.com?subject=Payment%20Verification%20Assistance" class="flex-1 py-2 rounded-xl text-xs font-semibold text-safar-600 hover:text-safar-700 hover:bg-rose-50 transition inline-flex items-center justify-center gap-1">
+            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+            <span>Contact Support</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1624,6 +1759,9 @@
     let activeChatPartner = null;
     let activeChatUnsubscribe = null;
     let tripsUnsubscribe = null;
+    let profileSnapshotUnsubscribe = null;
+    let lastKnownVerificationStatus = null;
+    let lastKnownSubscriptionStatus = null;
     let mapInstance = null;
     let googleMapInstance = null;
     let googleMapMarkers = [];
@@ -2355,13 +2493,205 @@
 
     window.hasActiveExplorerPass = function() {
       if (!currentProfile) return false;
-      if (currentProfile.subscription && currentProfile.subscription.active === true) {
+      if (currentProfile.subscription && (currentProfile.subscription.status === 'active' || currentProfile.subscription.active === true)) {
         if (currentProfile.subscription.validUntil) {
           return new Date(currentProfile.subscription.validUntil) > new Date();
         }
         return true;
       }
       return !!(currentProfile.isVip || currentProfile.hasExplorerPass);
+    };
+
+    // ==================== REAL-TIME NOTIFICATION & VERIFICATION MODAL CONTROLLERS ====================
+    window.showVerificationApprovedCelebration = function() {
+      const modal = document.getElementById('verification-approved-modal');
+      if (modal) modal.classList.remove('hidden');
+      showToast("🎉 Identity Verified! Your profile has been reviewed and awarded the Verified Explorer Shield.", "success");
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.closeVerificationApprovedModal = function() {
+      const modal = document.getElementById('verification-approved-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.showVerificationRejectedModal = function(reason) {
+      const modal = document.getElementById('verification-rejected-modal');
+      const reasonEl = document.getElementById('verification-rejection-reason-text');
+      if (reasonEl) reasonEl.textContent = reason || "Document photo is blurry, unreadable, or cut off.";
+      if (modal) modal.classList.remove('hidden');
+      showToast("⚠️ Identity verification requires attention.", "error");
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.closeVerificationRejectedModal = function() {
+      const modal = document.getElementById('verification-rejected-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.handleRetakeVerificationPhotos = function() {
+      closeVerificationRejectedModal();
+      switchView('profile');
+      setTimeout(() => {
+        if (typeof openSelfieModal === 'function') openSelfieModal();
+      }, 250);
+    };
+
+    window.showPaymentApprovedCelebration = function() {
+      const modal = document.getElementById('payment-approved-modal');
+      if (modal) modal.classList.remove('hidden');
+      showToast("🎉 Explorer Pass Activated! Unlimited chats and live trip board access are unlocked.", "success");
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.closePaymentApprovedModal = function() {
+      const modal = document.getElementById('payment-approved-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.showPaymentRejectedModal = function(reason) {
+      const modal = document.getElementById('payment-rejected-modal');
+      const reasonEl = document.getElementById('payment-rejection-reason-text');
+      if (reasonEl) reasonEl.textContent = reason || "12-digit UTR was not found in SBI bank account credits.";
+      if (modal) modal.classList.remove('hidden');
+      showToast("⚠️ Payment not verified. Please check your 12-digit UTR.", "error");
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.closePaymentRejectedModal = function() {
+      const modal = document.getElementById('payment-rejected-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.handleResubmitPaymentUtr = function() {
+      closePaymentRejectedModal();
+      if (typeof openUpiModal === 'function') openUpiModal('explorer_monthly', 299);
+    };
+
+    window.updateVerificationBadgeUI = function(status) {
+      const currentStatus = status || (currentProfile ? currentProfile.verificationStatus : 'unsubmitted');
+      const hBadge = document.getElementById('header-verification-badge');
+      const pPill = document.getElementById('profile-verification-status-pill');
+
+      if (hBadge) {
+        if (currentStatus === 'verified') {
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+          hBadge.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i><span id="header-verification-text">Verified Explorer ✓</span>';
+          hBadge.onclick = null;
+        } else if (currentStatus === 'pending_review' || (currentProfile && (currentProfile.selfieSubmitted || currentProfile.selfieData || currentProfile.govtIdData) && currentStatus !== 'rejected')) {
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+          hBadge.innerHTML = '<i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i><span id="header-verification-text">Review Pending ⌛</span>';
+          hBadge.onclick = null;
+        } else if (currentStatus === 'rejected') {
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 cursor-pointer";
+          hBadge.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-600"></i><span id="header-verification-text">Verification Rejected ⚠️</span>';
+          hBadge.onclick = () => showVerificationRejectedModal(currentProfile && currentProfile.verificationRejectionReason);
+        } else {
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200";
+          hBadge.innerHTML = '<i data-lucide="shield-alert" class="w-3.5 h-3.5 text-slate-500"></i><span id="header-verification-text">Unverified</span>';
+          hBadge.onclick = null;
+        }
+      }
+
+      if (pPill) {
+        if (currentStatus === 'verified') {
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center space-x-1";
+          pPill.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Verified Explorer ✓</span>';
+          pPill.onclick = null;
+        } else if (currentStatus === 'pending_review' || (currentProfile && (currentProfile.selfieSubmitted || currentProfile.selfieData || currentProfile.govtIdData) && currentStatus !== 'rejected')) {
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center space-x-1";
+          pPill.innerHTML = '<i data-lucide="clock" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Review Pending ⌛</span>';
+          pPill.onclick = null;
+        } else if (currentStatus === 'rejected') {
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 flex items-center space-x-1 cursor-pointer";
+          pPill.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Action Required: Re-upload ⚠️</span>';
+          pPill.onclick = () => showVerificationRejectedModal(currentProfile && currentProfile.verificationRejectionReason);
+        } else {
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center space-x-1";
+          pPill.innerHTML = '<i data-lucide="shield-alert" class="w-3.5 h-3.5"></i><span id="profile-verification-label">Unverified</span>';
+          pPill.onclick = null;
+        }
+      }
+
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.attachProfileRealtimeListener = function(uid) {
+      if (!uid || !isLiveFirebase || !db) return;
+
+      if (profileSnapshotUnsubscribe) {
+        try { profileSnapshotUnsubscribe(); } catch (e) {}
+        profileSnapshotUnsubscribe = null;
+      }
+
+      try {
+        const profileRef = doc(db, "profiles", uid);
+        profileSnapshotUnsubscribe = onSnapshot(profileRef, (docSnap) => {
+          if (!docSnap.exists()) return;
+          const data = docSnap.data();
+
+          const newVerificationStatus = data.verificationStatus || "unsubmitted";
+          const rejectionReason = data.verificationRejectionReason || "Verification document requires re-upload.";
+          const sub = data.subscription || {};
+          const newSubStatus = sub.status || (data.isVip || data.hasExplorerPass ? "active" : "none");
+          const paymentRejectionReason = sub.rejectionReason || "12-digit UTR was not found in SBI bank account credits.";
+
+          // Update currentProfile fields
+          if (currentProfile) {
+            currentProfile.verificationStatus = newVerificationStatus;
+            if (data.verificationRejectionReason) {
+              currentProfile.verificationRejectionReason = data.verificationRejectionReason;
+            }
+            if (data.isVip !== undefined) currentProfile.isVip = data.isVip;
+            if (data.hasExplorerPass !== undefined) currentProfile.hasExplorerPass = data.hasExplorerPass;
+            currentProfile.subscription = sub;
+            try {
+              localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+              if (data.isVip || data.hasExplorerPass) {
+                localStorage.setItem('safarmatch_pass_unlocked', 'true');
+              } else if (newSubStatus === 'rejected') {
+                localStorage.removeItem('safarmatch_pass_unlocked');
+              }
+            } catch (e) {}
+          }
+
+          // 1. Verification transitions
+          if (lastKnownVerificationStatus !== null && lastKnownVerificationStatus !== newVerificationStatus) {
+            if (newVerificationStatus === "verified") {
+              showVerificationApprovedCelebration();
+            } else if (newVerificationStatus === "rejected") {
+              showVerificationRejectedModal(rejectionReason);
+            }
+          } else if (lastKnownVerificationStatus === null) {
+            if (newVerificationStatus === "rejected") {
+              showVerificationRejectedModal(rejectionReason);
+            }
+          }
+          lastKnownVerificationStatus = newVerificationStatus;
+
+          // 2. Subscription transitions
+          if (lastKnownSubscriptionStatus !== null && lastKnownSubscriptionStatus !== newSubStatus) {
+            if (newSubStatus === "active") {
+              showPaymentApprovedCelebration();
+            } else if (newSubStatus === "rejected") {
+              showPaymentRejectedModal(paymentRejectionReason);
+            }
+          } else if (lastKnownSubscriptionStatus === null) {
+            if (newSubStatus === "rejected") {
+              showPaymentRejectedModal(paymentRejectionReason);
+            }
+          }
+          lastKnownSubscriptionStatus = newSubStatus;
+
+          // Update UI displays
+          updateVerificationBadgeUI(newVerificationStatus);
+          updateJourneyStatusUI();
+        }, (err) => {
+          console.warn("Profile real-time listener error:", err);
+        });
+      } catch (err) {
+        console.warn("Could not attach profile real-time listener:", err);
+      }
     };
 
     // ==================== PROFILE COMPLETION & VERIFICATION UI ====================
@@ -4116,6 +4446,12 @@
       if (currentUser) {
         if (auth) signOut(auth);
         currentUser = null;
+        if (profileSnapshotUnsubscribe) {
+          try { profileSnapshotUnsubscribe(); } catch (e) {}
+          profileSnapshotUnsubscribe = null;
+        }
+        lastKnownVerificationStatus = null;
+        lastKnownSubscriptionStatus = null;
         initRealWorldSession();
         document.getElementById('btn-auth-text').textContent = "Sign In";
         showToast("Signed out. Switched to guest session.", "info");
@@ -4226,6 +4562,14 @@
       if (profileAvatar) profileAvatar.src = avatarSrc;
       if (headerAvatar) headerAvatar.src = avatarSrc;
 
+      // Verification Badge & Status Pill UI
+      updateVerificationBadgeUI(currentProfile.verificationStatus);
+
+      // Attach Real-Time Profile Listener if UID available
+      if (currentProfile && currentProfile.uid) {
+        attachProfileRealtimeListener(currentProfile.uid);
+      }
+
       // Load registered travelers from localStorage (only real saved users)
       try {
         const storedTravelers = localStorage.getItem('safarmatch_all_travelers');
@@ -4313,6 +4657,28 @@
         db = getFirestore(app);
         storage = getStorage(app);
         isLiveFirebase = true;
+
+        if (auth) {
+          onAuthStateChanged(auth, async (user) => {
+            if (user) {
+              currentUser = user;
+              const authBtnText = document.getElementById('btn-auth-text');
+              if (authBtnText) authBtnText.textContent = "Sign Out";
+              if (currentProfile) {
+                currentProfile.uid = user.uid;
+                if (!currentProfile.name) currentProfile.name = user.displayName || "";
+                if (user.photoURL && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
+                  currentProfile.photoUrl = user.photoURL;
+                }
+              }
+              attachProfileRealtimeListener(user.uid);
+            } else {
+              if (currentProfile && currentProfile.uid) {
+                attachProfileRealtimeListener(currentProfile.uid);
+              }
+            }
+          });
+        }
       } catch (e) {
         console.warn("Firebase live init skipped, fallback active:", e);
         isLiveFirebase = false;
