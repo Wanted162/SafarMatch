@@ -236,7 +236,7 @@
       <!-- ==================== VIEW 1: EXPLORE MAP ==================== -->
       <section id="view-map" class="view-panel relative w-full h-full flex flex-col overflow-hidden">
         <!-- Floating Circuit Selector Bar -->
-        <div class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto z-[400] max-w-2xl bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-slate-200/80 flex flex-col gap-2">
+        <div class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto z-[25] max-w-2xl bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-slate-200/80 flex flex-col gap-2">
           <!-- Top Row: Indian Circuit Pills -->
           <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
             <span class="text-slate-400 font-semibold px-2 flex-shrink-0 flex items-center gap-1">
@@ -274,7 +274,7 @@
 
             <!-- Traveler Counter -->
             <div id="map-traveler-count-pill" class="flex-shrink-0 px-2.5 py-1 rounded-full bg-rose-50 text-safar-700 font-extrabold text-[11px] border border-rose-200">
-              18 Explorers
+              0 Explorers
             </div>
           </div>
         </div>
@@ -283,7 +283,7 @@
         <div id="map" class="w-full h-full z-0 bg-slate-100"></div>
 
         <!-- Floating Map Action Controls (Bottom Right) -->
-        <div class="absolute bottom-20 md:bottom-6 right-4 z-[400] flex flex-col gap-2">
+        <div class="absolute bottom-20 md:bottom-6 right-4 z-[25] flex flex-col gap-2">
           <!-- Reset Center to India -->
           <button onclick="resetMapCenter()" title="Center India Map" class="w-10 h-10 rounded-2xl bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-safar-600 transition">
             <i data-lucide="crosshair" class="w-5 h-5"></i>
@@ -995,7 +995,7 @@
   </datalist>
 
   <!-- ==================== MODAL: CREATE A TRIP PLAN ==================== -->
-  <div id="create-trip-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+  <div id="create-trip-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
@@ -1077,7 +1077,7 @@
   </div>
 
   <!-- ==================== MODAL: LIVE WEBCAM SELFIE VERIFICATION ==================== -->
-  <div id="selfie-modal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="selfie-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2">
@@ -1164,22 +1164,22 @@
   </div>
 
   <!-- ==================== MODAL: TRAVELER DETAIL INSPECT MODAL (From Map) ==================== -->
-  <div id="traveler-detail-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-      <div class="flex items-start justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 border-2 border-white shadow-md">
+  <div id="traveler-detail-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 my-auto">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center space-x-3 min-w-0">
+          <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 border-2 border-white shadow-md flex-shrink-0">
             <img id="modal-traveler-avatar" src="" alt="Avatar" class="w-full h-full object-cover" />
           </div>
-          <div>
-            <div class="flex items-center space-x-1.5">
-              <h3 id="modal-traveler-name" class="text-base font-bold text-slate-900">Traveler</h3>
-              <span id="modal-traveler-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">⚪ Unverified</span>
+          <div class="min-w-0">
+            <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+              <h3 id="modal-traveler-name" class="text-base font-bold text-slate-900 truncate">Traveler</h3>
+              <span id="modal-traveler-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0">⚪ Unverified</span>
             </div>
-            <p id="modal-traveler-city" class="text-xs text-slate-500">Goa Circuit</p>
+            <p id="modal-traveler-city" class="text-xs text-slate-500 truncate mt-0.5">Goa Circuit</p>
           </div>
         </div>
-        <button onclick="closeTravelerDetailModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100">
+        <button type="button" onclick="closeTravelerDetailModal()" title="Close Profile" class="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-100 transition flex-shrink-0 -mr-1 -mt-1 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1204,7 +1204,7 @@
   </div>
 
   <!-- ==================== MODAL: REPORT & BLOCK TRAVELER ==================== -->
-  <div id="report-block-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="report-block-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">
@@ -2468,8 +2468,6 @@
          }
          updateJourneyStatusUI();
        };
-       reader.readAsDataURL(blob);
-     };
        reader.readAsDataURL(blob);
      }
 
