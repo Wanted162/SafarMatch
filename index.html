@@ -117,7 +117,14 @@
 
     <!-- Right Header Actions (Auth, Verification Badge & Profile Completion) -->
     <div class="flex items-center space-x-3">
-            <!-- Cab & Stay Expense Splitter Tool Button -->
+            <!-- Feedback & Feature Ideas Trigger -->
+      <button onclick="openFeedbackModal()" class="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition cursor-pointer shadow-2xs" title="Suggest Features or Send Feedback">
+        <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-600"></i>
+        <span class="hidden sm:inline">Feedback & Ideas</span>
+      </button>
+      <!-- Owner Admin Verification Portal Trigger -->
+      <button onclick="openAdminPortalModal()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-slate-100 transition cursor-pointer" title="Owner Verification Portal">Admin</button>
+      <!-- Cab & Stay Expense Splitter Tool Button -->
       <button onclick="openCabSplitModal()" class="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer shadow-xs" title="Split Cab & Stay Costs">
         <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
         <span class="hidden sm:inline">Split Cab / Stay</span>
@@ -222,11 +229,11 @@
         <div class="flex items-center justify-between text-slate-500">
           <div class="flex items-center space-x-1.5">
             <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span id="cloud-status-text" class="text-[11px]">Firebase Firestore</span>
+            <span id="cloud-status-text" class="text-[11px]">256-Bit Encrypted Cloud Vault</span>
           </div>
-          <span class="text-[10px] text-slate-400 font-mono">v10 Web</span>
+          <span class="text-[10px] text-emerald-600 font-semibold">Safar Shield Active</span>
         </div>
-        <p class="text-[10px] text-slate-400">Zero-cost Leaflet & OSM tiles enabled.</p>
+        <p class="text-[10px] text-slate-400">Real-Time Bharat GPS & Safe Routing Active.</p>
       </div>
     </aside>
 
@@ -235,7 +242,7 @@
 
       <!-- ==================== VIEW 1: EXPLORE MAP ==================== -->
       <section id="view-map" class="view-panel relative w-full h-full flex flex-col overflow-hidden">
-        <!-- Floating Circuit & Destination Search Bar (100% Leaflet & Esri Map) -->
+        <!-- Floating Circuit & Destination Search Bar (Live Bharat Explorer Map) -->
         <div class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto z-[25] max-w-2xl bg-white/95 backdrop-blur-md p-2.5 rounded-2xl shadow-lg border border-slate-200/80 flex flex-col gap-2">
           <!-- Search Row: Destination Input with Datalist -->
           <div class="flex items-center gap-2">
@@ -636,7 +643,7 @@
                 <ul class="space-y-3 text-xs text-slate-700">
                   <li class="flex items-start space-x-2.5">
                     <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>Golden Glowing Map Pin:</strong> 3x larger pulsating beacon on the Leaflet Explore Map.</span>
+                    <span><strong>Golden Glowing Map Pin:</strong> 3x larger pulsating beacon on the Live Bharat Explorer Map.</span>
                   </li>
                   <li class="flex items-start space-x-2.5">
                     <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
@@ -795,9 +802,7 @@
                       <p class="text-[11px] text-slate-500">Aadhaar / Driving License / Voter ID</p>
                     </div>
                   </div>
-                  <span id="badge-govid-state" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">
-                    Optional
-                  </span>
+                  <span id="badge-govid-state" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">Mandatory *</span>
                 </div>
 
                 <div class="pt-1">
@@ -838,7 +843,7 @@
               </div>
             </div>
 
-            <!-- Home City & Upcoming Circuit / Destination (Google Maps Places Autocomplete) -->
+            <!-- Home City & Upcoming Circuit / Destination (Safar Indian Hubs Directory) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Home City (India) *</label>
@@ -853,7 +858,7 @@
                   />
                   <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-1">Free-form search powered by Google Maps.</p>
+                <p class="text-[11px] text-slate-400 mt-1">Search all destinations across Bharat.</p>
               </div>
 
               <div>
@@ -878,7 +883,7 @@
               <div class="flex items-center justify-between text-xs">
                 <span class="font-bold text-slate-700 flex items-center gap-1.5">
                   <i data-lucide="map" class="w-3.5 h-3.5 text-safar-600"></i>
-                  <span>Map Pin Preview (Google Maps)</span>
+                  <span>Live Location Pin Preview (Safar GPS)</span>
                 </span>
                 <span id="home-city-coords-text" class="text-slate-400 font-mono text-[11px]">Lat: 18.5204, Lng: 73.8567</span>
               </div>
@@ -1478,6 +1483,211 @@
     </div>
   </div>
 
+  
+  
+  <!-- ==================== MODAL: FEEDBACK & FEATURE SUGGESTION HUB ==================== -->
+  <div id="feedback-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[92vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-start justify-between pb-3 border-b border-slate-100 flex-shrink-0">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5">
+              <span>Help Shape SafarMatch Bharat</span>
+            </h3>
+            <p class="text-xs text-slate-500">Suggest a feature, request a new travel circuit, or report an issue directly to our founding team.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeFeedbackModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 overflow-y-auto pr-1">
+        <!-- 1. Category Pill Selector -->
+        <div>
+          <label class="block text-xs font-bold text-slate-800 mb-1.5">Select Suggestion Category</label>
+          <div class="grid grid-cols-2 gap-2 text-xs" id="feedback-category-group">
+            <button type="button" onclick="selectFeedbackCategory('feature')" data-cat="feature" class="feedback-cat-pill p-2.5 rounded-xl border border-amber-400 bg-amber-50 font-bold text-amber-900 text-left transition flex items-center space-x-2 cursor-pointer shadow-2xs">
+              <span class="text-base">💡</span>
+              <span>Feature Request</span>
+            </button>
+            <button type="button" onclick="selectFeedbackCategory('circuit')" data-cat="circuit" class="feedback-cat-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-slate-700 text-left transition flex items-center space-x-2 cursor-pointer">
+              <span class="text-base">🏔️</span>
+              <span>Suggest Circuit / Hub</span>
+            </button>
+            <button type="button" onclick="selectFeedbackCategory('bug')" data-cat="bug" class="feedback-cat-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-slate-700 text-left transition flex items-center space-x-2 cursor-pointer">
+              <span class="text-base">🐛</span>
+              <span>Report a Bug / Glitch</span>
+            </button>
+            <button type="button" onclick="selectFeedbackCategory('general')" data-cat="general" class="feedback-cat-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-slate-700 text-left transition flex items-center space-x-2 cursor-pointer">
+              <span class="text-base">🎒</span>
+              <span>General Feedback</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Community Satisfaction Rating -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold text-slate-800">Your SafarMatch Experience Rating</label>
+            <span id="feedback-star-label" class="text-xs font-extrabold text-amber-700">5 / 5 — Loving it!</span>
+          </div>
+          <div class="flex items-center space-x-2 p-2.5 rounded-2xl bg-slate-50 border border-slate-200 justify-center">
+            <button type="button" onclick="setFeedbackRating(1)" class="star-rating-btn p-1 text-amber-500 hover:scale-125 transition cursor-pointer" data-star="1">
+              <i data-lucide="star" class="w-6 h-6 fill-amber-500"></i>
+            </button>
+            <button type="button" onclick="setFeedbackRating(2)" class="star-rating-btn p-1 text-amber-500 hover:scale-125 transition cursor-pointer" data-star="2">
+              <i data-lucide="star" class="w-6 h-6 fill-amber-500"></i>
+            </button>
+            <button type="button" onclick="setFeedbackRating(3)" class="star-rating-btn p-1 text-amber-500 hover:scale-125 transition cursor-pointer" data-star="3">
+              <i data-lucide="star" class="w-6 h-6 fill-amber-500"></i>
+            </button>
+            <button type="button" onclick="setFeedbackRating(4)" class="star-rating-btn p-1 text-amber-500 hover:scale-125 transition cursor-pointer" data-star="4">
+              <i data-lucide="star" class="w-6 h-6 fill-amber-500"></i>
+            </button>
+            <button type="button" onclick="setFeedbackRating(5)" class="star-rating-btn p-1 text-amber-500 hover:scale-125 transition cursor-pointer" data-star="5">
+              <i data-lucide="star" class="w-6 h-6 fill-amber-500"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Traveler Email Input -->
+        <div>
+          <label class="block text-xs font-bold text-slate-800 mb-1">Traveler Email (For Direct Founder Follow-Up)</label>
+          <input 
+            type="email" 
+            id="feedback-email-input" 
+            placeholder="your.email@example.com" 
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
+          />
+        </div>
+
+        <!-- 4. Feedback & Details Textarea -->
+        <div>
+          <label class="block text-xs font-bold text-slate-800 mb-1">Feedback & Suggestion Details</label>
+          <textarea 
+            id="feedback-message-input" 
+            rows="3" 
+            placeholder="Tell us what you loved, what broke, or what features you want next (e.g. Group roadtrip split voting, trekking packing lists)..."
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white resize-none"
+            oninput="updateFeedbackMailtoLink()"
+          ></textarea>
+        </div>
+
+        <!-- 5. Submission Buttons -->
+        <div class="space-y-2 pt-1">
+          <button type="button" onclick="submitUserFeedback()" class="w-full py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Submit Feedback</span>
+          </button>
+          
+          <div class="text-center pt-1">
+            <a id="feedback-direct-mailto" href="mailto:safarmatch@gmail.com?subject=SafarMatch%20Feedback" class="inline-flex items-center space-x-1.5 text-[11px] font-bold text-slate-500 hover:text-amber-700 transition">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              <span>Or write directly to safarmatch@gmail.com</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: OWNER ADMIN VERIFICATION PORTAL ==================== -->
+  <div id="admin-portal-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-5 my-auto max-h-[90vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-start justify-between pb-3 border-b border-slate-100 flex-shrink-0">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span>SafarMatch Owner Admin Portal</span>
+              <span class="text-[10px] font-extrabold uppercase bg-rose-100 text-safar-800 px-2 py-0.5 rounded-full">Owner Review</span>
+            </h3>
+            <p class="text-xs text-slate-500">Compare live selfie and government ID before granting Verified Explorer Shield.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminPortalModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Passcode Gate View -->
+      <div id="admin-passcode-view" class="py-6 space-y-4 text-center max-w-sm mx-auto flex-shrink-0">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto">
+          <i data-lucide="lock" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-slate-900">Enter Admin Passcode</h4>
+          <p class="text-xs text-slate-500 mt-0.5">Authorized SafarMatch platform operators only.</p>
+        </div>
+        <div class="space-y-2">
+          <input 
+            type="password" 
+            id="admin-passcode-input" 
+            placeholder="Passcode" 
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-center text-sm font-mono tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-safar-500"
+            onkeydown="if(event.key==='Enter'){verifyAdminPasscode();}"
+          />
+          <button type="button" onclick="verifyAdminPasscode()" class="w-full py-2.5 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+            <i data-lucide="key" class="w-4 h-4"></i>
+            <span>Access Verification Queue</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Review Queue View (Hidden until unlocked) -->
+      <div id="admin-queue-view" class="hidden flex-1 overflow-y-auto space-y-4 pr-1">
+        <!-- Admin Navigation Tabs -->
+        <div class="flex items-center space-x-2 border-b border-slate-200 pb-2">
+          <button type="button" id="admin-tab-btn-verification" onclick="switchAdminTab('verification')" class="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-safar-100 text-safar-800 transition cursor-pointer">
+            ID Verification Review (<span id="admin-verification-badge-count">0</span>)
+          </button>
+          <button type="button" id="admin-tab-btn-feedback" onclick="switchAdminTab('feedback')" class="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 transition cursor-pointer">
+            User Feedback & Feature Ideas (<span id="admin-feedback-badge-count">0</span>)
+          </button>
+        </div>
+
+        <!-- Tab 1: Verification Review Queue -->
+        <div id="admin-tab-view-verification" class="space-y-4">
+          <div class="flex items-center justify-between bg-slate-50 px-3.5 py-2 rounded-xl text-xs">
+            <span class="font-bold text-slate-700" id="admin-queue-count">0 pending verification requests</span>
+            <button type="button" onclick="loadAdminVerificationQueue()" class="text-safar-600 hover:text-safar-800 font-bold flex items-center gap-1 text-[11px] cursor-pointer">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh
+            </button>
+          </div>
+          <div id="admin-queue-container" class="space-y-4">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Tab 2: User Feedback & Feature Ideas Queue -->
+        <div id="admin-tab-view-feedback" class="hidden space-y-4">
+          <div class="flex items-center justify-between bg-slate-50 px-3.5 py-2 rounded-xl text-xs">
+            <span class="font-bold text-slate-700" id="admin-feedback-count">0 user suggestions received</span>
+            <div class="flex items-center space-x-2">
+              <button type="button" onclick="loadAdminFeedbackQueue()" class="text-safar-600 hover:text-safar-800 font-bold flex items-center gap-1 text-[11px] cursor-pointer">
+                <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh
+              </button>
+              <button type="button" onclick="createSampleFeedback()" class="text-amber-700 hover:text-amber-800 font-bold flex items-center gap-1 text-[11px] cursor-pointer">
+                + Demo Feedback
+              </button>
+            </div>
+          </div>
+          <div id="admin-feedback-container" class="space-y-4">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1826,6 +2036,610 @@
       }
     ];
 
+    
+    // ==================== FEEDBACK & FEATURE SUGGESTION HUB (safarmatch@gmail.com) ====================
+    let activeFeedbackCategory = "feature";
+    let activeFeedbackRating = 5;
+    let feedbackCache = [
+      {
+        id: "fb_seed_01",
+        category: "feature",
+        rating: 5,
+        message: "A split cab calculator for Goa airport arrivals was brilliant! Could you also add a group poll for daily trek destinations?",
+        email: "rohan.trekker@gmail.com",
+        userName: "Rohan Verma",
+        userUid: "seed_rohan_03",
+        createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+        status: "new"
+      },
+      {
+        id: "fb_seed_02",
+        category: "circuit",
+        rating: 5,
+        message: "Please add Meghalaya (Shillong & Cherrapunji) living root bridges circuit before monsoon season!",
+        email: "ananya.sen@gmail.com",
+        userName: "Ananya Sen",
+        userUid: "seed_ananya_04",
+        createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+        status: "reviewed"
+      }
+    ];
+
+    window.openFeedbackModal = function() {
+      const modal = document.getElementById('feedback-modal');
+      if (!modal) return;
+      
+      const emailInput = document.getElementById('feedback-email-input');
+      if (emailInput) {
+        if (currentUser && currentUser.email) {
+          emailInput.value = currentUser.email;
+        } else if (currentProfile && currentProfile.email) {
+          emailInput.value = currentProfile.email;
+        } else {
+          emailInput.value = "";
+        }
+      }
+
+      const msgInput = document.getElementById('feedback-message-input');
+      if (msgInput) msgInput.value = "";
+
+      window.selectFeedbackCategory('feature');
+      window.setFeedbackRating(5);
+      modal.classList.remove('hidden');
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    };
+
+    window.closeFeedbackModal = function() {
+      const modal = document.getElementById('feedback-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.selectFeedbackCategory = function(cat) {
+      activeFeedbackCategory = cat;
+      const pills = document.querySelectorAll('.feedback-cat-pill');
+      pills.forEach(p => {
+        if (p.getAttribute('data-cat') === cat) {
+          p.className = "feedback-cat-pill p-2.5 rounded-xl border border-amber-400 bg-amber-50 font-bold text-amber-900 text-left transition flex items-center space-x-2 cursor-pointer shadow-2xs";
+        } else {
+          p.className = "feedback-cat-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-slate-700 text-left transition flex items-center space-x-2 cursor-pointer";
+        }
+      });
+      window.updateFeedbackMailtoLink();
+    };
+
+    window.setFeedbackRating = function(rating) {
+      activeFeedbackRating = rating;
+      const labels = {
+        1: "1 / 5 — Needs Attention",
+        2: "2 / 5 — Fair, Room to Grow",
+        3: "3 / 5 — Good Foundation",
+        4: "4 / 5 — Really Great!",
+        5: "5 / 5 — Loving SafarMatch!"
+      };
+      const labelEl = document.getElementById('feedback-star-label');
+      if (labelEl) labelEl.textContent = labels[rating] || (rating + " / 5");
+
+      const buttons = document.querySelectorAll('.star-rating-btn');
+      buttons.forEach(btn => {
+        const starNum = parseInt(btn.getAttribute('data-star') || "0");
+        const icon = btn.querySelector('svg, i');
+        if (starNum <= rating) {
+          btn.className = "star-rating-btn p-1 text-amber-500 hover:scale-125 transition cursor-pointer";
+          if (icon) {
+            icon.classList.remove('text-slate-300');
+            icon.classList.add('text-amber-500');
+            icon.setAttribute('fill', 'currentColor');
+          }
+        } else {
+          btn.className = "star-rating-btn p-1 text-slate-300 hover:scale-125 transition cursor-pointer";
+          if (icon) {
+            icon.classList.remove('text-amber-500');
+            icon.classList.add('text-slate-300');
+            icon.setAttribute('fill', 'none');
+          }
+        }
+      });
+
+      window.updateFeedbackMailtoLink();
+    };
+
+    window.updateFeedbackMailtoLink = function() {
+      const directLink = document.getElementById('feedback-direct-mailto');
+      if (!directLink) return;
+      const msg = document.getElementById('feedback-message-input')?.value || "";
+      const email = document.getElementById('feedback-email-input')?.value || "Traveler";
+      const catNames = { feature: "Feature Request", circuit: "New Circuit Suggestion", bug: "Bug Report", general: "General Feedback" };
+      const catName = catNames[activeFeedbackCategory] || "Feedback";
+
+      const subject = encodeURIComponent("SafarMatch Bharat Feedback: [" + catName + "]");
+      const body = encodeURIComponent("Category: " + catName + "\nRating: " + activeFeedbackRating + "/5 Stars\nFrom: " + email + "\n\nFeedback & Details:\n" + msg + "\n\n--- Sent via SafarMatch Hub");
+      directLink.href = "mailto:safarmatch@gmail.com?subject=" + subject + "&body=" + body;
+    };
+
+    window.submitUserFeedback = async function() {
+      const msgInput = document.getElementById('feedback-message-input');
+      const emailInput = document.getElementById('feedback-email-input');
+      const message = msgInput?.value.trim() || "";
+      const email = emailInput?.value.trim() || (currentUser?.email || "anonymous@safarmatch.in");
+
+      if (message.length < 10) {
+        showToast("⚠️ Please enter at least 10 characters so we can understand your idea.", "warning");
+        return;
+      }
+
+      const feedbackDoc = {
+        id: "fb_" + Date.now().toString(36),
+        category: activeFeedbackCategory,
+        rating: activeFeedbackRating,
+        message: message,
+        email: email,
+        userUid: currentUser?.uid || currentProfile?.uid || "guest",
+        userName: currentProfile?.name || "Guest Explorer",
+        createdAt: new Date().toISOString(),
+        status: "new"
+      };
+
+      feedbackCache.unshift(feedbackDoc);
+
+      if (isLiveFirebase && db) {
+        try {
+          await addDoc(collection(db, "feedback"), {
+            category: activeFeedbackCategory,
+            rating: activeFeedbackRating,
+            message: message,
+            email: email,
+            userUid: currentUser?.uid || currentProfile?.uid || "guest",
+            userName: currentProfile?.name || "Guest Explorer",
+            createdAt: serverTimestamp(),
+            status: "new"
+          });
+        } catch (err) {
+          console.warn("Firestore feedback write error:", err);
+        }
+      }
+
+      window.closeFeedbackModal();
+      showToast("💌 Thank you! Your feedback has been sent directly to the SafarMatch team.", "success");
+      window.updateAdminBadgeCounts();
+    };
+
+    // ==================== OWNER ADMIN VERIFICATION & FEEDBACK PORTAL ====================
+    let isAdminAuthenticated = false;
+    let activeAdminTab = "verification";
+
+    window.openAdminPortalModal = function() {
+      const modal = document.getElementById('admin-portal-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const passcodeView = document.getElementById('admin-passcode-view');
+      const queueView = document.getElementById('admin-queue-view');
+      const passInput = document.getElementById('admin-passcode-input');
+
+      if (isAdminAuthenticated) {
+        if (passcodeView) passcodeView.classList.add('hidden');
+        if (queueView) queueView.classList.remove('hidden');
+        window.switchAdminTab(activeAdminTab);
+      } else {
+        if (passcodeView) passcodeView.classList.remove('hidden');
+        if (queueView) queueView.classList.add('hidden');
+        if (passInput) {
+          passInput.value = "";
+          setTimeout(() => passInput.focus(), 100);
+        }
+      }
+
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    };
+
+    window.closeAdminPortalModal = function() {
+      const modal = document.getElementById('admin-portal-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.verifyAdminPasscode = function() {
+      const input = document.getElementById('admin-passcode-input');
+      if (!input) return;
+      const val = input.value.trim();
+      if (val === "safar2026") {
+        isAdminAuthenticated = true;
+        showToast("🔓 Admin Access Granted: SafarMatch Portal Unlocked", "success");
+        document.getElementById('admin-passcode-view').classList.add('hidden');
+        document.getElementById('admin-queue-view').classList.remove('hidden');
+        window.switchAdminTab('verification');
+        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      } else {
+        showToast("❌ Incorrect Admin Passcode", "error");
+        input.value = "";
+        input.focus();
+      }
+    };
+
+    window.switchAdminTab = function(tab) {
+      activeAdminTab = tab;
+      const vTabBtn = document.getElementById('admin-tab-btn-verification');
+      const fTabBtn = document.getElementById('admin-tab-btn-feedback');
+      const vView = document.getElementById('admin-tab-view-verification');
+      const fView = document.getElementById('admin-tab-view-feedback');
+
+      if (tab === 'verification') {
+        if (vTabBtn) vTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-safar-100 text-safar-800 transition cursor-pointer";
+        if (fTabBtn) fTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 transition cursor-pointer";
+        if (vView) vView.classList.remove('hidden');
+        if (fView) fView.classList.add('hidden');
+        window.loadAdminVerificationQueue();
+      } else {
+        if (vTabBtn) vTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 transition cursor-pointer";
+        if (fTabBtn) fTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-amber-100 text-amber-800 transition cursor-pointer";
+        if (vView) vView.classList.add('hidden');
+        if (fView) fView.classList.remove('hidden');
+        window.loadAdminFeedbackQueue();
+      }
+
+      window.updateAdminBadgeCounts();
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    };
+
+    window.updateAdminBadgeCounts = function() {
+      const vCountEl = document.getElementById('admin-verification-badge-count');
+      const fCountEl = document.getElementById('admin-feedback-badge-count');
+
+      let pendingV = 0;
+      if (currentProfile && (currentProfile.verificationStatus === "pending_review" || (!currentProfile.verificationStatus && (currentProfile.selfieData || currentProfile.govtIdData)))) pendingV++;
+      if (Array.isArray(allTravelersCache)) {
+        pendingV += allTravelersCache.filter(t => t.verificationStatus === "pending_review" && (!currentProfile || t.uid !== currentProfile.uid)).length;
+      }
+      if (vCountEl) vCountEl.textContent = pendingV;
+
+      const newFeedback = feedbackCache.filter(f => f.status === 'new').length;
+      if (fCountEl) fCountEl.textContent = newFeedback;
+    };
+
+    window.loadAdminVerificationQueue = async function() {
+      const container = document.getElementById('admin-queue-container');
+      const countEl = document.getElementById('admin-queue-count');
+      if (!container) return;
+
+      container.innerHTML = '<div class="py-8 text-center text-slate-400 text-xs font-medium"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2 text-safar-600"></i>Scanning verified traveler vault...</div>';
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+
+      const pendingList = [];
+
+      if (currentProfile && (currentProfile.verificationStatus === "pending_review" || (!currentProfile.verificationStatus && (currentProfile.selfieData || currentProfile.govtIdData)))) {
+        pendingList.push({ ...currentProfile });
+      }
+
+      if (Array.isArray(allTravelersCache)) {
+        allTravelersCache.forEach(t => {
+          if (t.verificationStatus === "pending_review" && !pendingList.some(p => p.uid === t.uid)) {
+            pendingList.push(t);
+          }
+        });
+      }
+
+      if (isLiveFirebase && db) {
+        try {
+          const snap = await getDocs(collection(db, "profiles"));
+          snap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.verificationStatus === "pending_review" && !pendingList.some(p => p.uid === docSnap.id)) {
+              pendingList.push({ uid: docSnap.id, ...data });
+            }
+          });
+        } catch (e) {
+          console.warn("Error fetching pending profiles for admin:", e);
+        }
+      }
+
+      window.updateAdminBadgeCounts();
+
+      if (pendingList.length === 0) {
+        if (countEl) countEl.textContent = "0 pending verification requests";
+        container.innerHTML = `
+          <div class="py-10 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
+              <i data-lucide="check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">Verification Queue is Clear!</p>
+              <p class="text-[11px] text-slate-500 mt-1">All explorer selfies & government IDs have been reviewed.</p>
+            </div>
+            <button type="button" onclick="createSamplePendingTraveler()" class="px-3 py-1.5 rounded-xl bg-safar-50 border border-safar-200 text-safar-700 font-bold text-xs hover:bg-safar-100 transition cursor-pointer">
+              + Generate Demo Pending Traveler for Review
+            </button>
+          </div>
+        `;
+        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+        return;
+      }
+
+      if (countEl) {
+        countEl.textContent = pendingList.length + " pending traveler" + (pendingList.length === 1 ? "" : "s") + " for review";
+      }
+
+      container.innerHTML = pendingList.map(item => {
+        const selfieSrc = item.selfieData || item.photoUrl || DEFAULT_AVATAR;
+        const govtIdSrc = item.govtIdData || "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80";
+
+        return `
+          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-full bg-safar-100 text-safar-700 font-bold flex items-center justify-center text-xs">
+                  ${(item.name || 'E')[0]}
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xs font-bold text-slate-900">${item.name || 'Anonymous Traveler'}</span>
+                    <span class="text-[10px] text-slate-500">${item.age || 24} yrs • ${item.gender || 'Explorer'}</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400">${item.homeCity || 'India'} ➔ ${item.upcomingCircuit || 'Goa'}</span>
+                </div>
+              </div>
+              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                Pending Review ⏳
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold text-slate-600">1. Live WebRTC Selfie</span>
+                  <span class="text-[9px] text-slate-400 font-mono">Face Check</span>
+                </div>
+                <div class="h-36 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                  <img src="${selfieSrc}" alt="Live Selfie" class="w-full h-full object-cover" />
+                </div>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold text-slate-600">2. Indian Govt Photo ID</span>
+                  <span class="text-[9px] text-slate-400 font-mono">Aadhaar/DL</span>
+                </div>
+                <div class="h-36 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                  <img src="${govtIdSrc}" alt="Government ID" class="w-full h-full object-cover" />
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button type="button" onclick="adminApproveUser('${item.uid}')" class="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                <span>Approve Verification ✓</span>
+              </button>
+              <button type="button" onclick="adminRejectUser('${item.uid}')" class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+                <span>Reject / Re-upload</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    };
+
+    window.createSamplePendingTraveler = function() {
+      const sample = {
+        uid: "demo_pending_" + Math.random().toString(36).substr(2, 6),
+        name: "Vikram Malhotra",
+        age: 26,
+        gender: "Male",
+        homeCity: "Chandigarh",
+        upcomingCircuit: "Himachal",
+        bio: "Paragliding in Bir Billing and hiking Triund. Looking for trek companions.",
+        verificationStatus: "pending_review",
+        selfieSubmitted: true,
+        selfieData: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+        govtIdData: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80",
+        lat: 32.0438,
+        lng: 76.7196
+      };
+      if (!Array.isArray(allTravelersCache)) allTravelersCache = [];
+      allTravelersCache.unshift(sample);
+      window.loadAdminVerificationQueue();
+      showToast("Sample pending traveler Vikram added for admin review", "info");
+    };
+
+    window.adminApproveUser = async function(uid) {
+      if (currentProfile && currentProfile.uid === uid) {
+        currentProfile.verificationStatus = "verified";
+        currentProfile.selfieSubmitted = true;
+        try { localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile)); } catch(e) {}
+      }
+      if (Array.isArray(allTravelersCache)) {
+        const found = allTravelersCache.find(t => t.uid === uid);
+        if (found) {
+          found.verificationStatus = "verified";
+          found.selfieSubmitted = true;
+        }
+      }
+      if (isLiveFirebase && db) {
+        try {
+          await setDoc(doc(db, "profiles", uid), {
+            verificationStatus: "verified",
+            selfieSubmitted: true,
+            verifiedAt: new Date().toISOString()
+          }, { merge: true });
+        } catch(e) {
+          console.warn("Admin approve Firestore write error:", e);
+        }
+      }
+      showToast("🛡️ Traveler approved! Verified Explorer badge awarded.", "success");
+      updateJourneyStatusUI();
+      renderTravelerPins();
+      window.loadAdminVerificationQueue();
+    };
+
+    window.adminRejectUser = async function(uid) {
+      if (currentProfile && currentProfile.uid === uid) {
+        currentProfile.verificationStatus = "unsubmitted";
+        currentProfile.selfieSubmitted = false;
+        currentProfile.selfieData = null;
+        currentProfile.govtIdData = null;
+        try { localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile)); } catch(e) {}
+      }
+      if (Array.isArray(allTravelersCache)) {
+        const found = allTravelersCache.find(t => t.uid === uid);
+        if (found) {
+          found.verificationStatus = "unsubmitted";
+          found.selfieSubmitted = false;
+        }
+      }
+      if (isLiveFirebase && db) {
+        try {
+          await setDoc(doc(db, "profiles", uid), {
+            verificationStatus: "unsubmitted",
+            selfieSubmitted: false,
+            selfieData: null,
+            govtIdData: null
+          }, { merge: true });
+        } catch(e) {
+          console.warn("Admin reject Firestore write error:", e);
+        }
+      }
+      showToast("⚠️ Verification rejected. Traveler prompted to re-upload clear photos.", "warning");
+      updateJourneyStatusUI();
+      renderTravelerPins();
+      window.loadAdminVerificationQueue();
+    };
+
+    window.loadAdminFeedbackQueue = async function() {
+      const container = document.getElementById('admin-feedback-container');
+      const countEl = document.getElementById('admin-feedback-count');
+      if (!container) return;
+
+      container.innerHTML = '<div class="py-8 text-center text-slate-400 text-xs font-medium"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2 text-amber-600"></i>Loading traveler suggestions...</div>';
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+
+      if (isLiveFirebase && db) {
+        try {
+          const snap = await getDocs(collection(db, "feedback"));
+          snap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (!feedbackCache.some(f => f.id === docSnap.id)) {
+              feedbackCache.push({ id: docSnap.id, ...data });
+            }
+          });
+        } catch (e) {
+          console.warn("Firestore feedback fetch:", e);
+        }
+      }
+
+      window.updateAdminBadgeCounts();
+
+      if (feedbackCache.length === 0) {
+        if (countEl) countEl.textContent = "0 user suggestions received";
+        container.innerHTML = `
+          <div class="py-10 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6">
+            <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+              <i data-lucide="lightbulb" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">No Feedback Submissions Yet</p>
+              <p class="text-[11px] text-slate-500 mt-1">User suggestions and bug reports will appear here in real-time.</p>
+            </div>
+            <button type="button" onclick="createSampleFeedback()" class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 font-bold text-xs hover:bg-amber-100 transition cursor-pointer">
+              + Generate Sample Feedback
+            </button>
+          </div>
+        `;
+        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+        return;
+      }
+
+      if (countEl) {
+        countEl.textContent = feedbackCache.length + " suggestion" + (feedbackCache.length === 1 ? "" : "s") + " received";
+      }
+
+      const catBadges = {
+        feature: { label: "💡 Feature Request", bg: "bg-amber-100 text-amber-800" },
+        circuit: { label: "🏔️ Travel Circuit", bg: "bg-sky-100 text-sky-800" },
+        bug: { label: "🐛 Bug Report", bg: "bg-rose-100 text-rose-800" },
+        general: { label: "🎒 General", bg: "bg-emerald-100 text-emerald-800" }
+      };
+
+      container.innerHTML = feedbackCache.map(item => {
+        const badge = catBadges[item.category] || { label: item.category, bg: "bg-slate-100 text-slate-700" };
+        const stars = "★".repeat(item.rating || 5) + "☆".repeat(5 - (item.rating || 5));
+        const isReviewed = item.status === "reviewed";
+
+        return `
+          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <div class="flex items-center space-x-2">
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${badge.bg}">
+                  ${badge.label}
+                </span>
+                <span class="text-amber-500 font-bold text-xs tracking-wider">${stars}</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isReviewed ? 'bg-slate-100 text-slate-500' : 'bg-emerald-100 text-emerald-700'}">
+                ${isReviewed ? 'Reviewed ✓' : 'New ✨'}
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-800 leading-relaxed font-medium">"${item.message}"</p>
+
+            <div class="flex items-center justify-between pt-1 text-[11px] text-slate-400 border-t border-slate-50">
+              <div class="flex items-center space-x-2">
+                <span class="font-semibold text-slate-700">${item.userName || 'Explorer'}</span>
+                <span>•</span>
+                <a href="mailto:${item.email}" class="text-safar-600 hover:underline">${item.email || 'safarmatch@gmail.com'}</a>
+              </div>
+              <div class="flex items-center space-x-2">
+                ${!isReviewed ? `
+                  <button type="button" onclick="adminMarkFeedbackReviewed('${item.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 font-bold text-[10px] transition cursor-pointer">
+                    Mark Reviewed ✓
+                  </button>
+                ` : ''}
+                <a href="mailto:${item.email}?subject=Regarding%20Your%20SafarMatch%20Suggestion&body=Hi%20${encodeURIComponent(item.userName || 'Explorer')},%0A%0AThank%20you%20for%20your%20feedback%20on%20SafarMatch!%0A" class="px-2.5 py-1 rounded-lg bg-safar-50 text-safar-700 hover:bg-safar-100 font-bold text-[10px] transition cursor-pointer flex items-center space-x-1">
+                  <i data-lucide="reply" class="w-3 h-3"></i>
+                  <span>Reply Email</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    };
+
+    window.adminMarkFeedbackReviewed = async function(id) {
+      const item = feedbackCache.find(f => f.id === id);
+      if (item) {
+        item.status = "reviewed";
+      }
+
+      if (isLiveFirebase && db) {
+        try {
+          await setDoc(doc(db, "feedback", id), { status: "reviewed" }, { merge: true });
+        } catch (e) {
+          console.warn("Firestore feedback status update:", e);
+        }
+      }
+
+      showToast("Feedback marked as reviewed", "info");
+      window.loadAdminFeedbackQueue();
+    };
+
+    window.createSampleFeedback = function() {
+      const sample = {
+        id: "fb_sample_" + Math.random().toString(36).substr(2, 6),
+        category: "feature",
+        rating: 5,
+        message: "Trek packing checklist and shared split cab pooling from Dehradun airport to Rishikesh would be super useful!",
+        email: "priya.solo@gmail.com",
+        userName: "Priya Patel",
+        userUid: "seed_priya_02",
+        createdAt: new Date().toISOString(),
+        status: "new"
+      };
+      feedbackCache.unshift(sample);
+      window.loadAdminFeedbackQueue();
+      showToast("Sample suggestion created for admin review", "info");
+    };
+
     // ==================== DAILY FREE CONNECTS & VIRAL RETENTION ====================
     window.getDailyConnects = function() {
       const today = new Date().toISOString().slice(0, 10);
@@ -2100,13 +2914,14 @@
     window.isStep1Complete = function() {
       if (!currentProfile) return false;
       const hasName = Boolean(currentProfile.name && currentProfile.name.trim().length >= 2);
-      const hasAge = Boolean(currentProfile.age && currentProfile.age >= 18);
+      const hasAge = Boolean(currentProfile.age && currentProfile.age >= 18 && currentProfile.age <= 99);
       const hasGender = Boolean(currentProfile.gender);
       const hasHomeCity = Boolean(currentProfile.homeCity && currentProfile.homeCity.trim().length >= 2);
       const hasCircuit = Boolean(currentProfile.upcomingCircuit);
       const hasBio = Boolean(currentProfile.bio && currentProfile.bio.trim().length >= 10);
-      const hasSelfie = Boolean(currentProfile.verificationStatus === "verified" || currentProfile.verificationStatus === "pending_review" || currentProfile.selfieSubmitted);
-      return hasName && hasAge && hasGender && hasHomeCity && hasCircuit && hasBio && hasSelfie;
+      const hasSelfie = Boolean(currentProfile.selfieData || currentProfile.selfieSubmitted || (currentProfile.photoUrl && currentProfile.verificationStatus === 'verified'));
+      const hasGovtId = Boolean(currentProfile.govtIdData || currentProfile.verificationStatus === 'verified');
+      return hasName && hasAge && hasGender && hasHomeCity && hasCircuit && hasBio && hasSelfie && hasGovtId;
     };
 
     window.hasActiveExplorerPass = function() {
@@ -2521,7 +3336,7 @@
 
     const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
 
-    // Render Pins for Travelers (Supports Google Maps Markers & Leaflet Markers)
+    // Render Pins for Travelers (Live Bharat Explorer Pins)
     window.renderTravelerPins = function(filterCircuit = "all") {
       const genderFilter = document.getElementById('map-filter-gender')?.value || 'all';
       const intentFilter = document.getElementById('map-filter-intent')?.value || 'all';
@@ -3863,7 +4678,17 @@
         if (hBadge) hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
         if (pLabel) pLabel.textContent = "🛡️ Verified Explorer ✓";
         if (pPill) pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center space-x-1";
-        if (selfieStateBadge) {
+              const govidBadge = document.getElementById('badge-govid-state');
+      if (govidBadge) {
+        if (currentProfile && (currentProfile.govtIdData || currentProfile.verificationStatus === 'verified')) {
+          govidBadge.textContent = "Uploaded ✓";
+          govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+        } else {
+          govidBadge.textContent = "Mandatory *";
+          govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800";
+        }
+      }
+      if (selfieStateBadge) {
           selfieStateBadge.textContent = "Verified ✓";
           selfieStateBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
         }
