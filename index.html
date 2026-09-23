@@ -2159,8 +2159,9 @@
     window.submitUserFeedback = async function() {
       const msgInput = document.getElementById('feedback-message-input');
       const emailInput = document.getElementById('feedback-email-input');
-      const message = msgInput?.value.trim() || "";
-      const email = emailInput?.value.trim() || (currentUser?.email || "anonymous@safarmatch.in");
+      const message = msgInput ? msgInput.value.trim() : "";
+      const email = emailInput && emailInput.value.trim() ? emailInput.value.trim() : (currentUser && currentUser.email ? currentUser.email : "anonymous@safarmatch.in");
+      const userName = (currentProfile && currentProfile.name) ? currentProfile.name : "Guest Explorer";
 
       if (message.length < 10) {
         showToast("⚠️ Please enter at least 10 characters so we can understand your idea.", "warning");
@@ -2174,13 +2175,14 @@
         message: message,
         email: email,
         userUid: currentUser?.uid || currentProfile?.uid || "guest",
-        userName: currentProfile?.name || "Guest Explorer",
+        userName: userName,
         createdAt: new Date().toISOString(),
         status: "new"
       };
 
       feedbackCache.unshift(feedbackDoc);
 
+      // 1. Dual Persistence: Cloud Firestore collection 'feedback' with serverTimestamp()
       if (isLiveFirebase && db) {
         try {
           await addDoc(collection(db, "feedback"), {
@@ -2189,7 +2191,7 @@
             message: message,
             email: email,
             userUid: currentUser?.uid || currentProfile?.uid || "guest",
-            userName: currentProfile?.name || "Guest Explorer",
+            userName: userName,
             createdAt: serverTimestamp(),
             status: "new"
           });
@@ -2198,10 +2200,43 @@
         }
       }
 
+      // 2. Direct Gmail Delivery Engine: Free Client-Side AJAX Dispatcher to safarmatch@gmail.com
+      try {
+        fetch("https://formsubmit.co/ajax/safarmatch@gmail.com", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            _subject: "New SafarMatch Feedback: [" + activeFeedbackCategory + "] from " + userName,
+            Category: activeFeedbackCategory,
+            Rating: activeFeedbackRating + " / 5 Stars",
+            Traveler_Name: userName,
+            Traveler_Email: email,
+            Message: message,
+            Submitted_At: new Date().toLocaleString('en-IN')
+          })
+        }).catch(function(err) {
+          console.warn("FormSubmit background dispatch error:", err);
+        });
+      } catch (dispatchErr) {
+        console.warn("FormSubmit dispatch exception:", dispatchErr);
+      }
+
+      // Reset input fields
+      if (msgInput) msgInput.value = "";
+      if (emailInput && (!currentUser || !currentUser.email)) {
+        emailInput.value = "";
+      }
+
+      // Close modal and show confirmation toast
       window.closeFeedbackModal();
-      showToast("💌 Thank you! Your feedback has been sent directly to the SafarMatch team.", "success");
+      showToast("Thank you! Your feedback has been sent directly to the SafarMatch team.", "success");
       window.updateAdminBadgeCounts();
     };
+
+    window.handleFeedbackSubmit = window.submitUserFeedback;
 
     // ==================== OWNER ADMIN VERIFICATION & FEEDBACK PORTAL ====================
     let isAdminAuthenticated = false;
