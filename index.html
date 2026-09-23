@@ -1414,6 +1414,7 @@
     const SEED_INDIAN_TRAVELERS = [];
     const SEED_INDIAN_TRIPS = [];
 
+    let currentView = "map";
     // ==================== STREAMLINED 2-STEP JOURNEY & GATING ====================
     window.isStep1Complete = function() {
       if (!currentProfile) return false;
@@ -2436,14 +2437,41 @@
     };
 
     function processVerificationSubmission(type, blob) {
-      if (!currentProfile) return;
-      currentProfile.selfieSubmitted = true;
-      currentProfile.verificationStatus = "pending_review";
-      currentProfile.verificationSubmittedAt = new Date().toISOString();
+       if (!currentProfile) return;
+       currentProfile.selfieSubmitted = true;
+       currentProfile.verificationStatus = "pending_review";
+       currentProfile.verificationSubmittedAt = new Date().toISOString();
 
-      showToast(`⏳ Photo submitted (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review (Est. 2-4 hrs).`, "info");
-      updateJourneyStatusUI();
-    }
+       const reader = new FileReader();
+       reader.onloadend = async function() {
+         const base64data = reader.result;
+         if (type === "selfie") currentProfile.selfieData = base64data;
+         else currentProfile.govtIdData = base64data;
+
+         if (isLiveFirebase && db && currentUser) {
+           try {
+             const updateData = {
+               verificationStatus: "pending_review",
+               verificationSubmittedAt: serverTimestamp()
+             };
+             if (type === "selfie") updateData.selfieData = base64data;
+             else updateData.govtIdData = base64data;
+
+             await setDoc(doc(db, "profiles", currentUser.uid), updateData, { merge: true });
+             showToast("Photo saved to Firestore! Status: In Review.", "success");
+           } catch(err) {
+             console.error("Firestore write error:", err);
+             showToast("Saved locally: " + err.message, "error");
+           }
+         } else {
+           showToast(`Photo saved (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review.`, "info");
+         }
+         updateJourneyStatusUI();
+       };
+       reader.readAsDataURL(blob);
+     };
+       reader.readAsDataURL(blob);
+     }
 
     // Testing Hook: Simulate Admin Verification Approval
     window.simulateAdminApprovalClick = function() {
@@ -2649,7 +2677,7 @@
       // If live Firebase is connected, sync user profile to Firestore
       if (isLiveFirebase && db) {
         try {
-          setDoc(doc(db, "users", currentProfile.uid), currentProfile, { merge: true });
+          setDoc(doc(db, "profiles", currentProfile.uid), currentProfile, { merge: true });
         } catch (err) {
           console.warn("Firestore sync error:", err);
         }
@@ -3056,7 +3084,7 @@
             }
           }).catch(e => console.warn("Trips fetch fallback:", e));
 
-          getDocs(collection(db, "users")).then(snapshot => {
+          getDocs(collection(db, "profiles")).then(snapshot => {
             if (!snapshot.empty) {
               const liveUsers = [];
               snapshot.forEach(doc => liveUsers.push({ uid: doc.id, ...doc.data() }));
