@@ -180,9 +180,10 @@
           </button>
 
           <!-- 3. Real-Time Chat (Explorer Pass Gated) -->
-          <button onclick="switchView('chat')" id="nav-btn-chat" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
+          <button onclick="switchView('chat')" id="nav-btn-chat" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100 relative">
             <i data-lucide="message-circle" class="w-4 h-4"></i>
             <span>Real-time Chat</span>
+            <span id="sidebar-chat-unread-dot" class="hidden w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
             <span id="sidebar-chat-badge" class="ml-auto text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
               <i data-lucide="lock" class="w-2.5 h-2.5"></i> Pass
             </span>
@@ -499,6 +500,37 @@
                 <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-600 flex-shrink-0"></i>
                 <span>Anti-Scam Filter: Phone numbers, UPI IDs, and external social handles are automatically restricted.</span>
               </div>
+            </div>
+
+            <!-- Connect Request Handshake Banners -->
+            <!-- A. Sender UI: Connection Request Pending Banner -->
+            <div id="chat-sender-pending-banner" class="hidden bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center space-x-2 text-xs font-semibold text-amber-900">
+              <i data-lucide="clock" class="w-4 h-4 text-amber-600 flex-shrink-0 animate-spin"></i>
+              <span id="chat-sender-pending-text">⏳ Connection Request Pending: Waiting for traveler to accept your request before further messages can be sent.</span>
+            </div>
+
+            <!-- B. Recipient UI: Incoming Request Action Banner -->
+            <div id="chat-recipient-action-banner" class="hidden bg-rose-50 border-b border-rose-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-rose-900">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="handshake" class="w-4 h-4 text-safar-600 flex-shrink-0"></i>
+                <span id="chat-recipient-action-text">🤝 Traveler wants to connect with you!</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button type="button" onclick="acceptConnectionRequest()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center space-x-1 cursor-pointer">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  <span>Accept Request ✓</span>
+                </button>
+                <button type="button" onclick="declineConnectionRequest()" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                  <span>Decline ✕</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- C. Declined Banner -->
+            <div id="chat-declined-banner" class="hidden bg-slate-100 border-b border-slate-300 px-4 py-2 flex items-center space-x-2 text-xs font-medium text-slate-600">
+              <i data-lucide="slash" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+              <span>✕ Connection Request Declined: This conversation is archived.</span>
             </div>
 
             <!-- Messages Stream Container -->
@@ -1103,6 +1135,7 @@
     <button onclick="switchView('chat')" id="mobile-nav-chat" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400 relative">
       <i data-lucide="message-circle" class="w-5 h-5"></i>
       <span class="text-[10px] font-medium mt-1">Chat</span>
+      <span id="mobile-chat-unread-dot" class="hidden absolute top-1 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
       <span id="mobile-chat-lock-badge" class="absolute top-1 right-2 text-[9px]">🔒</span>
     </button>
     <button onclick="switchView('monetization')" id="mobile-nav-monetization" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400">
@@ -3046,53 +3079,58 @@
     window.moderateMessageText = function(text) {
       if (!text || typeof text !== 'string') return { allowed: true };
 
-      // 1. Normalize text (strip leetspeak, zeros for o, 1 for i, @ for a, spaces, punctuation)
-      let norm = text.toLowerCase()
-        .replace(/[​-‍﻿]/g, '') // strip zero width characters
-        .replace(/[0o]/g, '0')
-        .replace(/[1il|!]/g, '1')
-        .replace(/[@a]/g, 'a')
-        .replace(/[3e]/g, '3')
-        .replace(/[5s$]/g, '5')
-        .replace(/[7t]/g, '7');
-
-      // Compressed version with all spaces & punctuation stripped
-      const stripped = text.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-
-      // 2. Check 10-digit phone patterns (Indian mobile begins with 6,7,8,9)
-      const phoneDigits = text.replace(/\D/g, '');
-      if (phoneDigits.length >= 10) {
-        if (/(?:(?:\+|0{0,2})91[\s-]*)?[6789]\d{9}/.test(phoneDigits) || /(?:^|\D)[6789]\d{9}(?:\D|$)/.test(phoneDigits)) {
-          return { allowed: false, reason: "Phone number detected. For traveler safety, sharing contact numbers is restricted." };
+      // 1. Vulgarity / Abusive / Sexually Explicit Slang (English & Hindi / Hinglish)
+      const abusivePatterns = [
+        /\b(fuck|fucking|fucker|shit|bitch|bastard|asshole|cunt|dick|pussy|boobs|tits|nude|nudes|hookup|escort|prostitute|porn|xxx|slut|whore|rape)\b/i,
+        /\b(chut|chutiya|choot|lund|lauda|loda|gaand|gand|bhenchod|behenchod|benchod|madarchod|madarchodh|bsdk|bhosdike|bhosadi|randi|raand|harami|kamina)\b/i,
+        /(?:^|\s)(bc|mc|bsdk)(?:\s|$|[!?,.])/i
+      ];
+      for (const pat of abusivePatterns) {
+        if (pat.test(text)) {
+          return { allowed: false, reason: "Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation." };
         }
       }
 
-      // Check spaced or dotted digit sequences (e.g. 9 8 7 6 5 4 3 2 1 0)
-      if (/[6-9][\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d[\s.,\-_*]{0,2}\d/.test(text)) {
-        return { allowed: false, reason: "Spaced phone number sequence detected." };
+      // 2. Indian Phone numbers (10+ digits with spaces, dashes, dots, +91, 0 prefix)
+      const phoneDigits = text.replace(/\D/g, '');
+      if (phoneDigits.length >= 10) {
+        if (/(?:(?:\+|0{0,2})91[\s-]*)?[6789]\d{9}/.test(phoneDigits) || /(?:^|\D)[6789]\d{9}(?:\D|$)/.test(phoneDigits)) {
+          return { allowed: false, reason: "Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation." };
+        }
+      }
+      if (/[6-9][\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d[\s.,\-_*]{1,3}\d/.test(text)) {
+        return { allowed: false, reason: "Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation." };
       }
 
       // 3. Spelled-out numbers (English & Hindi)
-      const numberWords = /(?:zero|one|two|three|four|five|six|seven|eight|nine|shunya|ek|do|teen|chaar|paanch|chhe|saat|aath|nau|triple|double)[\s\-_]+(?:zero|one|two|three|four|five|six|seven|eight|nine|shunya|ek|do|teen|chaar|paanch|chhe|saat|aath|nau)/i;
-      if (numberWords.test(text)) {
-        return { allowed: false, reason: "Spelled-out phone number detected." };
+      const numWordPattern = /(?:zero|one|two|three|four|five|six|seven|eight|nine|shunya|ek|do|teen|chaar|paanch|chhe|saat|aath|nau|double|triple)/i;
+      const wordTokens = text.toLowerCase().split(/[\s,\-_.]+/).filter(Boolean);
+      let numWordCount = 0;
+      for (const tok of wordTokens) {
+        if (numWordPattern.test(tok)) {
+          numWordCount++;
+          if (numWordCount >= 3) {
+            return { allowed: false, reason: "Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation." };
+          }
+        } else {
+          numWordCount = 0;
+        }
       }
 
-      // 4. Indian UPI VPAs (e.g. name@upi, @okhdfcbank, @oksbi, @paytm)
+      // 4. Indian UPI VPAs & Payment Handles
       const upiRegex = /[a-zA-Z0-9._-]+@(upi|okhdfcbank|oksbi|okaxis|okicici|paytm|axl|ibl|ybl|apl|barodampay|postbank|federal)/i;
-      if (upiRegex.test(text) || stripped.includes("@upi") || stripped.includes("paytm@") || stripped.includes("@ok")) {
-        return { allowed: false, reason: "UPI payment address detected. Off-platform money transfers are restricted." };
+      if (upiRegex.test(text) || /(gpay|phonepe|paytm)\s*[:=]\s*[a-zA-Z0-9]/i.test(text)) {
+        return { allowed: false, reason: "Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation." };
       }
 
-      // 5. Social Handles & External Messaging Links
-      const socialRegex = /(wa\.me|t\.me|telegram|whatsapp|insta|instagram|snapchat|fb\.me|facebook|snap:)[\s/:@_]/i;
-      if (socialRegex.test(text) || stripped.includes("wame") || stripped.includes("tme") || stripped.includes("telegram") || stripped.includes("instagram")) {
-        return { allowed: false, reason: "External messaging handles or social links are restricted." };
+      // 5. Social handles & external links
+      const socialRegex = /(wa\.me|t\.me|telegram|whatsapp|instagram|snapchat|facebook|fb\.me|tiktok|twitter\.com|x\.com|https?:\/\/|www\.)/i;
+      if (socialRegex.test(text) || /(?:insta|snap|fb)\s*[:@]\s*[a-zA-Z0-9_.]+/i.test(text) || /@[a-zA-Z0-9_]{3,}/.test(text)) {
+        return { allowed: false, reason: "Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation." };
       }
 
       return { allowed: true };
     };
-
     // ==================== GOOGLE MAPS API & MAP ENGINE (WITH LEAFLET FALLBACK) ====================
     window.initMap = async function() {
       const mapEl = document.getElementById('map');
@@ -4009,32 +4047,248 @@
       } catch (e) {}
     };
     // ==================== IN-APP REAL-TIME CHAT ====================
-    window.openChatWithTraveler = function(traveler) {
-      if (!traveler || !traveler.uid) return;
+    // Chat Metadata & Handshake Persistence Helpers
+    let activeChatDocUnsubscribe = null;
 
-      const hasPass = hasActiveExplorerPass();
-      const existingPartners = window.getExistingChatPartnerIds();
-      const isExisting = existingPartners.includes(traveler.uid);
+    function getChatMeta(chatId) {
+      try {
+        const raw = localStorage.getItem('safarmatch_chatmeta_' + chatId);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
 
-      if (!hasPass) {
-        if (!isExisting) {
-          const remaining = window.getDailyConnects();
-          if (remaining <= 0) {
-            window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
-            return;
+    function saveChatMeta(chatId, data) {
+      try {
+        localStorage.setItem('safarmatch_chatmeta_' + chatId, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function getAllChatMetas() {
+      const res = {};
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('safarmatch_chatmeta_')) {
+            const id = k.replace('safarmatch_chatmeta_', '');
+            try {
+              res[id] = JSON.parse(localStorage.getItem(k));
+            } catch (e) {}
           }
-          window.consumeDailyConnect();
-          window.recordChatPartner(traveler.uid);
-          showToast("✨ Companion connect active! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
         }
-      } else {
-        window.recordChatPartner(traveler.uid);
+      } catch (e) {}
+      return res;
+    }
+
+    // Real-Time Unread Notification Badges (Red Dots)
+    window.updateUnreadChatIndicators = function() {
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const allMetas = getAllChatMetas();
+      let hasUnread = false;
+
+      for (const cid in allMetas) {
+        const meta = allMetas[cid];
+        if (meta && Array.isArray(meta.unreadBy) && meta.unreadBy.includes(myUid)) {
+          hasUnread = true;
+          break;
+        }
       }
 
-      // Unsubscribe from any previous active chat listener
+      const sidebarDot = document.getElementById('sidebar-chat-unread-dot');
+      if (sidebarDot) {
+        if (hasUnread) sidebarDot.classList.remove('hidden');
+        else sidebarDot.classList.add('hidden');
+      }
+
+      const mobileDot = document.getElementById('mobile-chat-unread-dot');
+      if (mobileDot) {
+        if (hasUnread) mobileDot.classList.remove('hidden');
+        else mobileDot.classList.add('hidden');
+      }
+    };
+
+    // Update Handshake UI Banners & Message Input States
+    function updateHandshakeUI(meta, traveler) {
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const senderBanner = document.getElementById('chat-sender-pending-banner');
+      const senderText = document.getElementById('chat-sender-pending-text');
+      const recipientBanner = document.getElementById('chat-recipient-action-banner');
+      const recipientText = document.getElementById('chat-recipient-action-text');
+      const declinedBanner = document.getElementById('chat-declined-banner');
+      const input = document.getElementById('chat-message-input');
+      const sendBtn = document.querySelector('#chat-input-form button[type="submit"]');
+
+      // Reset banners
+      if (senderBanner) senderBanner.classList.add('hidden');
+      if (recipientBanner) recipientBanner.classList.add('hidden');
+      if (declinedBanner) declinedBanner.classList.add('hidden');
+
+      const partnerName = traveler ? traveler.name : 'Traveler';
+
+      if (!meta || meta.status === 'pending') {
+        const isInitiator = meta ? (meta.initiatorUid === myUid) : true;
+        if (isInitiator) {
+          if (senderBanner) senderBanner.classList.remove('hidden');
+          if (senderText) senderText.textContent = "⏳ Connection Request Pending: Waiting for " + partnerName + " to accept your request before further messages can be sent.";
+        } else {
+          if (recipientBanner) recipientBanner.classList.remove('hidden');
+          if (recipientText) recipientText.textContent = "🤝 " + partnerName + " wants to connect with you!";
+        }
+        if (input) {
+          input.disabled = true;
+          input.placeholder = isInitiator ? "Connection request pending acceptance..." : "Accept connection request above to start chatting...";
+        }
+        if (sendBtn) sendBtn.disabled = true;
+      } else if (meta.status === 'accepted') {
+        if (input) {
+          input.disabled = false;
+          input.placeholder = "Type a travel message (e.g. 'Hey, are you exploring Anjuna this weekend?')...";
+        }
+        if (sendBtn) sendBtn.disabled = false;
+      } else if (meta.status === 'declined') {
+        if (declinedBanner) declinedBanner.classList.remove('hidden');
+        if (input) {
+          input.disabled = true;
+          input.placeholder = "This conversation is archived.";
+        }
+        if (sendBtn) sendBtn.disabled = true;
+      }
+
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    }
+
+    // Accept Incoming Handshake
+    window.acceptConnectionRequest = async function() {
+      if (!activeChatPartner) return;
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = activeChatPartner.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
+
+      let meta = getChatMeta(chatId) || {
+        initiatorUid: partnerUid,
+        recipientUid: myUid
+      };
+      meta.status = "accepted";
+      meta.updatedAt = new Date().toISOString();
+      saveChatMeta(chatId, meta);
+
+      updateHandshakeUI(meta, activeChatPartner);
+      renderConversationList();
+      showToast("🤝 Connection request accepted! You can now chat in real-time.", "success");
+
+      if (isLiveFirebase && db) {
+        try {
+          await setDoc(doc(db, "chats", chatId), {
+            status: "accepted",
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (e) {
+          console.warn("Firestore accept chat error:", e);
+        }
+      }
+    };
+
+    // Decline Incoming Handshake
+    window.declineConnectionRequest = async function() {
+      if (!activeChatPartner) return;
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = activeChatPartner.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
+
+      let meta = getChatMeta(chatId) || {
+        initiatorUid: partnerUid,
+        recipientUid: myUid
+      };
+      meta.status = "declined";
+      meta.updatedAt = new Date().toISOString();
+      saveChatMeta(chatId, meta);
+
+      updateHandshakeUI(meta, activeChatPartner);
+      renderConversationList();
+      showToast("Connection request declined.", "info");
+
+      if (isLiveFirebase && db) {
+        try {
+          await setDoc(doc(db, "chats", chatId), {
+            status: "declined",
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (e) {
+          console.warn("Firestore decline chat error:", e);
+        }
+      }
+    };
+
+    // Open Chat with Traveler (with Connect Handshake Check)
+    window.openChatWithTraveler = async function(traveler) {
+      if (!traveler || !traveler.uid) return;
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = traveler.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
+
+      let meta = getChatMeta(chatId);
+      const hasPass = hasActiveExplorerPass();
+      const existingPartners = window.getExistingChatPartnerIds();
+      const isExisting = existingPartners.includes(partnerUid) || (meta && meta.status === 'accepted');
+
+      if (!hasPass && !isExisting && (!meta || meta.status === 'pending')) {
+        const remaining = window.getDailyConnects();
+        if (remaining <= 0) {
+          window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+          return;
+        }
+        if (!meta) {
+          window.consumeDailyConnect();
+          window.recordChatPartner(partnerUid);
+          showToast("✨ Connection request initiated! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
+        }
+      } else {
+        window.recordChatPartner(partnerUid);
+      }
+
+      // Initialize pending chat document if not yet existing
+      if (!meta) {
+        meta = {
+          initiatorUid: myUid,
+          recipientUid: partnerUid,
+          status: "pending",
+          unreadBy: [partnerUid],
+          lastMessage: "Connection request sent",
+          lastMessageTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        saveChatMeta(chatId, meta);
+
+        if (isLiveFirebase && db) {
+          try {
+            await setDoc(doc(db, "chats", chatId), {
+              ...meta,
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+          } catch (e) {
+            console.warn("Firestore init chat error:", e);
+          }
+        }
+      }
+
+      // Automatically clear unread status for currentUser on chat open
+      if (meta && Array.isArray(meta.unreadBy) && meta.unreadBy.includes(myUid)) {
+        meta.unreadBy = meta.unreadBy.filter(u => u !== myUid);
+        saveChatMeta(chatId, meta);
+        if (isLiveFirebase && db) {
+          setDoc(doc(db, "chats", chatId), { unreadBy: meta.unreadBy }, { merge: true }).catch(() => {});
+        }
+      }
+
+      // Cleanup prior listeners
       if (typeof activeChatUnsubscribe === 'function') {
         try { activeChatUnsubscribe(); } catch (err) {}
         activeChatUnsubscribe = null;
+      }
+      if (typeof activeChatDocUnsubscribe === 'function') {
+        try { activeChatDocUnsubscribe(); } catch (err) {}
+        activeChatDocUnsubscribe = null;
       }
 
       activeChatPartner = traveler;
@@ -4045,7 +4299,6 @@
       const avatarEl = document.getElementById('active-chat-avatar');
       const metaEl = document.getElementById('active-chat-meta');
       const badgeEl = document.getElementById('active-chat-badge');
-
       if (nameEl) nameEl.textContent = traveler.name;
       if (avatarEl) avatarEl.src = (traveler.photoUrl && traveler.photoUrl !== DEFAULT_AVATAR) ? traveler.photoUrl : DEFAULT_AVATAR;
       if (metaEl) metaEl.textContent = `${traveler.upcomingCircuit || 'India'} Circuit • Online`;
@@ -4062,20 +4315,31 @@
         }
       }
 
-      // Render locally cached messages first for instantaneous responsiveness
+      // Render cached messages & handshake UI
+      updateHandshakeUI(meta, traveler);
       renderMessagesForPartner(traveler.uid);
       renderConversationList();
+      window.updateUnreadChatIndicators();
 
-      // Attach Real-Time Firestore onSnapshot Listener
-      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
-      const partnerUid = traveler.uid;
-      const chatId = [myUid, partnerUid].sort().join('_');
-
+      // Attach Real-Time Firestore Listeners
       if (isLiveFirebase && db) {
         try {
+          // Listen to chat document status & unreadBy in real-time
+          activeChatDocUnsubscribe = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
+            if (docSnap.exists()) {
+              const liveMeta = docSnap.data();
+              saveChatMeta(chatId, liveMeta);
+              if (activeChatPartner && activeChatPartner.uid === partnerUid) {
+                updateHandshakeUI(liveMeta, traveler);
+              }
+              renderConversationList();
+              window.updateUnreadChatIndicators();
+            }
+          }, (err) => console.warn("Chat doc listener err:", err));
+
+          // Listen to chat messages subcollection in real-time
           const messagesRef = collection(db, "chats", chatId, "messages");
           const q = query(messagesRef, orderBy("createdAt", "asc"));
-
           activeChatUnsubscribe = onSnapshot(q, (snapshot) => {
             const liveMsgs = [];
             snapshot.forEach(docSnap => {
@@ -4096,13 +4360,12 @@
                 timestamp: timeStr || "Just now"
               });
             });
-
             if (liveMsgs.length > 0) {
               saveMessagesForPartner(partnerUid, liveMsgs);
               renderMessagesList(liveMsgs);
             }
           }, (err) => {
-            console.warn("Real-time Firestore chat onSnapshot error:", err);
+            console.warn("Real-time chat onSnapshot error:", err);
           });
         } catch (err) {
           console.warn("Could not bind real-time chat listener:", err);
@@ -4115,6 +4378,10 @@
         try { activeChatUnsubscribe(); } catch (err) {}
         activeChatUnsubscribe = null;
       }
+      if (typeof activeChatDocUnsubscribe === 'function') {
+        try { activeChatDocUnsubscribe(); } catch (err) {}
+        activeChatDocUnsubscribe = null;
+      }
       activeChatPartner = null;
       renderConversationList();
     };
@@ -4122,8 +4389,7 @@
     function renderConversationList() {
       const container = document.getElementById('chat-conversations-list');
       if (!container) return;
-
-      const myUid = currentProfile ? currentProfile.uid : '';
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
       const pool = (allTravelersCache && allTravelersCache.length > 0) ? allTravelersCache : SEED_INDIAN_TRAVELERS;
       const travelers = pool.filter(t => t.uid !== myUid);
 
@@ -4142,15 +4408,34 @@
       container.innerHTML = travelers.map(trv => {
         const isCurrent = activeChatPartner && activeChatPartner.uid === trv.uid;
         const photo = (trv.photoUrl && trv.photoUrl !== DEFAULT_AVATAR) ? trv.photoUrl : DEFAULT_AVATAR;
+        const chatId = [myUid, trv.uid].sort().join('_');
+        const meta = getChatMeta(chatId);
+        const hasUnread = meta && Array.isArray(meta.unreadBy) && meta.unreadBy.includes(myUid);
+
+        let statusBadge = '';
+        if (meta) {
+          if (meta.status === 'pending') {
+            statusBadge = '<span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">Pending</span>';
+          } else if (meta.status === 'accepted') {
+            statusBadge = '<span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded-full">Connected</span>';
+          } else if (meta.status === 'declined') {
+            statusBadge = '<span class="text-[9px] bg-slate-200 text-slate-600 font-bold px-1.5 py-0.5 rounded-full">Declined</span>';
+          }
+        }
+
         return `
           <div onclick='openChatWithTraveler(${JSON.stringify(trv)})' class="cursor-pointer p-2.5 rounded-2xl transition flex items-center space-x-2.5 ${isCurrent ? 'bg-rose-50 border border-rose-200' : 'hover:bg-slate-100'}">
             <div class="relative w-9 h-9 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 border border-slate-200">
               <img src="${photo}" class="w-full h-full object-cover" />
+              ${hasUnread ? '<span class="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>' : ''}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-800 truncate">${trv.name}</span>
-                <span class="text-[9px] text-slate-400">Active</span>
+                <div class="flex items-center space-x-1.5">
+                  ${statusBadge}
+                  ${hasUnread ? '<span class="w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse flex-shrink-0"></span>' : ''}
+                </div>
               </div>
               <p class="text-[10px] text-slate-500 truncate">${trv.upcomingCircuit || 'India'} • ${trv.travelIntent || 'Companion'}</p>
             </div>
@@ -4180,7 +4465,6 @@
     function renderMessagesList(msgs) {
       const container = document.getElementById('chat-messages-container');
       if (!container) return;
-
       if (!msgs || msgs.length === 0) {
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-8 space-y-3">
@@ -4196,7 +4480,6 @@
         if (window.lucide) window.lucide.createIcons();
         return;
       }
-
       container.innerHTML = msgs.map(m => {
         const isMe = m.sender === 'me';
         return `
@@ -4208,7 +4491,6 @@
           </div>
         `;
       }).join('');
-
       container.scrollTop = container.scrollHeight;
       if (window.lucide) window.lucide.createIcons();
     }
@@ -4218,16 +4500,22 @@
       renderMessagesList(msgs);
     }
 
+    // Send Message with Hardened Moderation & Unread Tracking
     window.handleSendMessage = async function(e) {
       e.preventDefault();
-      if (!hasActiveExplorerPass()) {
-        showToast("🔒 Explorer Pass Required to send messages.", "error");
-        switchView('monetization');
+      if (!activeChatPartner) {
+        showToast("Select a traveler from the list to start messaging.", "info");
         return;
       }
 
-      if (!activeChatPartner) {
-        showToast("Select a traveler from the list to start messaging.", "info");
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = activeChatPartner.uid;
+      const chatId = [myUid, partnerUid].sort().join('_');
+      const meta = getChatMeta(chatId);
+
+      // Check handshake status
+      if (meta && meta.status !== 'accepted') {
+        showToast("⏳ Connection request must be accepted before messages can be sent.", "warning");
         return;
       }
 
@@ -4235,19 +4523,16 @@
       const text = input.value.trim();
       if (!text) return;
 
-      // HARDENED ANTI-BYPASS CONTACT FILTER CHECK
+      // COMPREHENSIVE ZERO-COST IN-CHAT MODERATION
       const modCheck = moderateMessageText(text);
       if (!modCheck.allowed) {
-        showToast(`🛡️ ${modCheck.reason}`, "error");
         input.value = "";
+        showToast("⚠️ Safety Alert: Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation.", "error");
         return;
       }
 
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
-      const partnerUid = activeChatPartner.uid;
-      const chatId = [myUid, partnerUid].sort().join('_');
 
       const newMsg = {
         id: "msg_" + Date.now(),
@@ -4260,10 +4545,17 @@
       msgs.push(newMsg);
       saveMessagesForPartner(partnerUid, msgs);
       renderMessagesList(msgs);
-
       input.value = "";
 
-      // If connected to live Firestore, save to message collection in real-time
+      // Update meta with unreadBy for recipient
+      if (meta) {
+        meta.lastMessage = text;
+        meta.lastMessageTime = timeStr;
+        meta.unreadBy = [partnerUid];
+        saveChatMeta(chatId, meta);
+      }
+
+      // Save to Firestore in real-time
       if (isLiveFirebase && db) {
         try {
           await addDoc(collection(db, "chats", chatId, "messages"), {
@@ -4274,12 +4566,19 @@
             timestamp: timeStr,
             createdAt: serverTimestamp()
           });
+
+          await setDoc(doc(db, "chats", chatId), {
+            lastMessage: text,
+            lastMessageTime: timeStr,
+            unreadBy: [partnerUid],
+            updatedAt: serverTimestamp()
+          }, { merge: true });
         } catch (err) {
           console.warn("Firestore chat write error, saved locally:", err);
         }
       }
     };
-
+    
     // ==================== REALISTIC TRUST & VERIFICATION PIPELINE ====================
     window.openSelfieModal = function() {
       const modal = document.getElementById('selfie-modal');
@@ -5235,7 +5534,7 @@
 
       initRealWorldSession();
       initMap();
-      switchView('map');
+      switchView('map');      updateUnreadChatIndicators();
 
       // Real-time input listeners to update progress gauge dynamically
       const trackedInputs = ['input-full-name', 'input-age', 'input-gender', 'input-home-city', 'input-upcoming-circuit', 'input-bio'];
