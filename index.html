@@ -122,8 +122,6 @@
         <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-600"></i>
         <span class="hidden sm:inline">Feedback & Ideas</span>
       </button>
-      <!-- Owner Admin Verification Portal Trigger -->
-      <button onclick="openAdminPortalModal()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-slate-100 transition cursor-pointer" title="Owner Verification Portal">Admin</button>
       <!-- Cab & Stay Expense Splitter Tool Button -->
       <button onclick="openCabSplitModal()" class="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer shadow-xs" title="Split Cab & Stay Costs">
         <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
@@ -620,7 +618,7 @@
                   <i data-lucide="credit-card" class="w-4 h-4"></i>
                   <span>Buy Explorer Pass • ₹299 (UPI / Card)</span>
                 </button>
-                <p class="text-[10px] text-center text-slate-400">Secured via Razorpay Sandbox & RuPay UPI</p>
+                <p class="text-[10px] text-center text-slate-400">Secured via Direct UPI & RuPay (0% Transaction Fees)</p>
               </div>
             </div>
 
@@ -668,24 +666,7 @@
             </div>
           </div>
 
-          <!-- Developer / Preview Instant Activation Toolbar -->
-          <div class="p-4 rounded-2xl bg-slate-100 border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <div class="flex items-center space-x-2 text-slate-600">
-              <i data-lucide="terminal" class="w-4 h-4 text-slate-500"></i>
-              <span><strong>Sandbox Testing:</strong> Test the pass flow without real money:</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="handleInstantPassActivation()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center space-x-1">
-                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-                <span>⚡ 1-Click Instant Pass Activation</span>
-              </button>
-              <button onclick="handleRevokePass()" class="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition">
-                Reset
-              </button>
-            </div>
           </div>
-
-        </div>
 
         <div class="h-16 md:h-6"></div>
       </section>
@@ -745,17 +726,7 @@
                 </div>
               </div>
 
-              <!-- Admin Simulation Toggle for Testing -->
-              <button 
-                type="button" 
-                onclick="simulateAdminApprovalClick()" 
-                title="Testing Hook: Approve verification without waiting"
-                class="text-[11px] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-200 transition flex items-center space-x-1"
-              >
-                <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i>
-                <span>Simulate Admin Approval (Demo)</span>
-              </button>
-            </div>
+              </div>
 
             <!-- Verification Action Rows -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1016,14 +987,10 @@
 
         <button type="button" onclick="submitUtrVerification()" class="w-full py-3 rounded-2xl bg-safar-600 hover:bg-safar-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
           <i data-lucide="check-circle" class="w-4 h-4"></i>
-          <span>Submit UTR & Unlock Explorer Pass</span>
+          <span>Submit UTR for Verification</span>
         </button>
 
-        <!-- Sandbox Test Button -->
-        <button type="button" onclick="handleInstantPassActivation()" class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px] transition flex items-center justify-center space-x-1.5 cursor-pointer">
-          <span>⚡ Instant Test Activation (Skip Payment for Demo)</span>
-        </button>
-      </div>
+        </div>
     </div>
   </div>
 
@@ -1596,98 +1563,6 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL: OWNER ADMIN VERIFICATION PORTAL ==================== -->
-  <div id="admin-portal-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-5 my-auto max-h-[90vh] flex flex-col">
-      <!-- Header -->
-      <div class="flex items-start justify-between pb-3 border-b border-slate-100 flex-shrink-0">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-              <span>SafarMatch Owner Admin Portal</span>
-              <span class="text-[10px] font-extrabold uppercase bg-rose-100 text-safar-800 px-2 py-0.5 rounded-full">Owner Review</span>
-            </h3>
-            <p class="text-xs text-slate-500">Compare live selfie and government ID before granting Verified Explorer Shield.</p>
-          </div>
-        </div>
-        <button type="button" onclick="closeAdminPortalModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Passcode Gate View -->
-      <div id="admin-passcode-view" class="py-6 space-y-4 text-center max-w-sm mx-auto flex-shrink-0">
-        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto">
-          <i data-lucide="lock" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h4 class="text-sm font-bold text-slate-900">Enter Admin Passcode</h4>
-          <p class="text-xs text-slate-500 mt-0.5">Authorized SafarMatch platform operators only.</p>
-        </div>
-        <div class="space-y-2">
-          <input 
-            type="password" 
-            id="admin-passcode-input" 
-            placeholder="Passcode" 
-            class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-center text-sm font-mono tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-safar-500"
-            onkeydown="if(event.key==='Enter'){verifyAdminPasscode();}"
-          />
-          <button type="button" onclick="verifyAdminPasscode()" class="w-full py-2.5 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
-            <i data-lucide="key" class="w-4 h-4"></i>
-            <span>Access Verification Queue</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Admin Review Queue View (Hidden until unlocked) -->
-      <div id="admin-queue-view" class="hidden flex-1 overflow-y-auto space-y-4 pr-1">
-        <!-- Admin Navigation Tabs -->
-        <div class="flex items-center space-x-2 border-b border-slate-200 pb-2">
-          <button type="button" id="admin-tab-btn-verification" onclick="switchAdminTab('verification')" class="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-safar-100 text-safar-800 transition cursor-pointer">
-            ID Verification Review (<span id="admin-verification-badge-count">0</span>)
-          </button>
-          <button type="button" id="admin-tab-btn-feedback" onclick="switchAdminTab('feedback')" class="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 transition cursor-pointer">
-            User Feedback & Feature Ideas (<span id="admin-feedback-badge-count">0</span>)
-          </button>
-        </div>
-
-        <!-- Tab 1: Verification Review Queue -->
-        <div id="admin-tab-view-verification" class="space-y-4">
-          <div class="flex items-center justify-between bg-slate-50 px-3.5 py-2 rounded-xl text-xs">
-            <span class="font-bold text-slate-700" id="admin-queue-count">0 pending verification requests</span>
-            <button type="button" onclick="loadAdminVerificationQueue()" class="text-safar-600 hover:text-safar-800 font-bold flex items-center gap-1 text-[11px] cursor-pointer">
-              <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh
-            </button>
-          </div>
-          <div id="admin-queue-container" class="space-y-4">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-
-        <!-- Tab 2: User Feedback & Feature Ideas Queue -->
-        <div id="admin-tab-view-feedback" class="hidden space-y-4">
-          <div class="flex items-center justify-between bg-slate-50 px-3.5 py-2 rounded-xl text-xs">
-            <span class="font-bold text-slate-700" id="admin-feedback-count">0 user suggestions received</span>
-            <div class="flex items-center space-x-2">
-              <button type="button" onclick="loadAdminFeedbackQueue()" class="text-safar-600 hover:text-safar-800 font-bold flex items-center gap-1 text-[11px] cursor-pointer">
-                <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh
-              </button>
-              <button type="button" onclick="createSampleFeedback()" class="text-amber-700 hover:text-amber-800 font-bold flex items-center gap-1 text-[11px] cursor-pointer">
-                + Demo Feedback
-              </button>
-            </div>
-          </div>
-          <div id="admin-feedback-container" class="space-y-4">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -2210,6 +2085,7 @@
           },
           body: JSON.stringify({
             _subject: "New SafarMatch Feedback: [" + activeFeedbackCategory + "] from " + userName,
+            _captcha: "false",
             Category: activeFeedbackCategory,
             Rating: activeFeedbackRating + " / 5 Stars",
             Traveler_Name: userName,
@@ -2233,448 +2109,12 @@
       // Close modal and show confirmation toast
       window.closeFeedbackModal();
       showToast("Thank you! Your feedback has been sent directly to the SafarMatch team.", "success");
-      window.updateAdminBadgeCounts();
+      
     };
 
     window.handleFeedbackSubmit = window.submitUserFeedback;
 
-    // ==================== OWNER ADMIN VERIFICATION & FEEDBACK PORTAL ====================
-    let isAdminAuthenticated = false;
-    let activeAdminTab = "verification";
-
-    window.openAdminPortalModal = function() {
-      const modal = document.getElementById('admin-portal-modal');
-      if (!modal) return;
-      modal.classList.remove('hidden');
-
-      const passcodeView = document.getElementById('admin-passcode-view');
-      const queueView = document.getElementById('admin-queue-view');
-      const passInput = document.getElementById('admin-passcode-input');
-
-      if (isAdminAuthenticated) {
-        if (passcodeView) passcodeView.classList.add('hidden');
-        if (queueView) queueView.classList.remove('hidden');
-        window.switchAdminTab(activeAdminTab);
-      } else {
-        if (passcodeView) passcodeView.classList.remove('hidden');
-        if (queueView) queueView.classList.add('hidden');
-        if (passInput) {
-          passInput.value = "";
-          setTimeout(() => passInput.focus(), 100);
-        }
-      }
-
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-    };
-
-    window.closeAdminPortalModal = function() {
-      const modal = document.getElementById('admin-portal-modal');
-      if (modal) modal.classList.add('hidden');
-    };
-
-    window.verifyAdminPasscode = function() {
-      const input = document.getElementById('admin-passcode-input');
-      if (!input) return;
-      const val = input.value.trim();
-      if (val === "safar2026") {
-        isAdminAuthenticated = true;
-        showToast("🔓 Admin Access Granted: SafarMatch Portal Unlocked", "success");
-        document.getElementById('admin-passcode-view').classList.add('hidden');
-        document.getElementById('admin-queue-view').classList.remove('hidden');
-        window.switchAdminTab('verification');
-        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-      } else {
-        showToast("❌ Incorrect Admin Passcode", "error");
-        input.value = "";
-        input.focus();
-      }
-    };
-
-    window.switchAdminTab = function(tab) {
-      activeAdminTab = tab;
-      const vTabBtn = document.getElementById('admin-tab-btn-verification');
-      const fTabBtn = document.getElementById('admin-tab-btn-feedback');
-      const vView = document.getElementById('admin-tab-view-verification');
-      const fView = document.getElementById('admin-tab-view-feedback');
-
-      if (tab === 'verification') {
-        if (vTabBtn) vTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-safar-100 text-safar-800 transition cursor-pointer";
-        if (fTabBtn) fTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 transition cursor-pointer";
-        if (vView) vView.classList.remove('hidden');
-        if (fView) fView.classList.add('hidden');
-        window.loadAdminVerificationQueue();
-      } else {
-        if (vTabBtn) vTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 transition cursor-pointer";
-        if (fTabBtn) fTabBtn.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-amber-100 text-amber-800 transition cursor-pointer";
-        if (vView) vView.classList.add('hidden');
-        if (fView) fView.classList.remove('hidden');
-        window.loadAdminFeedbackQueue();
-      }
-
-      window.updateAdminBadgeCounts();
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-    };
-
-    window.updateAdminBadgeCounts = function() {
-      const vCountEl = document.getElementById('admin-verification-badge-count');
-      const fCountEl = document.getElementById('admin-feedback-badge-count');
-
-      let pendingV = 0;
-      if (currentProfile && (currentProfile.verificationStatus === "pending_review" || (!currentProfile.verificationStatus && (currentProfile.selfieData || currentProfile.govtIdData)))) pendingV++;
-      if (Array.isArray(allTravelersCache)) {
-        pendingV += allTravelersCache.filter(t => t.verificationStatus === "pending_review" && (!currentProfile || t.uid !== currentProfile.uid)).length;
-      }
-      if (vCountEl) vCountEl.textContent = pendingV;
-
-      const newFeedback = feedbackCache.filter(f => f.status === 'new').length;
-      if (fCountEl) fCountEl.textContent = newFeedback;
-    };
-
-    window.loadAdminVerificationQueue = async function() {
-      const container = document.getElementById('admin-queue-container');
-      const countEl = document.getElementById('admin-queue-count');
-      if (!container) return;
-
-      container.innerHTML = '<div class="py-8 text-center text-slate-400 text-xs font-medium"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2 text-safar-600"></i>Scanning verified traveler vault...</div>';
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-
-      const pendingList = [];
-
-      if (currentProfile && (currentProfile.verificationStatus === "pending_review" || (!currentProfile.verificationStatus && (currentProfile.selfieData || currentProfile.govtIdData)))) {
-        pendingList.push({ ...currentProfile });
-      }
-
-      if (Array.isArray(allTravelersCache)) {
-        allTravelersCache.forEach(t => {
-          if (t.verificationStatus === "pending_review" && !pendingList.some(p => p.uid === t.uid)) {
-            pendingList.push(t);
-          }
-        });
-      }
-
-      if (isLiveFirebase && db) {
-        try {
-          const snap = await getDocs(collection(db, "profiles"));
-          snap.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data.verificationStatus === "pending_review" && !pendingList.some(p => p.uid === docSnap.id)) {
-              pendingList.push({ uid: docSnap.id, ...data });
-            }
-          });
-        } catch (e) {
-          console.warn("Error fetching pending profiles for admin:", e);
-        }
-      }
-
-      window.updateAdminBadgeCounts();
-
-      if (pendingList.length === 0) {
-        if (countEl) countEl.textContent = "0 pending verification requests";
-        container.innerHTML = `
-          <div class="py-10 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6">
-            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
-              <i data-lucide="check" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <p class="text-xs font-bold text-slate-800">Verification Queue is Clear!</p>
-              <p class="text-[11px] text-slate-500 mt-1">All explorer selfies & government IDs have been reviewed.</p>
-            </div>
-            <button type="button" onclick="createSamplePendingTraveler()" class="px-3 py-1.5 rounded-xl bg-safar-50 border border-safar-200 text-safar-700 font-bold text-xs hover:bg-safar-100 transition cursor-pointer">
-              + Generate Demo Pending Traveler for Review
-            </button>
-          </div>
-        `;
-        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-        return;
-      }
-
-      if (countEl) {
-        countEl.textContent = pendingList.length + " pending traveler" + (pendingList.length === 1 ? "" : "s") + " for review";
-      }
-
-      container.innerHTML = pendingList.map(item => {
-        const selfieSrc = item.selfieData || item.photoUrl || DEFAULT_AVATAR;
-        const govtIdSrc = item.govtIdData || "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80";
-
-        return `
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-              <div class="flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-full bg-safar-100 text-safar-700 font-bold flex items-center justify-center text-xs">
-                  ${(item.name || 'E')[0]}
-                </div>
-                <div>
-                  <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold text-slate-900">${item.name || 'Anonymous Traveler'}</span>
-                    <span class="text-[10px] text-slate-500">${item.age || 24} yrs • ${item.gender || 'Explorer'}</span>
-                  </div>
-                  <span class="text-[10px] text-slate-400">${item.homeCity || 'India'} ➔ ${item.upcomingCircuit || 'Goa'}</span>
-                </div>
-              </div>
-              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                Pending Review ⏳
-              </span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div class="space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="text-[10px] font-bold text-slate-600">1. Live WebRTC Selfie</span>
-                  <span class="text-[9px] text-slate-400 font-mono">Face Check</span>
-                </div>
-                <div class="h-36 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
-                  <img src="${selfieSrc}" alt="Live Selfie" class="w-full h-full object-cover" />
-                </div>
-              </div>
-              <div class="space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="text-[10px] font-bold text-slate-600">2. Indian Govt Photo ID</span>
-                  <span class="text-[9px] text-slate-400 font-mono">Aadhaar/DL</span>
-                </div>
-                <div class="h-36 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
-                  <img src="${govtIdSrc}" alt="Government ID" class="w-full h-full object-cover" />
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 pt-1">
-              <button type="button" onclick="adminApproveUser('${item.uid}')" class="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
-                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                <span>Approve Verification ✓</span>
-              </button>
-              <button type="button" onclick="adminRejectUser('${item.uid}')" class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
-                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
-                <span>Reject / Re-upload</span>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-    };
-
-    window.createSamplePendingTraveler = function() {
-      const sample = {
-        uid: "demo_pending_" + Math.random().toString(36).substr(2, 6),
-        name: "Vikram Malhotra",
-        age: 26,
-        gender: "Male",
-        homeCity: "Chandigarh",
-        upcomingCircuit: "Himachal",
-        bio: "Paragliding in Bir Billing and hiking Triund. Looking for trek companions.",
-        verificationStatus: "pending_review",
-        selfieSubmitted: true,
-        selfieData: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
-        govtIdData: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80",
-        lat: 32.0438,
-        lng: 76.7196
-      };
-      if (!Array.isArray(allTravelersCache)) allTravelersCache = [];
-      allTravelersCache.unshift(sample);
-      window.loadAdminVerificationQueue();
-      showToast("Sample pending traveler Vikram added for admin review", "info");
-    };
-
-    window.adminApproveUser = async function(uid) {
-      if (currentProfile && currentProfile.uid === uid) {
-        currentProfile.verificationStatus = "verified";
-        currentProfile.selfieSubmitted = true;
-        try { localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile)); } catch(e) {}
-      }
-      if (Array.isArray(allTravelersCache)) {
-        const found = allTravelersCache.find(t => t.uid === uid);
-        if (found) {
-          found.verificationStatus = "verified";
-          found.selfieSubmitted = true;
-        }
-      }
-      if (isLiveFirebase && db) {
-        try {
-          await setDoc(doc(db, "profiles", uid), {
-            verificationStatus: "verified",
-            selfieSubmitted: true,
-            verifiedAt: new Date().toISOString()
-          }, { merge: true });
-        } catch(e) {
-          console.warn("Admin approve Firestore write error:", e);
-        }
-      }
-      showToast("🛡️ Traveler approved! Verified Explorer badge awarded.", "success");
-      updateJourneyStatusUI();
-      renderTravelerPins();
-      window.loadAdminVerificationQueue();
-    };
-
-    window.adminRejectUser = async function(uid) {
-      if (currentProfile && currentProfile.uid === uid) {
-        currentProfile.verificationStatus = "unsubmitted";
-        currentProfile.selfieSubmitted = false;
-        currentProfile.selfieData = null;
-        currentProfile.govtIdData = null;
-        try { localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile)); } catch(e) {}
-      }
-      if (Array.isArray(allTravelersCache)) {
-        const found = allTravelersCache.find(t => t.uid === uid);
-        if (found) {
-          found.verificationStatus = "unsubmitted";
-          found.selfieSubmitted = false;
-        }
-      }
-      if (isLiveFirebase && db) {
-        try {
-          await setDoc(doc(db, "profiles", uid), {
-            verificationStatus: "unsubmitted",
-            selfieSubmitted: false,
-            selfieData: null,
-            govtIdData: null
-          }, { merge: true });
-        } catch(e) {
-          console.warn("Admin reject Firestore write error:", e);
-        }
-      }
-      showToast("⚠️ Verification rejected. Traveler prompted to re-upload clear photos.", "warning");
-      updateJourneyStatusUI();
-      renderTravelerPins();
-      window.loadAdminVerificationQueue();
-    };
-
-    window.loadAdminFeedbackQueue = async function() {
-      const container = document.getElementById('admin-feedback-container');
-      const countEl = document.getElementById('admin-feedback-count');
-      if (!container) return;
-
-      container.innerHTML = '<div class="py-8 text-center text-slate-400 text-xs font-medium"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2 text-amber-600"></i>Loading traveler suggestions...</div>';
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-
-      if (isLiveFirebase && db) {
-        try {
-          const snap = await getDocs(collection(db, "feedback"));
-          snap.forEach(docSnap => {
-            const data = docSnap.data();
-            if (!feedbackCache.some(f => f.id === docSnap.id)) {
-              feedbackCache.push({ id: docSnap.id, ...data });
-            }
-          });
-        } catch (e) {
-          console.warn("Firestore feedback fetch:", e);
-        }
-      }
-
-      window.updateAdminBadgeCounts();
-
-      if (feedbackCache.length === 0) {
-        if (countEl) countEl.textContent = "0 user suggestions received";
-        container.innerHTML = `
-          <div class="py-10 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6">
-            <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
-              <i data-lucide="lightbulb" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <p class="text-xs font-bold text-slate-800">No Feedback Submissions Yet</p>
-              <p class="text-[11px] text-slate-500 mt-1">User suggestions and bug reports will appear here in real-time.</p>
-            </div>
-            <button type="button" onclick="createSampleFeedback()" class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 font-bold text-xs hover:bg-amber-100 transition cursor-pointer">
-              + Generate Sample Feedback
-            </button>
-          </div>
-        `;
-        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-        return;
-      }
-
-      if (countEl) {
-        countEl.textContent = feedbackCache.length + " suggestion" + (feedbackCache.length === 1 ? "" : "s") + " received";
-      }
-
-      const catBadges = {
-        feature: { label: "💡 Feature Request", bg: "bg-amber-100 text-amber-800" },
-        circuit: { label: "🏔️ Travel Circuit", bg: "bg-sky-100 text-sky-800" },
-        bug: { label: "🐛 Bug Report", bg: "bg-rose-100 text-rose-800" },
-        general: { label: "🎒 General", bg: "bg-emerald-100 text-emerald-800" }
-      };
-
-      container.innerHTML = feedbackCache.map(item => {
-        const badge = catBadges[item.category] || { label: item.category, bg: "bg-slate-100 text-slate-700" };
-        const stars = "★".repeat(item.rating || 5) + "☆".repeat(5 - (item.rating || 5));
-        const isReviewed = item.status === "reviewed";
-
-        return `
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2.5">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-              <div class="flex items-center space-x-2">
-                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${badge.bg}">
-                  ${badge.label}
-                </span>
-                <span class="text-amber-500 font-bold text-xs tracking-wider">${stars}</span>
-              </div>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isReviewed ? 'bg-slate-100 text-slate-500' : 'bg-emerald-100 text-emerald-700'}">
-                ${isReviewed ? 'Reviewed ✓' : 'New ✨'}
-              </span>
-            </div>
-
-            <p class="text-xs text-slate-800 leading-relaxed font-medium">"${item.message}"</p>
-
-            <div class="flex items-center justify-between pt-1 text-[11px] text-slate-400 border-t border-slate-50">
-              <div class="flex items-center space-x-2">
-                <span class="font-semibold text-slate-700">${item.userName || 'Explorer'}</span>
-                <span>•</span>
-                <a href="mailto:${item.email}" class="text-safar-600 hover:underline">${item.email || 'safarmatch@gmail.com'}</a>
-              </div>
-              <div class="flex items-center space-x-2">
-                ${!isReviewed ? `
-                  <button type="button" onclick="adminMarkFeedbackReviewed('${item.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 font-bold text-[10px] transition cursor-pointer">
-                    Mark Reviewed ✓
-                  </button>
-                ` : ''}
-                <a href="mailto:${item.email}?subject=Regarding%20Your%20SafarMatch%20Suggestion&body=Hi%20${encodeURIComponent(item.userName || 'Explorer')},%0A%0AThank%20you%20for%20your%20feedback%20on%20SafarMatch!%0A" class="px-2.5 py-1 rounded-lg bg-safar-50 text-safar-700 hover:bg-safar-100 font-bold text-[10px] transition cursor-pointer flex items-center space-x-1">
-                  <i data-lucide="reply" class="w-3 h-3"></i>
-                  <span>Reply Email</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-    };
-
-    window.adminMarkFeedbackReviewed = async function(id) {
-      const item = feedbackCache.find(f => f.id === id);
-      if (item) {
-        item.status = "reviewed";
-      }
-
-      if (isLiveFirebase && db) {
-        try {
-          await setDoc(doc(db, "feedback", id), { status: "reviewed" }, { merge: true });
-        } catch (e) {
-          console.warn("Firestore feedback status update:", e);
-        }
-      }
-
-      showToast("Feedback marked as reviewed", "info");
-      window.loadAdminFeedbackQueue();
-    };
-
-    window.createSampleFeedback = function() {
-      const sample = {
-        id: "fb_sample_" + Math.random().toString(36).substr(2, 6),
-        category: "feature",
-        rating: 5,
-        message: "Trek packing checklist and shared split cab pooling from Dehradun airport to Rishikesh would be super useful!",
-        email: "priya.solo@gmail.com",
-        userName: "Priya Patel",
-        userUid: "seed_priya_02",
-        createdAt: new Date().toISOString(),
-        status: "new"
-      };
-      feedbackCache.unshift(sample);
-      window.loadAdminFeedbackQueue();
-      showToast("Sample suggestion created for admin review", "info");
-    };
-
+    
     // ==================== DAILY FREE CONNECTS & VIRAL RETENTION ====================
     window.getDailyConnects = function() {
       const today = new Date().toISOString().slice(0, 10);
@@ -2793,7 +2233,7 @@
       navigator.clipboard.writeText(vpa).then(() => {
         const btnText = document.getElementById('upi-copy-btn-text');
         if (btnText) {
-          btnText.textContent = "Copied! ✓";
+          btnText.textContent = "Copied!";
           setTimeout(() => { btnText.textContent = "Copy UPI ID"; }, 2500);
         }
         showToast("📋 UPI ID (pisalpranit1-1@oksbi) copied to clipboard!", "success");
@@ -2807,85 +2247,39 @@
       if (!input) return;
       const utr = input.value.trim();
       if (!/^[0-9]{12}$/.test(utr)) {
-        showToast("❌ Please enter a valid 12-digit UPI Reference / UTR Number.", "error");
+        showToast("Please enter a valid 12-digit UPI Reference / UTR Number.", "error");
         return;
       }
-
       if (currentProfile) {
-        currentProfile.isVip = true;
-        currentProfile.hasExplorerPass = true;
         currentProfile.subscription = {
-          plan: activeUpiPlan === 'boost' ? 'trip_boost' : 'explorer_monthly',
-          active: true,
-          method: "upi_direct",
-          vpa: "pisalpranit1-1@oksbi",
+          status: "pending_review",
           utr: utr,
-          activatedAt: new Date().toISOString()
-        };
-
-        try {
-          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-          localStorage.setItem('safarmatch_pass_unlocked', 'true');
-        } catch (e) {}
-
-        if (isLiveFirebase && db) {
-          try {
-            await setDoc(doc(db, "profiles", currentProfile.uid), {
-              isVip: true,
-              hasExplorerPass: true,
-              subscription: currentProfile.subscription
-            }, { merge: true });
-          } catch (err) {
-            console.warn("Firestore subscription write error:", err);
-          }
-        }
-      }
-
-      closeUpiModal();
-      showToast(`🎉 Payment Verified (UTR: ${utr})! Explorer Pass active!`, "success");
-      updateJourneyStatusUI();
-    };
-
-    // Instant Sandbox Test Activation
-    window.handleInstantPassActivation = async function() {
-      const testUtr = "DEMO" + Math.floor(10000000 + Math.random() * 90000000);
-      if (currentProfile) {
-        currentProfile.isVip = true;
-        currentProfile.hasExplorerPass = true;
-        currentProfile.subscription = {
           plan: "explorer_monthly",
-          active: true,
-          method: "upi_direct_sandbox",
-          vpa: "pisalpranit1-1@oksbi",
-          utr: testUtr,
           activatedAt: new Date().toISOString()
         };
-
         try {
           localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-          localStorage.setItem('safarmatch_pass_unlocked', 'true');
         } catch (e) {}
-
         if (isLiveFirebase && db) {
           try {
             await setDoc(doc(db, "profiles", currentProfile.uid), {
-              isVip: true,
-              hasExplorerPass: true,
-              subscription: currentProfile.subscription
+              subscription: {
+                status: "pending_review",
+                utr: utr,
+                plan: "explorer_monthly",
+                activatedAt: serverTimestamp()
+              }
             }, { merge: true });
           } catch (err) {
             console.warn("Firestore subscription write error:", err);
           }
         }
       }
-
       closeUpiModal();
-      closePaywallModal();
-      showToast("⚡ Sandbox Pass Unlocked! VIP status active across SafarMatch.", "success");
+      showToast("Payment received! Our team is verifying the UTR. Pass will activate shortly.", "info");
       updateJourneyStatusUI();
     };
 
-    // ==================== CAB & STAY EXPENSE SPLITTER ====================
     window.openCabSplitModal = function() {
       const modal = document.getElementById('cab-split-modal');
       if (!modal) return;
@@ -2970,6 +2364,142 @@
       return !!(currentProfile.isVip || currentProfile.hasExplorerPass);
     };
 
+    // ==================== PROFILE COMPLETION & VERIFICATION UI ====================
+    window.updateProfileCompletionUI = function() {
+      if (!currentProfile) return;
+      let score = 0;
+      if (currentProfile.name && currentProfile.name.trim().length >= 2) score += 15;
+      if (currentProfile.age && currentProfile.age >= 18) score += 10;
+      if (currentProfile.gender) score += 10;
+      if (currentProfile.homeCity && currentProfile.homeCity.trim().length >= 2) score += 15;
+      if (currentProfile.upcomingCircuit) score += 15;
+      if (currentProfile.bio && currentProfile.bio.trim().length >= 10) score += 5;
+      if (currentProfile.selfieData || currentProfile.selfieSubmitted || (currentProfile.photoUrl && currentProfile.verificationStatus === 'verified')) score += 15;
+      if (currentProfile.govtIdData || currentProfile.verificationStatus === 'verified') score += 15;
+      const pct = Math.min(100, score);
+
+      // Progress bars
+      const headerBar = document.getElementById('header-profile-progress');
+      if (headerBar) headerBar.style.width = `${pct}%`;
+      const profilePct = document.getElementById('profile-completion-pct');
+      const profileBar = document.getElementById('profile-completion-bar');
+      const sidebarPct = document.getElementById('sidebar-profile-pct');
+      if (profilePct) profilePct.textContent = `${pct}%`;
+      if (profileBar) profileBar.style.width = `${pct}%`;
+      if (sidebarPct) sidebarPct.textContent = `${pct}%`;
+
+      // Profile completion hint text
+      const hintEl = document.getElementById('profile-completion-hint');
+      if (hintEl) {
+        if (pct >= 100) {
+          hintEl.textContent = "Profile 100% complete! Dual identity verification submitted.";
+          hintEl.className = "text-[10px] text-emerald-600 font-medium";
+        } else if (!currentProfile.selfieData && !currentProfile.selfieSubmitted && currentProfile.verificationStatus !== 'verified') {
+          hintEl.textContent = "Add live selfie verification (+15%) to increase trust score.";
+          hintEl.className = "text-[10px] text-rose-500 font-medium";
+        } else if (!currentProfile.govtIdData && currentProfile.verificationStatus !== 'verified') {
+          hintEl.textContent = "Upload Indian Government Photo ID (+15%) for full verification.";
+          hintEl.className = "text-[10px] text-rose-500 font-medium";
+        } else if (!currentProfile.bio || currentProfile.bio.trim().length < 10) {
+          hintEl.textContent = "Write a quick bio (+5%) to introduce yourself to travel buddies.";
+          hintEl.className = "text-[10px] text-amber-600 font-medium";
+        } else {
+          hintEl.textContent = "Complete remaining profile details to reach 100%.";
+          hintEl.className = "text-[10px] text-slate-500";
+        }
+      }
+
+      // Profile Header Display Name & Subtext
+      const pDisplayName = document.getElementById('profile-display-name');
+      const pDisplaySub = document.getElementById('profile-display-sub');
+      if (pDisplayName) {
+        pDisplayName.textContent = currentProfile.name || "Explorer Profile";
+      }
+      if (pDisplaySub) {
+        if (pct >= 100) {
+          pDisplaySub.textContent = "Step 1 Complete ✓ Ready to explore circuits & connect with verified companions.";
+        } else {
+          pDisplaySub.textContent = `Profile is ${pct}% complete. Complete Step 1 to unlock full companion matching.`;
+        }
+      }
+
+      // Avatar sync
+      const avatarSrc = (currentProfile.photoUrl && currentProfile.photoUrl !== DEFAULT_AVATAR) ? currentProfile.photoUrl : DEFAULT_AVATAR;
+      const profileAvatar = document.getElementById('profile-display-avatar');
+      const headerAvatar = document.getElementById('header-user-avatar');
+      if (profileAvatar && profileAvatar.src !== avatarSrc) profileAvatar.src = avatarSrc;
+      if (headerAvatar && headerAvatar.src !== avatarSrc) headerAvatar.src = avatarSrc;
+
+      // Header Verification Badge
+      const hBadge = document.getElementById('header-verification-badge');
+      const hText = document.getElementById('header-verification-text');
+      if (hBadge && hText) {
+        if (currentProfile.verificationStatus === 'verified') {
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+          hBadge.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i><span id="header-verification-text">Verified Explorer ✓</span>`;
+        } else if (currentProfile.verificationStatus === 'pending_review' || currentProfile.selfieSubmitted || currentProfile.selfieData || currentProfile.govtIdData) {
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+          hBadge.innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i><span id="header-verification-text">Review Pending</span>`;
+        } else {
+          hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200";
+          hBadge.innerHTML = `<i data-lucide="shield-alert" class="w-3.5 h-3.5 text-slate-500"></i><span id="header-verification-text">Unverified</span>`;
+        }
+      }
+
+      // Profile Page Verification Status Pill
+      const pPill = document.getElementById('profile-verification-status-pill');
+      const pLabel = document.getElementById('profile-verification-label');
+      if (pPill && pLabel) {
+        if (currentProfile.verificationStatus === 'verified') {
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center space-x-1";
+          pPill.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i><span id="profile-verification-label">Verified Explorer ✓</span>`;
+        } else if (currentProfile.verificationStatus === 'pending_review' || currentProfile.selfieSubmitted || currentProfile.selfieData || currentProfile.govtIdData) {
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center space-x-1";
+          pPill.innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i><span id="profile-verification-label">Verification In Review ⏳</span>`;
+        } else {
+          pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center space-x-1";
+          pPill.innerHTML = `<i data-lucide="shield-alert" class="w-3.5 h-3.5 text-slate-500"></i><span id="profile-verification-label">Unverified</span>`;
+        }
+      }
+
+      // Action Rows Verification Badges
+      const selfieBadge = document.getElementById('badge-selfie-state');
+      if (selfieBadge) {
+        if (currentProfile.verificationStatus === 'verified') {
+          selfieBadge.textContent = "Verified ✓";
+          selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+        } else if (currentProfile.selfieData || currentProfile.selfieSubmitted) {
+          selfieBadge.textContent = "Submitted (In Review)";
+          selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700";
+        } else {
+          selfieBadge.textContent = "Not Done";
+          selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600";
+        }
+      }
+
+      const govidBadge = document.getElementById('badge-govid-state');
+      if (govidBadge) {
+        if (currentProfile.verificationStatus === 'verified') {
+          govidBadge.textContent = "Verified ✓";
+          govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+        } else if (currentProfile.govtIdData) {
+          govidBadge.textContent = "Submitted (In Review)";
+          govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700";
+        } else {
+          govidBadge.textContent = "Mandatory *";
+          govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800";
+        }
+      }
+
+      
+    };
+
+    function updateProfileCompletionUI() {
+      if (typeof window.updateProfileCompletionUI === 'function') {
+        window.updateProfileCompletionUI();
+      }
+    }
+
     window.updateJourneyStatusUI = function() {
       const step1Done = isStep1Complete();
       const hasPass = hasActiveExplorerPass();
@@ -3031,7 +2561,8 @@
       const chatLocked = document.getElementById('chat-paywall-locked');
       const chatUnlocked = document.getElementById('chat-content-unlocked');
       if (chatLocked && chatUnlocked) {
-        if (hasPass) {
+        const canChat = hasPass || Boolean(activeChatPartner && window.getExistingChatPartnerIds().includes(activeChatPartner.uid)) || window.getDailyConnects() > 0;
+        if (canChat) {
           chatLocked.classList.add('hidden');
           chatUnlocked.classList.remove('hidden');
         } else {
@@ -3967,12 +3498,47 @@
       }
     };
 
+    
+    // Chat Partner & Daily Session Tracking
+    window.getExistingChatPartnerIds = function() {
+      try {
+        const raw = localStorage.getItem('safarmatch_active_chat_partners');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    };
+    window.recordChatPartner = function(partnerUid) {
+      if (!partnerUid) return;
+      try {
+        const list = window.getExistingChatPartnerIds();
+        if (!list.includes(partnerUid)) {
+          list.push(partnerUid);
+          localStorage.setItem('safarmatch_active_chat_partners', JSON.stringify(list));
+        }
+      } catch (e) {}
+    };
     // ==================== IN-APP REAL-TIME CHAT ====================
     window.openChatWithTraveler = function(traveler) {
-      if (!hasActiveExplorerPass()) {
-        showToast("🔒 Explorer Pass Required: Active pass needed to chat.", "error");
-        switchView('monetization');
-        return;
+      if (!traveler || !traveler.uid) return;
+
+      const hasPass = hasActiveExplorerPass();
+      const existingPartners = window.getExistingChatPartnerIds();
+      const isExisting = existingPartners.includes(traveler.uid);
+
+      if (!hasPass) {
+        if (!isExisting) {
+          const remaining = window.getDailyConnects();
+          if (remaining <= 0) {
+            window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+            return;
+          }
+          window.consumeDailyConnect();
+          window.recordChatPartner(traveler.uid);
+          showToast("✨ Companion connect active! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
+        }
+      } else {
+        window.recordChatPartner(traveler.uid);
       }
 
       // Unsubscribe from any previous active chat listener
@@ -4409,13 +3975,13 @@
               verificationStatus: "pending_review",
               verificationSubmittedAt: serverTimestamp()
             }, { merge: true });
-            showToast(`🛡️ ${type === 'selfie' ? 'Selfie' : 'Govt ID'} stored securely in profile! Verification in review.`, "success");
+            showToast("Your identity is under review by our team.", "info");
           } catch (err) {
             console.warn("Firestore profile verification write error:", err);
-            showToast(`⏳ Photo saved locally (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review.`, "info");
+            showToast("Your identity is under review by our team.", "info");
           }
         } else {
-          showToast(`⏳ Photo submitted (${(blob.size / 1024).toFixed(1)} KB)! Status: In Review (Est. 2-4 hrs).`, "info");
+          showToast("Your identity is under review by our team.", "info");
         }
 
         try {
@@ -4427,435 +3993,22 @@
       reader.readAsDataURL(blob);
     }
 
-    // Testing Hook: Simulate Admin Verification Approval
-    window.simulateAdminApprovalClick = function() {
-      if (!currentProfile) return;
-      window.simulateAdminApproval(currentProfile.uid);
-    };
-
-    window.simulateAdminApproval = function(uid) {
-      if (currentProfile) {
-        currentProfile.verificationStatus = "verified";
-        currentProfile.selfieSubmitted = true;
-        try {
-          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-        } catch (e) {}
-
-        if (isLiveFirebase && db) {
-          try {
-            setDoc(doc(db, "profiles", currentProfile.uid), {
-              verificationStatus: "verified",
-              selfieSubmitted: true
-            }, { merge: true });
-          } catch (e) {
-            console.warn("Firestore approval sync error:", e);
-          }
-        }
-      }
-      showToast("🛡️ Admin Simulation: Verification Approved! Verified Explorer shield active.", "success");
-      updateJourneyStatusUI();
-    };
-
-    // ==================== MONETIZATION (RAZORPAY & UPI SANDBOX) ====================
+    // ==================== DIRECT 0% FEE UPI PAYMENT ENGINE (pisalpranit1-1@oksbi) ====================
     window.initiateExplorerPassCheckout = function(amount = 299) {
-      // Streamlined check: prompt profile completion if not done
       if (!isStep1Complete()) {
         showToast("⚠️ Complete your quick 2-minute travel profile first to activate pass benefits.", "error");
         switchView('profile');
         return;
       }
-
-      // Check if Razorpay is loaded
-      if (typeof Razorpay !== 'undefined') {
-        const options = {
-          key: "rzp_test_51SafarMatchLive",
-          amount: amount * 100,
-          currency: "INR",
-          name: "SafarMatch Bharat",
-          description: "Explorer Pass • 1-Month Unlimited Companion Access",
-          image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e11d48'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E",
-          handler: function(response) {
-            handlePaymentSuccess(response.razorpay_payment_id || ("pay_" + Date.now()), amount);
-          },
-          prefill: {
-            name: currentProfile ? currentProfile.name : "Traveler",
-            email: "traveler@safarmatch.in",
-            contact: "9876543210"
-          },
-          theme: { color: "#e11d48" },
-          modal: {
-            ondismiss: function() {
-              openUpiSandboxModal(amount);
-            }
-          }
-        };
-        try {
-          const rzp = new Razorpay(options);
-          rzp.open();
-        } catch (e) {
-          openUpiSandboxModal(amount);
-        }
-      } else {
-        openUpiSandboxModal(amount);
-      }
+      openUpiModal('explorer', amount);
     };
 
     window.initiateTripBoostCheckout = function(amount = 99) {
-      openUpiSandboxModal(amount, "Trip & Pin Boost (7-Day Spotlight)");
+      openUpiModal('boost', amount);
     };
 
-    function openUpiSandboxModal(amount, title = "Explorer Pass (₹299)") {
-      const existing = document.getElementById('upi-sandbox-modal');
-      if (existing) existing.remove();
-
-      const modal = document.createElement('div');
-      modal.id = "upi-sandbox-modal";
-      modal.className = "fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4";
-      modal.innerHTML = `
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-100">
-          <div class="w-12 h-12 rounded-2xl bg-rose-100 text-safar-600 flex items-center justify-center mx-auto shadow-xs">
-            <i data-lucide="smartphone" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-safar-800 px-2.5 py-0.5 rounded-full">UPI Sandbox Gateway</span>
-            <h3 class="text-base font-bold text-slate-900 mt-2">${title}</h3>
-            <p class="text-xs text-slate-500 mt-1">Pay via BHIM, GPay, PhonePe, or Paytm simulator</p>
-          </div>
-          <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono text-slate-700">
-            VPA: <strong class="text-slate-900">safarmatch@okhdfcbank</strong><br/>
-            Amount: <strong class="text-safar-600">₹${amount}.00</strong>
-          </div>
-          <div class="pt-2 flex flex-col gap-2">
-            <button onclick="handlePaymentSuccess('upi_${Date.now()}', ${amount})" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition">
-              Simulate UPI Payment Success ✓
-            </button>
-            <button onclick="document.getElementById('upi-sandbox-modal').remove()" class="w-full py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50">
-              Cancel
-            </button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
-    }
-
-    window.handlePaymentSuccess = function(paymentId, amount) {
-      const upiModal = document.getElementById('upi-sandbox-modal');
-      if (upiModal) upiModal.remove();
-
-      if (currentProfile) {
-        currentProfile.isVip = true;
-        currentProfile.hasExplorerPass = true;
-        currentProfile.subscription = {
-          plan: "explorer_monthly",
-          active: true,
-          validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          orderId: paymentId,
-          amount: amount,
-          activatedAt: new Date().toISOString()
-        };
-
-        try {
-          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-          localStorage.setItem('safarmatch_pass_unlocked', 'true');
-        } catch (e) {}
-
-        if (isLiveFirebase && db) {
-          try {
-            setDoc(doc(db, "profiles", currentProfile.uid), {
-              isVip: true,
-              hasExplorerPass: true,
-              subscription: currentProfile.subscription
-            }, { merge: true });
-          } catch (err) {
-            console.warn("Firestore subscription write error:", err);
-          }
-        }
-      }
-
-      showToast(`🎉 Payment of ₹${amount} Successful! ID: ${paymentId}. Explorer Pass active!`, "success");
-      updateJourneyStatusUI();
-
-      setTimeout(() => {
-        switchView('trips');
-      }, 400);
-    };
-
-    window.handleInstantPassActivation = function() {
-      handlePaymentSuccess("sandbox_instant_" + Date.now(), 299);
-    };
-
-    window.handleRevokePass = function() {
-      if (currentProfile) {
-        currentProfile.isVip = false;
-        currentProfile.hasExplorerPass = false;
-        if (currentProfile.subscription) currentProfile.subscription.active = false;
-      }
-      showToast("Explorer Pass reset to locked for testing.", "info");
-      updateJourneyStatusUI();
-    };
-
-    // ==================== PROFILE FORM & COMPLETION GAUGE ====================
-    window.selectTravelIntent = function(btn) {
-      document.querySelectorAll('.intent-pill').forEach(p => {
-        p.className = "intent-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200";
-      });
-      btn.className = "intent-pill px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-safar-700 border border-rose-200";
-      document.getElementById('input-travel-intent').value = btn.getAttribute('data-intent');
-    };
-
-    window.toggleStyleTag = function(btn) {
-      const isSelected = btn.classList.contains('bg-rose-50');
-      if (isSelected) {
-        btn.className = "style-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200";
-      } else {
-        btn.className = "style-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-safar-700 border border-rose-200";
-      }
-    };
-
-    window.handleSaveProfile = function(e) {
-      e.preventDefault();
-      if (!currentProfile) return;
-
-      currentProfile.name = document.getElementById('input-full-name').value.trim();
-      currentProfile.age = parseInt(document.getElementById('input-age').value) || "";
-      currentProfile.gender = document.getElementById('input-gender').value;
-      currentProfile.homeCity = document.getElementById('input-home-city').value.trim();
-      currentProfile.upcomingCircuit = document.getElementById('input-upcoming-circuit').value.trim();
-      currentProfile.travelIntent = document.getElementById('input-travel-intent').value;
-      currentProfile.bio = document.getElementById('input-bio').value.trim();
-
-      if (INDIAN_LOCATIONS[currentProfile.upcomingCircuit]) {
-        currentProfile.lat = INDIAN_LOCATIONS[currentProfile.upcomingCircuit].lat;
-        currentProfile.lng = INDIAN_LOCATIONS[currentProfile.upcomingCircuit].lng;
-      } else if (!currentProfile.lat || !currentProfile.lng) {
-        // Fallback default coordinates if not geocoded yet
-        currentProfile.lat = 18.5204;
-        currentProfile.lng = 73.8567;
-      }
-
-      const styles = [];
-      document.querySelectorAll('.style-pill.bg-rose-50').forEach(p => {
-        styles.push(p.getAttribute('data-style'));
-      });
-      currentProfile.travelStyles = styles;
-
-      // Persist user profile to localStorage
-      try {
-        localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-      } catch (err) {
-        console.warn("Storage error for profile:", err);
-      }
-
-      // Add or update in allTravelersCache
-      if (currentProfile.name && currentProfile.name.length >= 2) {
-        if (!allTravelersCache) allTravelersCache = [];
-        const existingIdx = allTravelersCache.findIndex(t => t.uid === currentProfile.uid);
-        if (existingIdx >= 0) {
-          allTravelersCache[existingIdx] = { ...currentProfile };
-        } else {
-          allTravelersCache.push({ ...currentProfile });
-        }
-        try {
-          localStorage.setItem('safarmatch_all_travelers', JSON.stringify(allTravelersCache));
-        } catch (err) {
-          console.warn("Storage error for travelers:", err);
-        }
-      }
-
-      // If live Firebase is connected, sync user profile to Firestore profiles collection
-      if (isLiveFirebase && db) {
-        try {
-          setDoc(doc(db, "profiles", currentProfile.uid), currentProfile, { merge: true });
-        } catch (err) {
-          console.warn("Firestore sync error:", err);
-        }
-      }
-
-      renderTravelerPins();
-      showToast("💾 Profile details saved!", "success");
-      updateJourneyStatusUI();
-    };
-
-    window.updateProfileCompletionUI = function() {
-      if (!currentProfile) return;
-
-      let score = 0;
-      if (currentProfile.name && currentProfile.name.length >= 2) score += 20;
-      if (currentProfile.age && currentProfile.age >= 18) score += 15;
-      if (currentProfile.gender) score += 15;
-      if (currentProfile.homeCity && currentProfile.homeCity.length >= 2) score += 15;
-      if (currentProfile.upcomingCircuit) score += 15;
-      if (currentProfile.bio && currentProfile.bio.length >= 10) score += 10;
-      if (currentProfile.verificationStatus === 'verified' || currentProfile.selfieSubmitted) score += 10;
-
-      const pct = Math.min(100, score);
-
-      const headerBar = document.getElementById('header-profile-progress');
-      if (headerBar) headerBar.style.width = `${pct}%`;
-
-      const profilePct = document.getElementById('profile-completion-pct');
-      const profileBar = document.getElementById('profile-completion-bar');
-      const sidebarPct = document.getElementById('sidebar-profile-pct');
-      if (profilePct) profilePct.textContent = `${pct}%`;
-      if (profileBar) profileBar.style.width = `${pct}%`;
-      if (sidebarPct) sidebarPct.textContent = `${pct}%`;
-
-      // Verification Badge in Header and Profile
-      const hBadge = document.getElementById('header-verification-badge');
-      const hText = document.getElementById('header-verification-text');
-      const pPill = document.getElementById('profile-verification-status-pill');
-      const pLabel = document.getElementById('profile-verification-label');
-      const selfieStateBadge = document.getElementById('badge-selfie-state');
-
-      if (currentProfile.verificationStatus === 'verified') {
-        if (hText) hText.textContent = "Verified Explorer ✓";
-        if (hBadge) hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
-        if (pLabel) pLabel.textContent = "🛡️ Verified Explorer ✓";
-        if (pPill) pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center space-x-1";
-              const govidBadge = document.getElementById('badge-govid-state');
-      if (govidBadge) {
-        if (currentProfile && (currentProfile.govtIdData || currentProfile.verificationStatus === 'verified')) {
-          govidBadge.textContent = "Uploaded ✓";
-          govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-        } else {
-          govidBadge.textContent = "Mandatory *";
-          govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800";
-        }
-      }
-      if (selfieStateBadge) {
-          selfieStateBadge.textContent = "Verified ✓";
-          selfieStateBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-        }
-      } else if (currentProfile.verificationStatus === 'pending_review') {
-        if (hText) hText.textContent = "Verification In Review";
-        if (hBadge) hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200";
-        if (pLabel) pLabel.textContent = "⏳ Verification in Review (Est. 2-4 hrs)";
-        if (pPill) pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center space-x-1";
-        if (selfieStateBadge) {
-          selfieStateBadge.textContent = "In Review ⏳";
-          selfieStateBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800";
-        }
-      } else {
-        if (hText) hText.textContent = "Unverified";
-        if (hBadge) hBadge.className = "hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200";
-        if (pLabel) pLabel.textContent = "Unverified";
-        if (pPill) pPill.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center space-x-1";
-        if (selfieStateBadge) {
-          selfieStateBadge.textContent = "Not Done";
-          selfieStateBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600";
-        }
-      }
-
-      // Display name and avatar updates
-      const dispName = document.getElementById('profile-display-name');
-      const headerName = document.getElementById('header-user-name');
-      if (dispName && currentProfile.name) dispName.textContent = currentProfile.name;
-      if (headerName && currentProfile.name) headerName.textContent = currentProfile.name;
-
-      const headerVip = document.getElementById('header-vip-star');
-      if (headerVip) {
-        if (hasActiveExplorerPass()) headerVip.classList.remove('hidden');
-        else headerVip.classList.add('hidden');
-      }
-    };
-
-    window.triggerAvatarUpload = function() {
-      document.getElementById('profile-avatar-file-input').click();
-    };
-
-    window.handleAvatarFileSelected = function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        if (currentProfile) {
-          currentProfile.photoUrl = evt.target.result;
-        }
-        const imgEl = document.getElementById('profile-display-avatar');
-        const hImg = document.getElementById('header-user-avatar');
-        if (imgEl) imgEl.src = evt.target.result;
-        if (hImg) hImg.src = evt.target.result;
-        showToast("Profile avatar updated!", "success");
-      };
-      reader.readAsDataURL(file);
-    };
-
-    // ==================== SURAKSHA SHIELD (WOMEN'S SAFE MODE) ====================
-    window.toggleSurakshaMode = function(checked) {
-      if (currentProfile) {
-        currentProfile.surakshaShield = checked;
-      }
-      showToast(checked ? "🛡️ Suraksha Shield Activated: Pins hidden from male accounts." : "Suraksha Shield disabled.", "info");
-      renderTravelerPins();
-    };
-
-    // ==================== REPORT & BLOCK MODAL ====================
-    window.openReportModalFromChat = function() {
-      if (!activeChatPartner) return;
-      openReportBlockModal(activeChatPartner);
-    };
-
-    window.reportInspectedTraveler = function() {
-      closeTravelerDetailModal();
-      if (inspectedTraveler) openReportBlockModal(inspectedTraveler);
-    };
-
-    function openReportBlockModal(traveler) {
-      inspectedTraveler = traveler;
-      document.getElementById('report-user-name').textContent = traveler.name;
-      document.getElementById('report-block-modal').classList.remove('hidden');
-    }
-
-    window.closeReportBlockModal = function() {
-      document.getElementById('report-block-modal').classList.add('hidden');
-    };
-
-    window.submitReportAndBlock = function(isBlock) {
-      if (!inspectedTraveler) return;
-      if (isBlock) {
-        blockedUsersList.push(inspectedTraveler.uid);
-        renderTravelerPins();
-        showToast(`Traveler ${inspectedTraveler.name} has been blocked and reported.`, "error");
-      } else {
-        showToast("Safety report submitted for admin review.", "success");
-      }
-      closeReportBlockModal();
-    };
-
-    // ==================== MAP PIN INSPECT MODAL ====================
-    window.inspectTravelerFromMap = function(uid) {
-      const travelers = allTravelersCache || [];
-      let trv = travelers.find(t => t.uid === uid);
-      if (!trv && currentProfile && currentProfile.uid === uid) {
-        trv = currentProfile;
-      }
-      if (!trv) return;
-
-      inspectedTraveler = trv;
-      const modal = document.getElementById('traveler-detail-modal');
-      const photo = (trv.photoUrl && trv.photoUrl !== DEFAULT_AVATAR) ? trv.photoUrl : DEFAULT_AVATAR;
-      document.getElementById('modal-traveler-avatar').src = photo;
-      document.getElementById('modal-traveler-name').textContent = trv.name;
-      document.getElementById('modal-traveler-city').textContent = `${trv.upcomingCircuit || 'India'} Circuit • ${trv.homeCity || 'India'}`;
-      document.getElementById('modal-traveler-bio').textContent = trv.bio || "Traveler exploring India.";
-
-      const badge = document.getElementById('modal-traveler-badge');
-      if (trv.verificationStatus === 'verified') {
-        badge.textContent = "🛡️ Verified ✓";
-        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-      } else {
-        badge.textContent = "⚪ Unverified";
-        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600";
-      }
-
-      const stylesContainer = document.getElementById('modal-traveler-styles');
-      stylesContainer.innerHTML = (trv.travelStyles || []).map(s => `
-        <span class="px-2 py-0.5 rounded-full bg-rose-50 text-safar-700 text-[10px] font-semibold border border-rose-100">${s}</span>
-      `).join('');
-
-      modal.classList.remove('hidden');
+    function openUpiSandboxModal(amount = 299, title = "Explorer Pass (₹299)") {
+      openUpiModal(amount === 99 ? 'boost' : 'explorer', amount);
     };
 
     window.closeTravelerDetailModal = function() {
