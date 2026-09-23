@@ -1782,6 +1782,7 @@
     let blockedUsersList = [];
     let currentTripCircuitFilter = "all";
     let inspectedTraveler = null;
+    let currentReportTarget = null;
 
     // WebRTC Camera Stream reference
     let cameraMediaStream = null;
@@ -4341,6 +4342,346 @@
       openUpiModal(amount === 99 ? 'boost' : 'explorer', amount);
     };
 
+
+    // ==================== SURAKSHA SHIELD TOGGLE ====================
+    window.toggleSurakshaMode = function(enabled) {
+      if (!currentProfile) return;
+      currentProfile.surakshaShield = !!enabled;
+      try {
+        localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+      } catch (e) {}
+
+      if (isLiveFirebase && db && currentProfile.uid) {
+        try {
+          setDoc(doc(db, "profiles", currentProfile.uid), {
+            surakshaShield: !!enabled
+          }, { merge: true }).catch(err => console.warn("Firestore suraksha update error:", err));
+        } catch (e) {}
+      }
+
+      const toggleInput = document.getElementById('sidebar-suraksha-toggle');
+      if (toggleInput) toggleInput.checked = !!enabled;
+
+      renderTravelerPins();
+      showToast(
+        enabled
+          ? "🛡️ Suraksha Shield Active: Highlighting verified solo female travelers and trusted safety circuits."
+          : "Suraksha Shield set to standard filter.",
+        "info"
+      );
+    };
+
+    // ==================== TRAVELER INSPECTION & MAP INTERACTIONS ====================
+    window.inspectTravelerFromMap = function(uid) {
+      const traveler = (allTravelersCache || []).find(t => t.uid === uid);
+      if (!traveler) return;
+      inspectedTraveler = traveler;
+
+      const modal = document.getElementById('traveler-detail-modal');
+      const avatar = document.getElementById('modal-traveler-avatar');
+      const nameEl = document.getElementById('modal-traveler-name');
+      const badgeEl = document.getElementById('modal-traveler-badge');
+      const cityEl = document.getElementById('modal-traveler-city');
+      const bioEl = document.getElementById('modal-traveler-bio');
+      const stylesContainer = document.getElementById('modal-traveler-styles');
+
+      if (avatar) avatar.src = traveler.photoUrl || DEFAULT_AVATAR;
+      if (nameEl) nameEl.textContent = (traveler.name || 'Traveler') + ', ' + (traveler.age || '24');
+
+      if (badgeEl) {
+        if (traveler.verificationStatus === 'verified') {
+          badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex-shrink-0";
+          badgeEl.textContent = "✓ Verified Explorer";
+        } else {
+          badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0";
+          badgeEl.textContent = "⚪ Unverified";
+        }
+      }
+
+      if (cityEl) cityEl.textContent = (traveler.upcomingCircuit || 'All India') + ' • ' + (traveler.homeCity || 'India');
+      if (bioEl) bioEl.textContent = traveler.bio || "Fellow explorer on the Bharat backpacking circuit!";
+
+      if (stylesContainer) {
+        stylesContainer.innerHTML = '';
+        const styles = Array.isArray(traveler.travelStyles) && traveler.travelStyles.length > 0
+          ? traveler.travelStyles
+          : ['Backpacker', 'Hostels'];
+        styles.forEach(s => {
+          const span = document.createElement('span');
+          span.className = "px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-100";
+          span.textContent = s;
+          stylesContainer.appendChild(span);
+        });
+      }
+
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.reportInspectedTraveler = function() {
+      closeTravelerDetailModal();
+      if (!inspectedTraveler) return;
+      currentReportTarget = inspectedTraveler;
+      const nameSpan = document.getElementById('report-user-name');
+      if (nameSpan) nameSpan.textContent = inspectedTraveler.name || 'Traveler';
+      const modal = document.getElementById('report-block-modal');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.openReportModalFromChat = function() {
+      if (!activeChatPartner) return;
+      currentReportTarget = activeChatPartner;
+      const nameSpan = document.getElementById('report-user-name');
+      if (nameSpan) nameSpan.textContent = activeChatPartner.name || 'Traveler';
+      const modal = document.getElementById('report-block-modal');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.closeReportBlockModal = function() {
+      const modal = document.getElementById('report-block-modal');
+      if (modal) modal.classList.add('hidden');
+      currentReportTarget = null;
+    };
+
+    window.submitReportAndBlock = async function(blockUser = true) {
+      if (!currentReportTarget) {
+        closeReportBlockModal();
+        return;
+      }
+      const targetUid = currentReportTarget.uid;
+      const targetName = currentReportTarget.name || 'Traveler';
+      const reasonSelect = document.getElementById('report-reason-select');
+      const detailsInput = document.getElementById('report-details-text');
+      const reason = reasonSelect ? reasonSelect.value : 'unspecified';
+      const details = detailsInput ? detailsInput.value.trim() : '';
+
+      if (isLiveFirebase && db) {
+        try {
+          await addDoc(collection(db, "reports"), {
+            reporterUid: currentProfile ? currentProfile.uid : 'anonymous',
+            reporterName: currentProfile ? currentProfile.name : 'Anonymous',
+            reportedUid: targetUid,
+            reportedName: targetName,
+            reason: reason,
+            details: details,
+            blockApplied: !!blockUser,
+            createdAt: serverTimestamp()
+          });
+        } catch (e) {
+          console.warn("Firestore report submission error:", e);
+        }
+      }
+
+      if (blockUser && targetUid) {
+        try {
+          const blockedStr = localStorage.getItem('safarmatch_blocked_users') || '[]';
+          const blocked = JSON.parse(blockedStr);
+          if (!blocked.includes(targetUid)) {
+            blocked.push(targetUid);
+            localStorage.setItem('safarmatch_blocked_users', JSON.stringify(blocked));
+          }
+        } catch (e) {}
+
+        allTravelersCache = (allTravelersCache || []).filter(t => t.uid !== targetUid);
+        renderTravelerPins();
+        renderConversationList();
+
+        if (activeChatPartner && activeChatPartner.uid === targetUid) {
+          if (typeof activeChatUnsubscribe === 'function') {
+            try { activeChatUnsubscribe(); } catch (e) {}
+            activeChatUnsubscribe = null;
+          }
+          activeChatPartner = null;
+          const header = document.getElementById('chat-active-header');
+          const empty = document.getElementById('chat-empty-state');
+          if (header) header.classList.add('hidden');
+          if (empty) empty.classList.remove('hidden');
+        }
+
+        showToast("🚫 " + targetName + " blocked & reported. They will no longer appear on your map or chats.", "success");
+      } else {
+        showToast("🛡️ Safety report submitted for " + targetName + ". Our trust & safety team will review it.", "info");
+      }
+
+      if (detailsInput) detailsInput.value = '';
+      closeReportBlockModal();
+    };
+
+    // ==================== PROFILE EDITING, TAGS & PHOTO UPLOAD ====================
+    window.triggerAvatarUpload = function() {
+      const input = document.getElementById('profile-avatar-file-input');
+      if (input) input.click();
+    };
+
+    window.handleAvatarFileSelected = function(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 400;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+
+          if (currentProfile) {
+            currentProfile.photoUrl = base64Data;
+            try {
+              localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+            } catch (err) {}
+
+            const profileAvatar = document.getElementById('profile-display-avatar');
+            const headerAvatar = document.getElementById('header-user-avatar');
+            if (profileAvatar) profileAvatar.src = base64Data;
+            if (headerAvatar) headerAvatar.src = base64Data;
+
+            if (isLiveFirebase && db && currentProfile.uid) {
+              setDoc(doc(db, "profiles", currentProfile.uid), {
+                photoUrl: base64Data
+              }, { merge: true }).catch(err => console.warn("Firestore avatar update error:", err));
+            }
+
+            updateJourneyStatusUI();
+            showToast("📸 Profile photo updated successfully!", "success");
+          }
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.selectTravelIntent = function(btn) {
+      if (!btn) return;
+      const intent = btn.getAttribute('data-intent');
+      if (!intent) return;
+      const input = document.getElementById('input-travel-intent');
+      if (input) input.value = intent;
+      if (currentProfile) currentProfile.travelIntent = intent;
+
+      document.querySelectorAll('.intent-pill').forEach(el => {
+        el.className = "intent-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer";
+      });
+      btn.className = "intent-pill px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-safar-700 border border-rose-200 transition cursor-pointer";
+      updateJourneyStatusUI();
+    };
+
+    window.toggleStyleTag = function(btn) {
+      if (!btn) return;
+      const style = btn.getAttribute('data-style');
+      if (!style || !currentProfile) return;
+
+      if (!Array.isArray(currentProfile.travelStyles)) {
+        currentProfile.travelStyles = [];
+      }
+
+      const idx = currentProfile.travelStyles.indexOf(style);
+      if (idx > -1) {
+        currentProfile.travelStyles.splice(idx, 1);
+        btn.className = "style-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer";
+      } else {
+        currentProfile.travelStyles.push(style);
+        btn.className = "style-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-safar-700 border border-rose-200 transition cursor-pointer";
+      }
+
+      updateJourneyStatusUI();
+    };
+
+    window.handleSaveProfile = async function(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (!currentProfile) return;
+
+      const name = document.getElementById('input-full-name')?.value.trim() || '';
+      const age = parseInt(document.getElementById('input-age')?.value) || null;
+      const gender = document.getElementById('input-gender')?.value || 'Male';
+      const homeCity = document.getElementById('input-home-city')?.value.trim() || '';
+      const upcomingCircuit = document.getElementById('input-upcoming-circuit')?.value || 'Goa';
+      const bio = document.getElementById('input-bio')?.value.trim() || '';
+      const travelIntent = document.getElementById('input-travel-intent')?.value || 'Companion';
+
+      if (!name || name.length < 2) {
+        showToast("Please enter your full name (minimum 2 letters).", "error");
+        return;
+      }
+      if (!age || age < 18) {
+        showToast("Please enter a valid age (18 or older).", "error");
+        return;
+      }
+      if (!homeCity || homeCity.length < 2) {
+        showToast("Please enter your home city.", "error");
+        return;
+      }
+
+      currentProfile.name = name;
+      currentProfile.age = age;
+      currentProfile.gender = gender;
+      currentProfile.homeCity = homeCity;
+      currentProfile.upcomingCircuit = upcomingCircuit;
+      currentProfile.bio = bio;
+      currentProfile.travelIntent = travelIntent;
+
+      const circuitCoords = {
+        'Goa': { lat: 15.2993, lng: 74.1240 },
+        'Himachal': { lat: 32.2432, lng: 77.1892 },
+        'Uttarakhand': { lat: 30.0869, lng: 78.2676 },
+        'Rajasthan': { lat: 26.9124, lng: 75.7873 },
+        'Kerala': { lat: 9.9312, lng: 76.2673 },
+        'Varanasi': { lat: 25.3176, lng: 82.9739 },
+        'Kashmir & Ladakh': { lat: 34.1526, lng: 77.5771 },
+        'North East India': { lat: 26.1445, lng: 91.7362 }
+      };
+      if (circuitCoords[upcomingCircuit] && (!currentProfile.lat || !currentProfile.lng)) {
+        currentProfile.lat = circuitCoords[upcomingCircuit].lat;
+        currentProfile.lng = circuitCoords[upcomingCircuit].lng;
+      }
+
+      try {
+        localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+      } catch (err) {}
+
+      if (!allTravelersCache) allTravelersCache = [];
+      const existingIdx = allTravelersCache.findIndex(t => t.uid === currentProfile.uid);
+      if (existingIdx >= 0) {
+        allTravelersCache[existingIdx] = { ...currentProfile };
+      } else {
+        allTravelersCache.push({ ...currentProfile });
+      }
+
+      if (isLiveFirebase && db && currentProfile.uid) {
+        try {
+          await setDoc(doc(db, "profiles", currentProfile.uid), {
+            ...currentProfile,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (err) {
+          console.warn("Firestore profile save error:", err);
+        }
+      }
+
+      updateJourneyStatusUI();
+      renderTravelerPins();
+      showToast("✅ Profile saved! Your backpacker passport is updated.", "success");
+    };
+
     window.closeTravelerDetailModal = function() {
       document.getElementById('traveler-detail-modal').classList.add('hidden');
     };
@@ -4564,6 +4905,35 @@
 
       // Verification Badge & Status Pill UI
       updateVerificationBadgeUI(currentProfile.verificationStatus);
+
+      // Initialize Suraksha Shield toggle state
+      const surakshaToggle = document.getElementById('sidebar-suraksha-toggle');
+      if (surakshaToggle) {
+        surakshaToggle.checked = !!currentProfile.surakshaShield;
+      }
+
+      // Initialize Intent Pills
+      if (currentProfile.travelIntent) {
+        document.querySelectorAll('.intent-pill').forEach(el => {
+          if (el.getAttribute('data-intent') === currentProfile.travelIntent) {
+            el.className = "intent-pill px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-safar-700 border border-rose-200 transition cursor-pointer";
+          } else {
+            el.className = "intent-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer";
+          }
+        });
+      }
+
+      // Initialize Travel Style Pills
+      if (Array.isArray(currentProfile.travelStyles)) {
+        document.querySelectorAll('.style-pill').forEach(el => {
+          const st = el.getAttribute('data-style');
+          if (currentProfile.travelStyles.includes(st)) {
+            el.className = "style-pill px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-safar-700 border border-rose-200 transition cursor-pointer";
+          } else {
+            el.className = "style-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer";
+          }
+        });
+      }
 
       // Attach Real-Time Profile Listener if UID available
       if (currentProfile && currentProfile.uid) {
