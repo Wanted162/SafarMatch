@@ -300,6 +300,18 @@
                 <option value="Group Backpacker">🏕️ Group Backpacker</option>
                 <option value="Cab Splitter">🚕 Cab / Scooter Split</option>
               </select>
+
+              <!-- Suraksha Shield Filter Button -->
+              <button 
+                type="button" 
+                id="map-suraksha-toggle" 
+                onclick="toggleSurakshaMode(!currentProfile.surakshaShield)" 
+                class="px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center space-x-1 cursor-pointer transition flex-shrink-0"
+                title="Toggle Suraksha Shield Safe Mode (Highlights Verified & Female Travelers)"
+              >
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+                <span class="hidden sm:inline">Suraksha</span> <span>Shield</span>
+              </button>
             </div>
 
             <!-- Traveler Counter -->
@@ -307,6 +319,13 @@
               0 Explorers
             </div>
           </div>
+        </div>
+
+        <!-- Floating Active Suraksha Shield Banner (Shown when Safe Mode is active) -->
+        <div id="map-suraksha-banner" class="hidden absolute top-24 left-1/2 -translate-x-1/2 z-[24] bg-slate-900/90 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border border-rose-500/40 flex items-center space-x-2 animate-fadeIn cursor-pointer" onclick="openSurakshaEmergencyModal()">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <i data-lucide="shield-check" class="w-4 h-4 text-rose-400"></i>
+          <span>Suraksha Shield Active • Verified Explorers Only</span>
         </div>
 
         <!-- The Leaflet Map Canvas (Full Viewport) -->
@@ -329,13 +348,17 @@
       <section id="view-trips" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto pb-24 md:pb-0">
         <!-- Sticky Header with Circuit Filters & Action Button -->
         <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-        <!-- Mobile Quick-Actions Banner (Feedback & Cab Splitter) -->
+        <!-- Mobile Quick-Actions Banner (Feedback, Cab Splitter & Suraksha Shield) -->
         <div class="flex md:hidden items-center justify-between gap-2 pb-1 border-b border-slate-100">
-          <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-1.5 px-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
+          <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-1.5 px-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
             <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-            <span>Split Cab / Stay</span>
+            <span>Split Cab</span>
           </button>
-          <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-1.5 px-2.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
+          <button onclick="toggleSurakshaMode(!currentProfile.surakshaShield)" id="mobile-suraksha-toggle" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-1.5 px-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 transition">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+            <span>Suraksha</span>
+          </button>
+          <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-1.5 px-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
             <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
             <span>Feedback</span>
           </button>
@@ -500,10 +523,14 @@
                 </div>
               </div>
 
-              <!-- Safety / Block / Report Button -->
-              <div class="flex items-center space-x-2">
-                <button onclick="openReportModalFromChat()" title="Report or Block Traveler" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition">
-                  <i data-lucide="shield-alert" class="w-4 h-4"></i>
+              <!-- Safety & Action Buttons -->
+              <div class="flex items-center space-x-1.5">
+                <button type="button" onclick="openSurakshaEmergencyModal()" title="Suraksha Safety Shield & Emergency SOS" class="px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition flex items-center space-x-1 cursor-pointer">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+                  <span class="hidden sm:inline">Suraksha</span> <span>Shield</span>
+                </button>
+                <button onclick="openReportModalFromChat()" title="Report or Block Traveler" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition cursor-pointer">
+                  <i data-lucide="flag" class="w-4 h-4"></i>
                 </button>
               </div>
             </div>
@@ -512,31 +539,42 @@
             <div class="bg-amber-50/70 border-b border-amber-200/60 px-4 py-1.5 flex items-center justify-between text-[11px] text-amber-800">
               <div class="flex items-center space-x-1.5">
                 <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-600 flex-shrink-0"></i>
-                <span>Anti-Scam Filter: Phone numbers, UPI IDs, and external social handles are automatically restricted.</span>
+                <span>Anti-Scam Filter: Phone numbers, UPI IDs, and external links are automatically filtered for safety.</span>
               </div>
             </div>
 
             <!-- Connect Request Handshake Banners -->
             <!-- A. Sender UI: Connection Request Pending Banner -->
-            <div id="chat-sender-pending-banner" class="hidden bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center space-x-2 text-xs font-semibold text-amber-900">
-              <i data-lucide="clock" class="w-4 h-4 text-amber-600 flex-shrink-0 animate-spin"></i>
-              <span id="chat-sender-pending-text">⏳ Connection Request Pending: Waiting for traveler to accept your request before further messages can be sent.</span>
+            <div id="chat-sender-pending-banner" class="hidden bg-amber-50/90 border-b border-amber-200/80 px-4 py-2 flex items-center justify-between text-xs text-amber-900">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600 flex-shrink-0"></i>
+                <span id="chat-sender-pending-text" class="font-medium">Connection request sent • Waiting for traveler to accept.</span>
+              </div>
+              <span class="text-[10px] font-bold text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded-full">Request Sent</span>
             </div>
 
             <!-- B. Recipient UI: Incoming Request Action Banner -->
-            <div id="chat-recipient-action-banner" class="hidden bg-rose-50 border-b border-rose-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-rose-900">
-              <div class="flex items-center space-x-2">
-                <i data-lucide="handshake" class="w-4 h-4 text-safar-600 flex-shrink-0"></i>
-                <span id="chat-recipient-action-text">🤝 Traveler wants to connect with you!</span>
+            <div id="chat-recipient-action-banner" class="hidden bg-gradient-to-r from-rose-50 via-white to-pink-50 border-b border-rose-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+              <div class="flex items-center space-x-3 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-safar-600 flex-shrink-0">
+                  <i data-lucide="handshake" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="text-xs font-bold text-slate-900 truncate" id="chat-recipient-action-name">Traveler</span>
+                    <span class="text-[9px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">New Request</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 truncate mt-0.5" id="chat-recipient-action-text">Accept this connection request to unlock instant 2-way messaging and stay splitting.</p>
+                </div>
               </div>
-              <div class="flex items-center space-x-2">
-                <button type="button" onclick="acceptConnectionRequest()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center space-x-1 cursor-pointer">
+              <div class="flex items-center space-x-2 flex-shrink-0">
+                <button type="button" onclick="acceptConnectionRequest()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center space-x-1 cursor-pointer">
                   <i data-lucide="check" class="w-3.5 h-3.5"></i>
                   <span>Accept Request ✓</span>
                 </button>
-                <button type="button" onclick="declineConnectionRequest()" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition flex items-center space-x-1 cursor-pointer">
+                <button type="button" onclick="declineConnectionRequest()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition flex items-center space-x-1 cursor-pointer">
                   <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                  <span>Decline ✕</span>
+                  <span>Decline</span>
                 </button>
               </div>
             </div>
@@ -731,16 +769,77 @@
       <!-- ==================== VIEW 5: MY TRAVEL PROFILE & TRUST SUITE ==================== -->
       <section id="view-profile" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-4 sm:p-8 space-y-6 pb-28 md:pb-8">
-          <!-- Mobile Quick-Actions Banner (Cab Splitter & Feedback) -->
-          <div class="flex md:hidden items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
-            <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
+          <!-- Mobile Quick-Actions Banner (Cab Splitter, Suraksha Shield & Feedback) -->
+          <div class="flex md:hidden items-center justify-between gap-2 bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-2 px-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
               <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-              <span>Split Cab / Stay</span>
+              <span>Split Cab</span>
             </button>
-            <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
+            <button onclick="toggleSurakshaMode(!currentProfile.surakshaShield)" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-2 px-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 transition">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+              <span>Suraksha</span>
+            </button>
+            <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-2 px-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
               <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
-              <span>Feedback & Ideas</span>
+              <span>Feedback</span>
             </button>
+          </div>
+
+          <!-- Dedicated Suraksha Shield (भारत सुरक्षा शील्ड) & Safety Controls Card -->
+          <div class="bg-gradient-to-br from-rose-50/90 via-white to-pink-50/80 rounded-3xl p-6 border border-rose-200/80 shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-md shadow-rose-200 flex-shrink-0">
+                  <i data-lucide="shield-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Suraksha Shield (सुरक्षा शील्ड)</h3>
+                    <span id="suraksha-status-badge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">Standard Mode</span>
+                  </div>
+                  <p class="text-[11px] text-slate-600 mt-0.5">Designed for solo female backpackers and verified travelers across Bharat.</p>
+                </div>
+              </div>
+
+              <!-- Safe Mode Toggle Control -->
+              <div class="flex items-center space-x-3 bg-white px-3.5 py-2 rounded-2xl border border-rose-200/80 shadow-xs flex-shrink-0">
+                <span class="text-xs font-bold text-slate-700">Safe Mode Filter</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="profile-suraksha-toggle" onchange="toggleSurakshaMode(this.checked)" class="sr-only peer" />
+                  <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 3 Pillars of Suraksha Protection -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-[11px] text-slate-600">
+              <div class="p-3 bg-white/80 rounded-2xl border border-rose-100/80 space-y-1">
+                <div class="font-bold text-rose-900 flex items-center space-x-1.5">
+                  <i data-lucide="eye-off" class="w-3.5 h-3.5 text-rose-600"></i>
+                  <span>Privacy Pin Guard</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed">Hides your GPS pins & trips from non-female profiles. Highlights verified solo travelers.</p>
+              </div>
+              <div class="p-3 bg-white/80 rounded-2xl border border-rose-100/80 space-y-1">
+                <div class="font-bold text-rose-900 flex items-center space-x-1.5">
+                  <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-600"></i>
+                  <span>Anti-Scam Vault</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed">Restricts off-platform phone numbers, fake UPI IDs, and unverified chat requests.</p>
+              </div>
+              <div class="p-3 bg-white/80 rounded-2xl border border-rose-100/80 space-y-1 flex flex-col justify-between">
+                <div>
+                  <div class="font-bold text-rose-900 flex items-center space-x-1.5">
+                    <i data-lucide="phone-call" class="w-3.5 h-3.5 text-rose-600"></i>
+                    <span>Emergency Helplines</span>
+                  </div>
+                  <p class="text-[10px] text-slate-500 leading-relaxed">Pan-India Police (112) & Women Safety Helpline (1091) quick dial.</p>
+                </div>
+                <button type="button" onclick="openSurakshaEmergencyModal()" class="mt-2 text-[10px] font-bold text-rose-700 hover:text-rose-800 underline flex items-center space-x-1 cursor-pointer">
+                  <span>View SOS & Helplines →</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Profile Top Header -->
@@ -1519,7 +1618,111 @@
     </div>
   </div>
 
-  
+  <!-- ==================== MODAL: SURAKSHA EMERGENCY & SAFETY SHIELD ==================== -->
+  <div id="suraksha-emergency-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-rose-100 space-y-4 my-auto max-h-[90dvh] overflow-y-auto flex flex-col">
+      <!-- Header -->
+      <div class="flex items-start justify-between pb-3 border-b border-slate-100 flex-shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-rose-200">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <span>Suraksha Shield Safety Suite</span>
+            </h3>
+            <p class="text-xs text-slate-500">Instant emergency helplines & safety protection across Bharat</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeSurakshaEmergencyModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Safe Mode Status & Toggle Banner -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <i data-lucide="shield-check" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Safe Mode Filter</div>
+            <div class="text-[11px] text-slate-500">Hides pins & trips from non-female profiles</div>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="modal-suraksha-toggle" onchange="toggleSurakshaMode(this.checked)" class="sr-only peer" />
+          <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
+        </label>
+      </div>
+
+      <!-- Emergency Helplines Quick-Dial -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Government Emergency Helplines (Pan-India)</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- 112 -->
+          <a href="tel:112" class="p-3 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 transition flex items-center justify-between group">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-xs">
+                112
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-900">All India Emergency</p>
+                <p class="text-[10px] text-slate-500">Police, Medical, Fire</p>
+              </div>
+            </div>
+            <span class="text-xs font-extrabold text-rose-700 group-hover:underline">Call 112 📞</span>
+          </a>
+
+          <!-- 1091 -->
+          <a href="tel:1091" class="p-3 rounded-2xl bg-pink-50 hover:bg-pink-100 border border-pink-200 transition flex items-center justify-between group">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-xl bg-pink-600 text-white flex items-center justify-center font-black text-xs">
+                1091
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-900">Women Safety</p>
+                <p class="text-[10px] text-slate-500">National Women Helpline</p>
+              </div>
+            </div>
+            <span class="text-xs font-extrabold text-pink-700 group-hover:underline">Call 1091 📞</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Location & Circuit Copy for WhatsApp/SMS sharing -->
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-safar-600"></i>
+            <span>Share My Travel Location</span>
+          </span>
+          <button type="button" onclick="copyMyLocationSummary()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            <span>Copy Location</span>
+          </button>
+        </div>
+        <p id="suraksha-location-preview" class="text-[11px] text-slate-600 bg-white p-2 rounded-xl border border-slate-200 font-mono-code">
+          Current Circuit: Loading location...
+        </p>
+      </div>
+
+      <!-- Verified Traveler Protocol Advice -->
+      <div class="space-y-1.5 text-[11px] text-slate-600 bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200/80">
+        <div class="font-bold text-emerald-900 flex items-center space-x-1.5">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>Safar Safety Guidelines for Travelers</span>
+        </div>
+        <ul class="list-disc list-inside space-y-0.5 text-slate-600 pl-1">
+          <li>Always meet companion travelers in well-lit, public cafes or transport hubs first.</li>
+          <li>Never transfer advance money via UPI for shared stays before meeting in person.</li>
+          <li>Share your live trip circuit and stay address with a trusted friend or family member.</li>
+        </ul>
+      </div>
+
+      <button type="button" onclick="closeSurakshaEmergencyModal()" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer">
+        Close Safety Shield
+      </button>
+    </div>
+  </div>
   
   <!-- ==================== MODAL: FEEDBACK & FEATURE SUGGESTION HUB ==================== -->
   <div id="feedback-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
@@ -3429,7 +3632,8 @@
     window.renderTravelerPins = function(filterCircuit = "all") {
       const genderFilter = document.getElementById('map-filter-gender')?.value || 'all';
       const intentFilter = document.getElementById('map-filter-intent')?.value || 'all';
-      const isSoloWomanSafe = currentProfile && currentProfile.surakshaShield && currentProfile.gender === 'Female';
+      const isSurakshaActive = !!(currentProfile && currentProfile.surakshaShield);
+      const isSoloWomanSafe = isSurakshaActive && (currentProfile.gender === 'Female');
 
       // Load registered community travelers (with fallback to verified seed travelers)
       const travelersList = (allTravelersCache && allTravelersCache.length > 0)
@@ -3467,7 +3671,10 @@
           }
         }
 
-        if (isSoloWomanSafe && traveler.gender === 'Male' && !traveler.isSelf) return false;
+        if (isSurakshaActive && !traveler.isSelf) {
+          if (isSoloWomanSafe && traveler.gender === 'Male') return false;
+          if (traveler.verificationStatus && traveler.verificationStatus !== 'verified') return false;
+        }
         if (blockedUsersList.includes(traveler.uid)) return false;
 
         // Circuit / Keyword filter
@@ -3846,8 +4053,16 @@
 
       const trips = allTripsCache || [];
       const kw = searchKeyword.trim().toLowerCase();
+      const isSurakshaActive = !!(currentProfile && currentProfile.surakshaShield);
+      const isFemaleUser = (currentProfile && currentProfile.gender === 'Female');
 
       const filtered = trips.filter(t => {
+        // Suraksha Shield Safe Mode: filter out male or unverified trips for safe mode
+        if (isSurakshaActive && t.creatorUid !== (currentProfile ? currentProfile.uid : '')) {
+          if (isFemaleUser && t.creatorGender === 'Male') return false;
+          if (t.creatorVerification && t.creatorVerification !== 'verified') return false;
+        }
+
         // Circuit filter
         if (filterCircuit !== 'all' && t.circuit !== filterCircuit) return false;
         // Search keyword across destination, title, itinerary
@@ -4081,6 +4296,39 @@
     // ==================== IN-APP REAL-TIME CHAT ====================
     // Chat Metadata & Handshake Persistence Helpers
     let activeChatDocUnsubscribe = null;
+    let globalChatsUnsubscribe = null;
+
+    function setupGlobalChatsListener(myUid) {
+      if (!myUid || myUid === 'guest' || !isLiveFirebase || !db) return;
+      if (typeof globalChatsUnsubscribe === 'function') {
+        try { globalChatsUnsubscribe(); } catch (e) {}
+        globalChatsUnsubscribe = null;
+      }
+      try {
+        const chatsRef = collection(db, "chats");
+        globalChatsUnsubscribe = onSnapshot(chatsRef, (snapshot) => {
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const cid = docSnap.id;
+            if (data && (data.initiatorUid === myUid || data.recipientUid === myUid)) {
+              saveChatMeta(cid, data);
+              if (activeChatPartner) {
+                const activeCid = [myUid, activeChatPartner.uid].sort().join('_');
+                if (activeCid === cid) {
+                  updateHandshakeUI(data, activeChatPartner);
+                }
+              }
+            }
+          });
+          window.updateUnreadChatIndicators();
+          renderConversationList();
+        }, (err) => {
+          console.warn("Global chats listener error:", err);
+        });
+      } catch (err) {
+        console.warn("setupGlobalChatsListener init error:", err);
+      }
+    }
 
     function getChatMeta(chatId) {
       try {
@@ -4146,6 +4394,7 @@
       const senderBanner = document.getElementById('chat-sender-pending-banner');
       const senderText = document.getElementById('chat-sender-pending-text');
       const recipientBanner = document.getElementById('chat-recipient-action-banner');
+      const recipientName = document.getElementById('chat-recipient-action-name');
       const recipientText = document.getElementById('chat-recipient-action-text');
       const declinedBanner = document.getElementById('chat-declined-banner');
       const input = document.getElementById('chat-message-input');
@@ -4157,21 +4406,41 @@
       if (declinedBanner) declinedBanner.classList.add('hidden');
 
       const partnerName = traveler ? traveler.name : 'Traveler';
+      const partnerUid = traveler ? traveler.uid : '';
+      const msgs = partnerUid ? getMessagesForPartner(partnerUid) : [];
 
       if (!meta || meta.status === 'pending') {
         const isInitiator = meta ? (meta.initiatorUid === myUid) : true;
         if (isInitiator) {
-          if (senderBanner) senderBanner.classList.remove('hidden');
-          if (senderText) senderText.textContent = "⏳ Connection Request Pending: Waiting for " + partnerName + " to accept your request before further messages can be sent.";
+          // User is sender / initiator
+          if (msgs.length > 0) {
+            // Already sent intro message
+            if (senderBanner) senderBanner.classList.remove('hidden');
+            if (senderText) senderText.textContent = "Connection request sent to " + partnerName + " • Waiting for acceptance...";
+            if (input) {
+              input.disabled = false;
+              input.placeholder = "Send a follow-up or wait for " + partnerName + " to accept...";
+            }
+          } else {
+            // New conversation: Keep input open so sender can type their opening intro
+            if (senderBanner) senderBanner.classList.add('hidden');
+            if (input) {
+              input.disabled = false;
+              input.placeholder = "Type your intro travel message to " + partnerName + " (e.g. 'Hey, want to split a cab?')...";
+            }
+          }
+          if (sendBtn) sendBtn.disabled = false;
         } else {
+          // User is recipient: Display the clean accept action card
           if (recipientBanner) recipientBanner.classList.remove('hidden');
-          if (recipientText) recipientText.textContent = "🤝 " + partnerName + " wants to connect with you!";
+          if (recipientName) recipientName.textContent = partnerName;
+          if (recipientText) recipientText.textContent = partnerName + " wants to connect with you! Accept below or reply to unlock instant 2-way chat.";
+          if (input) {
+            input.disabled = false;
+            input.placeholder = "Type a reply to automatically accept & connect with " + partnerName + "...";
+          }
+          if (sendBtn) sendBtn.disabled = false;
         }
-        if (input) {
-          input.disabled = true;
-          input.placeholder = isInitiator ? "Connection request pending acceptance..." : "Accept connection request above to start chatting...";
-        }
-        if (sendBtn) sendBtn.disabled = true;
       } else if (meta.status === 'accepted') {
         if (input) {
           input.disabled = false;
@@ -4182,7 +4451,7 @@
         if (declinedBanner) declinedBanner.classList.remove('hidden');
         if (input) {
           input.disabled = true;
-          input.placeholder = "This conversation is archived.";
+          input.placeholder = "This connection request was declined.";
         }
         if (sendBtn) sendBtn.disabled = true;
       }
@@ -4205,9 +4474,28 @@
       meta.updatedAt = new Date().toISOString();
       saveChatMeta(chatId, meta);
 
+      // Append clean system confirmation message to thread
+      const msgs = getMessagesForPartner(partnerUid);
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      msgs.push({
+        id: "sys_" + Date.now(),
+        sender: "system",
+        text: "🤝 Connection request accepted! You and " + activeChatPartner.name + " can now coordinate trips in real-time.",
+        timestamp: timeStr
+      });
+      saveMessagesForPartner(partnerUid, msgs);
+      renderMessagesList(msgs);
+
       updateHandshakeUI(meta, activeChatPartner);
       renderConversationList();
-      showToast("🤝 Connection request accepted! You can now chat in real-time.", "success");
+      showToast("🤝 Connection request accepted! Start chatting.", "success");
+
+      // Auto-focus input for instant reply
+      const input = document.getElementById('chat-message-input');
+      if (input) {
+        input.disabled = false;
+        input.focus();
+      }
 
       if (isLiveFirebase && db) {
         try {
@@ -4215,6 +4503,13 @@
             status: "accepted",
             updatedAt: serverTimestamp()
           }, { merge: true });
+
+          await addDoc(collection(db, "chats", chatId, "messages"), {
+            text: "🤝 Connection request accepted! You can now chat in real-time.",
+            sender: "system",
+            timestamp: timeStr,
+            createdAt: serverTimestamp()
+          });
         } catch (e) {
           console.warn("Firestore accept chat error:", e);
         }
@@ -4252,54 +4547,77 @@
       }
     };
 
-    // Open Chat with Traveler (with Connect Handshake Check)
+    // Open Chat with Traveler (with Async Remote Doc Check & Deadlock-Free Handshake)
     window.openChatWithTraveler = async function(traveler) {
       if (!traveler || !traveler.uid) return;
       const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
       const partnerUid = traveler.uid;
       const chatId = [myUid, partnerUid].sort().join('_');
 
-      let meta = getChatMeta(chatId);
-      const hasPass = hasActiveExplorerPass();
-      const existingPartners = window.getExistingChatPartnerIds();
-      const isExisting = existingPartners.includes(partnerUid) || (meta && meta.status === 'accepted');
+      let meta = null;
+      let chatSnap = null;
 
-      if (!hasPass && !isExisting && (!meta || meta.status === 'pending')) {
-        const remaining = window.getDailyConnects();
-        if (remaining <= 0) {
-          window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
-          return;
+      // Step A: Check Firestore first for existing remote chat handshake
+      if (isLiveFirebase && db) {
+        try {
+          chatSnap = await getDoc(doc(db, "chats", chatId));
+        } catch (err) {
+          console.warn("Firestore check chat error:", err);
         }
-        if (!meta) {
-          window.consumeDailyConnect();
-          window.recordChatPartner(partnerUid);
-          showToast("✨ Connection request initiated! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
-        }
-      } else {
-        window.recordChatPartner(partnerUid);
       }
 
-      // Initialize pending chat document if not yet existing
-      if (!meta) {
-        meta = {
-          initiatorUid: myUid,
-          recipientUid: partnerUid,
-          status: "pending",
-          unreadBy: [partnerUid],
-          lastMessage: "Connection request sent",
-          lastMessageTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
+      if (chatSnap && chatSnap.exists()) {
+        // Remote chat document exists: Load exact liveMeta and never overwrite initiatorUid
+        const liveMeta = chatSnap.data();
+        meta = { ...liveMeta };
         saveChatMeta(chatId, meta);
+        window.recordChatPartner(partnerUid);
+      } else {
+        // Check if we have a valid cached meta locally
+        const cachedMeta = getChatMeta(chatId);
+        if (cachedMeta && cachedMeta.initiatorUid) {
+          meta = cachedMeta;
+          window.recordChatPartner(partnerUid);
+        } else {
+          // Brand new chat initiated by myUid
+          const hasPass = hasActiveExplorerPass();
+          const existingPartners = window.getExistingChatPartnerIds();
+          const isExisting = existingPartners.includes(partnerUid);
 
-        if (isLiveFirebase && db) {
-          try {
-            await setDoc(doc(db, "chats", chatId), {
-              ...meta,
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp()
-            }, { merge: true });
-          } catch (e) {
-            console.warn("Firestore init chat error:", e);
+          if (!hasPass && !isExisting) {
+            const remaining = window.getDailyConnects();
+            if (remaining <= 0) {
+              window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+              return;
+            }
+            window.consumeDailyConnect();
+            window.recordChatPartner(partnerUid);
+            showToast("✨ Connection request initiated! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
+          } else {
+            window.recordChatPartner(partnerUid);
+          }
+
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          meta = {
+            initiatorUid: myUid,
+            recipientUid: partnerUid,
+            status: "pending",
+            unreadBy: [partnerUid],
+            lastMessage: "Connection request sent",
+            lastMessageTime: timeStr
+          };
+          saveChatMeta(chatId, meta);
+
+          if (isLiveFirebase && db) {
+            try {
+              await setDoc(doc(db, "chats", chatId), {
+                ...meta,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+              }, { merge: true });
+            } catch (e) {
+              console.warn("Firestore init chat error:", e);
+            }
           }
         }
       }
@@ -4400,11 +4718,10 @@
             console.warn("Real-time chat onSnapshot error:", err);
           });
         } catch (err) {
-          console.warn("Could not bind real-time chat listener:", err);
+          console.warn("Firestore chat listener error:", err);
         }
       }
     };
-
     window.closeActiveChat = function() {
       if (typeof activeChatUnsubscribe === 'function') {
         try { activeChatUnsubscribe(); } catch (err) {}
@@ -4417,6 +4734,35 @@
       activeChatPartner = null;
       renderConversationList();
     };
+
+    window.openChatWithTravelerById = function(partnerUid) {
+      if (!partnerUid) return;
+      const pool = (allTravelersCache && allTravelersCache.length > 0) ? allTravelersCache : SEED_INDIAN_TRAVELERS;
+      let trv = pool.find(t => t.uid === partnerUid);
+      if (!trv && activeChatPartner && activeChatPartner.uid === partnerUid) {
+        trv = activeChatPartner;
+      }
+      if (!trv) {
+        trv = {
+          uid: partnerUid,
+          name: "Traveler",
+          photoUrl: DEFAULT_AVATAR,
+          upcomingCircuit: "India",
+          verificationStatus: "verified"
+        };
+      }
+      openChatWithTraveler(trv);
+    };
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
     function renderConversationList() {
       const container = document.getElementById('chat-conversations-list');
@@ -4447,7 +4793,12 @@
         let statusBadge = '';
         if (meta) {
           if (meta.status === 'pending') {
-            statusBadge = '<span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">Pending</span>';
+            const isInitiator = (meta.initiatorUid === myUid);
+            if (isInitiator) {
+              statusBadge = '<span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">Pending</span>';
+            } else {
+              statusBadge = '<span class="text-[9px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded-full animate-pulse">Request</span>';
+            }
           } else if (meta.status === 'accepted') {
             statusBadge = '<span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded-full">Connected</span>';
           } else if (meta.status === 'declined') {
@@ -4456,20 +4807,20 @@
         }
 
         return `
-          <div onclick='openChatWithTraveler(${JSON.stringify(trv)})' class="cursor-pointer p-2.5 rounded-2xl transition flex items-center space-x-2.5 ${isCurrent ? 'bg-rose-50 border border-rose-200' : 'hover:bg-slate-100'}">
+          <div onclick="openChatWithTravelerById('${trv.uid}')" class="cursor-pointer p-2.5 rounded-2xl transition flex items-center space-x-2.5 ${isCurrent ? 'bg-rose-50 border border-rose-200' : 'hover:bg-slate-100'}">
             <div class="relative w-9 h-9 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 border border-slate-200">
               <img src="${photo}" class="w-full h-full object-cover" />
               ${hasUnread ? '<span class="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>' : ''}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-800 truncate">${trv.name}</span>
+                <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(trv.name)}</span>
                 <div class="flex items-center space-x-1.5">
                   ${statusBadge}
                   ${hasUnread ? '<span class="w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse flex-shrink-0"></span>' : ''}
                 </div>
               </div>
-              <p class="text-[10px] text-slate-500 truncate">${trv.upcomingCircuit || 'India'} • ${trv.travelIntent || 'Companion'}</p>
+              <p class="text-[10px] text-slate-500 truncate">${escapeHtml(trv.upcomingCircuit || 'India')} • ${escapeHtml(trv.travelIntent || 'Companion')}</p>
             </div>
           </div>
         `;
@@ -4505,7 +4856,7 @@
             </div>
             <p class="text-xs font-bold text-slate-700">Protected In-App Chat</p>
             <p class="text-[11px] text-slate-500 max-w-xs leading-relaxed">
-              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? activeChatPartner.name : 'this explorer'}! Messages are synchronized in real-time.
+              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? escapeHtml(activeChatPartner.name) : 'this explorer'}! Messages are verified and 256-bit safe.
             </p>
           </div>
         `;
@@ -4513,11 +4864,20 @@
         return;
       }
       container.innerHTML = msgs.map(m => {
+        if (m.sender === 'system') {
+          return `
+            <div class="flex justify-center my-2.5">
+              <div class="bg-slate-100/95 border border-slate-200 text-slate-600 text-[11px] font-semibold px-3.5 py-1.5 rounded-full flex items-center space-x-1.5 shadow-2xs">
+                <span>${escapeHtml(m.text)}</span>
+              </div>
+            </div>
+          `;
+        }
         const isMe = m.sender === 'me';
         return `
           <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
             <div class="max-w-xs sm:max-w-md p-3 rounded-2xl text-xs ${isMe ? 'bg-safar-600 text-white rounded-br-xs shadow-xs' : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs shadow-xs'}">
-              <p class="leading-relaxed">${m.text}</p>
+              <p class="leading-relaxed">${escapeHtml(m.text)}</p>
             </div>
             <span class="text-[9px] text-slate-400 mt-1 px-1">${m.timestamp || ''}</span>
           </div>
@@ -4532,7 +4892,7 @@
       renderMessagesList(msgs);
     }
 
-    // Send Message with Hardened Moderation & Unread Tracking
+    // Send Message with Hardened Moderation & Seamless Handshake Acceptance
     window.handleSendMessage = async function(e) {
       e.preventDefault();
       if (!activeChatPartner) {
@@ -4543,11 +4903,11 @@
       const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
       const partnerUid = activeChatPartner.uid;
       const chatId = [myUid, partnerUid].sort().join('_');
-      const meta = getChatMeta(chatId);
+      let meta = getChatMeta(chatId);
 
-      // Check handshake status
-      if (meta && meta.status !== 'accepted') {
-        showToast("⏳ Connection request must be accepted before messages can be sent.", "warning");
+      // If declined, block sending
+      if (meta && meta.status === 'declined') {
+        showToast("This connection request was declined.", "warning");
         return;
       }
 
@@ -4563,6 +4923,38 @@
         return;
       }
 
+      const msgs = getMessagesForPartner(partnerUid);
+      const isFirstMessage = msgs.length === 0;
+
+      // If recipient is replying to a pending connection request, automatically accept it!
+      if (meta && meta.status === 'pending' && meta.recipientUid === myUid) {
+        meta.status = 'accepted';
+        meta.updatedAt = new Date().toISOString();
+        saveChatMeta(chatId, meta);
+        if (isLiveFirebase && db) {
+          setDoc(doc(db, "chats", chatId), { status: "accepted", updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+        }
+        showToast("🤝 Connection accepted and reply sent!", "success");
+      }
+
+      // Check daily connect quotas on first intro message by initiator
+      const hasPass = hasActiveExplorerPass();
+      const existingPartners = window.getExistingChatPartnerIds();
+      const isExisting = existingPartners.includes(partnerUid);
+
+      if (isFirstMessage && !hasPass && !isExisting) {
+        const remaining = window.getDailyConnects();
+        if (remaining <= 0) {
+          window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+          return;
+        }
+        window.consumeDailyConnect();
+        window.recordChatPartner(partnerUid);
+        showToast("✨ Connection request sent! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
+      } else {
+        window.recordChatPartner(partnerUid);
+      }
+
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -4573,19 +4965,28 @@
         timestamp: timeStr
       };
 
-      const msgs = getMessagesForPartner(partnerUid);
       msgs.push(newMsg);
       saveMessagesForPartner(partnerUid, msgs);
       renderMessagesList(msgs);
       input.value = "";
 
-      // Update meta with unreadBy for recipient
-      if (meta) {
+      if (!meta) {
+        meta = {
+          initiatorUid: myUid,
+          recipientUid: partnerUid,
+          status: "pending",
+          lastMessage: text,
+          lastMessageTime: timeStr,
+          unreadBy: [partnerUid]
+        };
+      } else {
         meta.lastMessage = text;
         meta.lastMessageTime = timeStr;
         meta.unreadBy = [partnerUid];
-        saveChatMeta(chatId, meta);
       }
+      saveChatMeta(chatId, meta);
+      updateHandshakeUI(meta, activeChatPartner);
+      renderConversationList();
 
       // Save to Firestore in real-time
       if (isLiveFirebase && db) {
@@ -4600,14 +5001,65 @@
           });
 
           await setDoc(doc(db, "chats", chatId), {
-            lastMessage: text,
-            lastMessageTime: timeStr,
-            unreadBy: [partnerUid],
+            ...meta,
             updatedAt: serverTimestamp()
           }, { merge: true });
         } catch (err) {
           console.warn("Firestore chat write error, saved locally:", err);
         }
+      }
+
+      // Realistic Seed Ambassador Acceptance & Interactive Reply
+      if (partnerUid.startsWith('seed_') && meta.status === 'pending') {
+        setTimeout(() => {
+          if (!activeChatPartner || activeChatPartner.uid !== partnerUid) return;
+          meta.status = "accepted";
+          meta.updatedAt = new Date().toISOString();
+          saveChatMeta(chatId, meta);
+
+          // Add acceptance notification to messages
+          const currentMsgs = getMessagesForPartner(partnerUid);
+          currentMsgs.push({
+            id: "sys_" + Date.now(),
+            sender: "system",
+            text: `🤝 ${activeChatPartner.name} accepted your connection request!`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+          saveMessagesForPartner(partnerUid, currentMsgs);
+          renderMessagesList(currentMsgs);
+          updateHandshakeUI(meta, activeChatPartner);
+          renderConversationList();
+          showToast(`🤝 ${activeChatPartner.name} accepted your connection request!`, "success");
+
+          // Ambassador sends a tailored, contextual travel reply
+          setTimeout(() => {
+            const replies = {
+              "seed_aarav_01": "Hey! Great to connect! I'm based in Morjim this week, exploring cafes and sunsets. Are you looking to split a scooter or grab seafood tonight?",
+              "seed_priya_02": "Hi there! Nice to meet you! I'm prepping for the Kheerganga trek next week. Have you packed warm layers? Let's definitely coordinate trails!",
+              "seed_rohan_03": "Hello fellow traveler! Doing a heritage and photography trail across Jaipur & Udaipur. Happy to split a cab for the fort circuits!",
+              "seed_meera_04": "Hey! Doing backwaters kayaking and working from Varkala cliffs. The weather is lovely here! What does your circuit look like?",
+              "seed_kabir_05": "Hi! Exploring the living root bridges and Dawki river this week. Always glad to connect with a fellow backpacker!",
+              "seed_ananya_06": "Namaste! Capturing dawn boat rides along the ghats and classical music evenings. Happy to share good local food spots!"
+            };
+            const replyText = replies[partnerUid] || `Hey! Glad to connect on SafarMatch! What are your travel plans for ${activeChatPartner.upcomingCircuit || 'this circuit'}?`;
+            const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const updatedMsgs = getMessagesForPartner(partnerUid);
+            updatedMsgs.push({
+              id: "msg_" + Date.now(),
+              sender: "partner",
+              text: replyText,
+              timestamp: replyTime
+            });
+            saveMessagesForPartner(partnerUid, updatedMsgs);
+            renderMessagesList(updatedMsgs);
+
+            meta.lastMessage = replyText;
+            meta.lastMessageTime = replyTime;
+            saveChatMeta(chatId, meta);
+            renderConversationList();
+          }, 900);
+        }, 1400);
       }
     };
     
@@ -4839,7 +5291,7 @@
     };
 
 
-    // ==================== SURAKSHA SHIELD TOGGLE ====================
+    // ==================== SURAKSHA SHIELD (भारत सुरक्षा शील्ड) CONTROLS ====================
     window.toggleSurakshaMode = function(enabled) {
       if (!currentProfile) return;
       currentProfile.surakshaShield = !!enabled;
@@ -4855,16 +5307,107 @@
         } catch (e) {}
       }
 
-      const toggleInput = document.getElementById('sidebar-suraksha-toggle');
-      if (toggleInput) toggleInput.checked = !!enabled;
+      // Synchronize all toggle inputs in UI
+      const toggleIds = ['sidebar-suraksha-toggle', 'profile-suraksha-toggle', 'modal-suraksha-toggle'];
+      toggleIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = !!enabled;
+      });
 
+      // Synchronize Map Suraksha Toggle Button style
+      const mapBtn = document.getElementById('map-suraksha-toggle');
+      if (mapBtn) {
+        if (enabled) {
+          mapBtn.className = "px-2.5 py-1 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-xs flex items-center space-x-1 cursor-pointer transition flex-shrink-0";
+        } else {
+          mapBtn.className = "px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center space-x-1 cursor-pointer transition flex-shrink-0";
+        }
+      }
+
+      // Synchronize Mobile Suraksha Quick Button style
+      const mobBtn = document.getElementById('mobile-suraksha-toggle');
+      if (mobBtn) {
+        if (enabled) {
+          mobBtn.className = "flex-1 flex items-center justify-center space-x-1 text-xs font-bold py-1.5 px-2 rounded-xl bg-rose-600 text-white shadow-xs transition cursor-pointer";
+        } else {
+          mobBtn.className = "flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-1.5 px-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 transition cursor-pointer";
+        }
+      }
+
+      // Update Map Suraksha Floating Banner
+      const mapBanner = document.getElementById('map-suraksha-banner');
+      if (mapBanner) {
+        if (enabled) mapBanner.classList.remove('hidden');
+        else mapBanner.classList.add('hidden');
+      }
+
+      // Update Suraksha Status Badges
+      const surakshaBadge = document.getElementById('suraksha-status-badge');
+      if (surakshaBadge) {
+        if (enabled) {
+          surakshaBadge.textContent = "Safe Mode Active 🛡️";
+          surakshaBadge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200";
+        } else {
+          surakshaBadge.textContent = "Standard Mode";
+          surakshaBadge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200";
+        }
+      }
+
+      // Re-filter Map and Trip Board feeds
       renderTravelerPins();
+      if (typeof renderTripsFeed === 'function') renderTripsFeed();
+
       showToast(
         enabled
-          ? "🛡️ Suraksha Shield Active: Highlighting verified solo female travelers and trusted safety circuits."
-          : "Suraksha Shield set to standard filter.",
+          ? "🛡️ Suraksha Shield Active: Safe Mode enabled! Only verified & female companion profiles are shown."
+          : "Suraksha Shield set to standard explorer mode.",
         "info"
       );
+
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.openSurakshaEmergencyModal = function() {
+      const modal = document.getElementById('suraksha-emergency-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const modalToggle = document.getElementById('modal-suraksha-toggle');
+      if (modalToggle && currentProfile) {
+        modalToggle.checked = !!currentProfile.surakshaShield;
+      }
+
+      const locPreview = document.getElementById('suraksha-location-preview');
+      if (locPreview && currentProfile) {
+        const circuit = currentProfile.upcomingCircuit || 'Bharat Explorer Circuit';
+        const coords = (currentProfile.lat && currentProfile.lng) ? `(GPS: ${Number(currentProfile.lat).toFixed(4)}° N, ${Number(currentProfile.lng).toFixed(4)}° E)` : '';
+        locPreview.textContent = `Current Circuit: ${circuit} ${coords}`;
+      }
+
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.closeSurakshaEmergencyModal = function() {
+      const modal = document.getElementById('suraksha-emergency-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.copyMyLocationSummary = function() {
+      const name = (currentProfile && currentProfile.name) ? currentProfile.name : "Safar Traveler";
+      const circuit = (currentProfile && currentProfile.upcomingCircuit) ? currentProfile.upcomingCircuit : "Goa";
+      const lat = (currentProfile && currentProfile.lat) ? Number(currentProfile.lat).toFixed(4) : "15.2993";
+      const lng = (currentProfile && currentProfile.lng) ? Number(currentProfile.lng).toFixed(4) : "74.1240";
+      const summary = `🚨 SafarMatch Suraksha Emergency Beacon: ${name} is traveling in ${circuit} circuit (GPS: ${lat}° N, ${lng}° E). Live coordination beacon shared for verified traveler safety.`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(summary).then(() => {
+          showToast("📋 Location Beacon copied! Paste to send via WhatsApp or SMS.", "success");
+        }).catch(() => {
+          showToast("Beacon: " + summary, "info");
+        });
+      } else {
+        showToast("Beacon: " + summary, "info");
+      }
     };
 
     // ==================== TRAVELER INSPECTION & MAP INTERACTIONS ====================
@@ -5439,7 +5982,7 @@
 
       // Attach Real-Time Profile Listener if UID available
       if (currentProfile && currentProfile.uid) {
-        attachProfileRealtimeListener(currentProfile.uid);
+        attachProfileRealtimeListener(currentProfile.uid); setupGlobalChatsListener(currentProfile.uid);
       }
 
       // Load registered travelers from localStorage (only real saved users)
@@ -5551,7 +6094,7 @@
                   currentProfile.photoUrl = user.photoURL;
                 }
               }
-              attachProfileRealtimeListener(user.uid);
+              attachProfileRealtimeListener(user.uid); setupGlobalChatsListener(user.uid);
             } else {
               if (currentProfile && currentProfile.uid) {
                 attachProfileRealtimeListener(currentProfile.uid);

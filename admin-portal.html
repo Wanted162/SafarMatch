@@ -807,7 +807,7 @@
                     Live Video Frame
                   </span>
                 </div>
-                <div class="h-64 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center relative group cursor-pointer" onclick="openLightbox('${selfieSrc}', 'Live Selfie - ${escapeHtml(traveler.name)}')">
+                <div class="h-64 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center relative group cursor-pointer" onclick="openSelfieLightboxByUid('${traveler.uid}')">
                   <img src="${selfieSrc}" alt="Selfie" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                   <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                     <span class="text-xs font-bold text-white bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-1.5">
@@ -828,7 +828,7 @@
                     Compulsory Document
                   </span>
                 </div>
-                <div class="h-64 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center relative group cursor-pointer" onclick="${govtSrc ? `openLightbox('${govtSrc}', 'Govt Photo ID - ${escapeHtml(traveler.name)}')` : ''}">
+                <div class="h-64 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center relative group cursor-pointer" onclick="openGovtIdLightboxByUid('${traveler.uid}')">
                   ${govtSrc ? `
                     <img src="${govtSrc}" alt="Govt ID" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" />
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
@@ -851,7 +851,7 @@
             <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-3 border-t border-slate-800/80">
               <button 
                 type="button" 
-                onclick="openRejectVerificationModal('${traveler.uid}', '${escapeHtml(traveler.name)}')" 
+                onclick="openRejectVerificationModalByUid('${traveler.uid}')" 
                 class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-300 text-xs font-bold border border-slate-700 hover:border-rose-800 transition flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <i data-lucide="x" class="w-4 h-4"></i>
@@ -860,7 +860,7 @@
 
               <button 
                 type="button" 
-                onclick="adminApproveIdentity('${traveler.uid}', '${escapeHtml(traveler.name)}')" 
+                onclick="adminApproveIdentityByUid('${traveler.uid}')" 
                 class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-md shadow-emerald-950/40 transition flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <i data-lucide="check" class="w-4 h-4"></i>
@@ -1031,7 +1031,8 @@
                 </div>
                 <button 
                   type="button" 
-                  onclick="copyTextToClipboard('${escapeHtml(utr)}')" 
+                  data-utr="${escapeHtml(utr)}"
+                  onclick="copyTextToClipboard(this.getAttribute('data-utr'))" 
                   class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 transition cursor-pointer"
                 >
                   <i data-lucide="copy" class="w-3.5 h-3.5"></i>
@@ -1048,7 +1049,7 @@
             <div class="flex flex-row md:flex-col items-center justify-end gap-2.5 flex-shrink-0">
               <button 
                 type="button" 
-                onclick="adminConfirmPayment('${traveler.uid}', '${escapeHtml(traveler.name)}', '${escapeHtml(utr)}', '${escapeHtml(sub.plan || 'explorer_monthly')}')" 
+                onclick="adminConfirmPaymentByUid('${traveler.uid}')" 
                 class="flex-1 md:flex-initial w-full px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-md transition flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
@@ -1057,7 +1058,7 @@
 
               <button 
                 type="button" 
-                onclick="openRejectPaymentModal('${traveler.uid}', '${escapeHtml(traveler.name)}', '${escapeHtml(utr)}')" 
+                onclick="openRejectPaymentModalByUid('${traveler.uid}')" 
                 class="flex-1 md:flex-initial w-full px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-400 text-xs font-bold border border-slate-700 hover:border-rose-800 transition flex items-center justify-center space-x-1.5 cursor-pointer"
               >
                 <i data-lucide="x-circle" class="w-4 h-4"></i>
@@ -1251,6 +1252,47 @@
     window.closeLightbox = function() {
       const modal = document.getElementById('lightbox-modal');
       if (modal) modal.classList.add('hidden');
+    };
+
+    window.openSelfieLightboxByUid = function(uid) {
+      const traveler = verificationQueue.find(t => t.uid === uid);
+      if (!traveler) return;
+      const selfieSrc = traveler.selfieData || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
+      openLightbox(selfieSrc, 'Live Selfie - ' + (traveler.name || 'Applicant'));
+    };
+
+    window.openGovtIdLightboxByUid = function(uid) {
+      const traveler = verificationQueue.find(t => t.uid === uid);
+      if (!traveler || !traveler.govtIdData) return;
+      openLightbox(traveler.govtIdData, 'Govt Photo ID - ' + (traveler.name || 'Applicant'));
+    };
+
+    window.adminApproveIdentityByUid = function(uid) {
+      const traveler = verificationQueue.find(t => t.uid === uid);
+      if (!traveler) return;
+      adminApproveIdentity(traveler.uid, traveler.name || 'Traveler');
+    };
+
+    window.openRejectVerificationModalByUid = function(uid) {
+      const traveler = verificationQueue.find(t => t.uid === uid);
+      if (!traveler) return;
+      openRejectVerificationModal(traveler.uid, traveler.name || 'Traveler');
+    };
+
+    window.adminConfirmPaymentByUid = function(uid) {
+      const traveler = paymentsQueue.find(t => t.uid === uid);
+      if (!traveler) return;
+      const sub = traveler.subscription || {};
+      const utr = sub.utrNumber || sub.upiReference || '000000000000';
+      adminConfirmPayment(traveler.uid, traveler.name || 'Traveler', utr, sub.plan || 'explorer_monthly');
+    };
+
+    window.openRejectPaymentModalByUid = function(uid) {
+      const traveler = paymentsQueue.find(t => t.uid === uid);
+      if (!traveler) return;
+      const sub = traveler.subscription || {};
+      const utr = sub.utrNumber || sub.upiReference || '000000000000';
+      openRejectPaymentModal(traveler.uid, traveler.name || 'Traveler', utr);
     };
 
     window.copyTextToClipboard = function(text) {
