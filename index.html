@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>SafarMatch — India's Live Travel Dating & Companion Platform</title>
   <meta name="description" content="Discover verified travel companions and romantic connections across Goa, Himachal, Uttarakhand, Rajasthan and beyond with zero booking fees and direct UPI." />
   <meta property="og:title" content="SafarMatch — India's Live Travel Dating & Companion Platform" />
@@ -49,6 +49,9 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
+    .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+    .pt-safe { padding-top: max(0.75rem, env(safe-area-inset-top)); }
+
     .leaflet-popup-content-wrapper {
       padding: 0;
       border-radius: 1.25rem;
@@ -80,7 +83,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased overflow-hidden h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 antialiased overflow-hidden h-[100dvh] flex flex-col">
 
   <!-- ==================== TOP NAVIGATION HEADER ==================== -->
   <header class="h-16 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-30 flex-shrink-0 shadow-xs">
@@ -118,12 +121,12 @@
     <!-- Right Header Actions (Auth, Verification Badge & Profile Completion) -->
     <div class="flex items-center space-x-3">
             <!-- Feedback & Feature Ideas Trigger -->
-      <button onclick="openFeedbackModal()" class="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition cursor-pointer shadow-2xs" title="Suggest Features or Send Feedback">
+      <button onclick="openFeedbackModal()" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition cursor-pointer shadow-2xs flex-shrink-0" title="Suggest Features or Send Feedback">
         <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-600"></i>
         <span class="hidden sm:inline">Feedback & Ideas</span>
       </button>
       <!-- Cab & Stay Expense Splitter Tool Button -->
-      <button onclick="openCabSplitModal()" class="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer shadow-xs" title="Split Cab & Stay Costs">
+      <button onclick="openCabSplitModal()" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer shadow-xs flex-shrink-0" title="Split Cab & Stay Costs">
         <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
         <span class="hidden sm:inline">Split Cab / Stay</span>
       </button>
@@ -134,7 +137,7 @@
       </div>
 
       <!-- Profile Completion Gauge -->
-      <div onclick="switchView('profile')" class="cursor-pointer flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-2.5 py-1.5 rounded-xl transition">
+      <div onclick="switchView('profile')" class="cursor-pointer flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-2 py-1.5 sm:px-2.5 rounded-xl transition flex-shrink-0">
         <div class="w-7 h-7 rounded-full bg-slate-200 overflow-hidden flex-shrink-0 border border-white shadow-xs">
           <img id="header-user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar" class="w-full h-full object-cover" />
         </div>
@@ -150,7 +153,7 @@
       </div>
 
       <!-- Google / Auth Button -->
-      <button id="btn-auth" onclick="handleAuthAction()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-xs">
+      <button id="btn-auth" onclick="handleAuthAction()" class="flex-shrink-0 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 sm:px-3.5 sm:py-2 rounded-xl transition flex items-center space-x-1.5 shadow-xs">
         <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
         <span id="btn-auth-text">Sign In</span>
       </button>
@@ -242,7 +245,7 @@
       <!-- ==================== VIEW 1: EXPLORE MAP ==================== -->
       <section id="view-map" class="view-panel relative w-full h-full flex flex-col overflow-hidden">
         <!-- Floating Circuit & Destination Search Bar (Live Bharat Explorer Map) -->
-        <div class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto z-[25] max-w-2xl bg-white/95 backdrop-blur-md p-2.5 rounded-2xl shadow-lg border border-slate-200/80 flex flex-col gap-2">
+        <div class="absolute top-2 left-2 right-2 sm:left-4 sm:right-auto z-[25] max-w-2xl bg-white/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl shadow-lg border border-slate-200/80 flex flex-col gap-2">
           <!-- Search Row: Destination Input with Datalist -->
           <div class="flex items-center gap-2">
             <div class="relative flex-1">
@@ -310,7 +313,7 @@
         <div id="map" class="w-full h-full z-0 bg-slate-100"></div>
 
         <!-- Floating Map Action Controls (Bottom Right) -->
-        <div class="absolute bottom-20 md:bottom-6 right-4 z-[25] flex flex-col gap-2">
+        <div class="absolute bottom-24 md:bottom-6 right-3 sm:right-4 z-[25] flex flex-col gap-2">
           <!-- Reset Center to India -->
           <button onclick="resetMapCenter()" title="Center India Map" class="w-10 h-10 rounded-2xl bg-white shadow-md border border-slate-200 flex items-center justify-center text-slate-700 hover:text-safar-600 transition">
             <i data-lucide="crosshair" class="w-5 h-5"></i>
@@ -323,9 +326,20 @@
       </section>
 
       <!-- ==================== VIEW 2: LIVE INDIA TRIP BOARD ==================== -->
-      <section id="view-trips" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
+      <section id="view-trips" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto pb-24 md:pb-0">
         <!-- Sticky Header with Circuit Filters & Action Button -->
-        <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <!-- Mobile Quick-Actions Banner (Feedback & Cab Splitter) -->
+        <div class="flex md:hidden items-center justify-between gap-2 pb-1 border-b border-slate-100">
+          <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-1.5 px-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
+            <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+            <span>Split Cab / Stay</span>
+          </button>
+          <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-1.5 px-2.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
+            <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+            <span>Feedback</span>
+          </button>
+        </div>
           <div>
             <div class="flex items-center space-x-2">
               <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Live India Trip Board</h2>
@@ -566,8 +580,19 @@
       </section>
 
       <!-- ==================== VIEW 4: EXPLORER PASS & MONETIZATION ==================== -->
-      <section id="view-monetization" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
-        <div class="max-w-4xl mx-auto w-full p-4 sm:p-8 space-y-6">
+      <section id="view-monetization" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto pb-24 md:pb-0">
+        <div class="max-w-4xl mx-auto w-full p-4 sm:p-8 space-y-6 pb-28 md:pb-8">
+          <!-- Mobile Quick-Actions Banner (Cab Splitter & Feedback) -->
+          <div class="flex md:hidden items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
+            <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
+              <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+              <span>Split Cab / Stay</span>
+            </button>
+            <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
+              <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+              <span>Feedback & Ideas</span>
+            </button>
+          </div>
 
           <!-- Header -->
           <div class="text-center space-y-2 max-w-xl mx-auto">
@@ -705,7 +730,18 @@
 
       <!-- ==================== VIEW 5: MY TRAVEL PROFILE & TRUST SUITE ==================== -->
       <section id="view-profile" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
-        <div class="max-w-4xl mx-auto w-full p-4 sm:p-8 space-y-6">
+        <div class="max-w-4xl mx-auto w-full p-4 sm:p-8 space-y-6 pb-28 md:pb-8">
+          <!-- Mobile Quick-Actions Banner (Cab Splitter & Feedback) -->
+          <div class="flex md:hidden items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
+            <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
+              <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+              <span>Split Cab / Stay</span>
+            </button>
+            <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
+              <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+              <span>Feedback & Ideas</span>
+            </button>
+          </div>
 
           <!-- Profile Top Header -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
@@ -943,7 +979,7 @@
 
   <!-- ==================== MODAL: DIRECT UPI PAYMENT & UTR VERIFICATION ==================== -->
   <div id="upi-payment-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5 my-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 sm:space-y-5 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <!-- Header -->
       <div class="flex items-start justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">
@@ -1028,7 +1064,7 @@
 
   <!-- ==================== MODAL: DAILY CONNECT LIMIT PAYWALL ==================== -->
   <div id="paywall-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-4 sm:p-6 shadow-2xl border border-slate-100 text-center space-y-4 max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-14 h-14 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center mx-auto shadow-xs">
         <i data-lucide="sparkles" class="w-7 h-7"></i>
       </div>
@@ -1054,7 +1090,7 @@
 
   <!-- ==================== MODAL: CAB & STAY EXPENSE SPLITTER ==================== -->
   <div id="cab-split-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 my-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="flex items-start justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">
           <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -1123,28 +1159,28 @@
   </div>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION BAR ==================== -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-around py-2 px-1 z-30 shadow-lg">
-    <button onclick="switchView('map')" id="mobile-nav-map" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-safar-600">
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-around py-1.5 px-1 z-40 shadow-lg pb-safe">
+    <button onclick="switchView('map')" id="mobile-nav-map" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-safar-600 transition">
       <i data-lucide="map-pin" class="w-5 h-5"></i>
-      <span class="text-[10px] font-bold mt-1">Map</span>
+      <span class="text-[10px] font-bold mt-0.5">Map</span>
     </button>
-    <button onclick="switchView('trips')" id="mobile-nav-trips" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400">
+    <button onclick="switchView('trips')" id="mobile-nav-trips" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 transition">
       <i data-lucide="calendar" class="w-5 h-5"></i>
-      <span class="text-[10px] font-medium mt-1">Trips</span>
+      <span class="text-[10px] font-medium mt-0.5">Trips</span>
     </button>
-    <button onclick="switchView('chat')" id="mobile-nav-chat" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400 relative">
+    <button onclick="switchView('chat')" id="mobile-nav-chat" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 relative transition">
       <i data-lucide="message-circle" class="w-5 h-5"></i>
-      <span class="text-[10px] font-medium mt-1">Chat</span>
-      <span id="mobile-chat-unread-dot" class="hidden absolute top-1 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
-      <span id="mobile-chat-lock-badge" class="absolute top-1 right-2 text-[9px]">🔒</span>
+      <span class="text-[10px] font-medium mt-0.5">Chat</span>
+      <span id="mobile-chat-unread-dot" class="hidden absolute top-1 right-4 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
+      <span id="mobile-chat-lock-badge" class="absolute top-1 right-3 text-[9px]">🔒</span>
     </button>
-    <button onclick="switchView('monetization')" id="mobile-nav-monetization" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400">
+    <button onclick="switchView('monetization')" id="mobile-nav-monetization" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 transition">
       <i data-lucide="zap" class="w-5 h-5"></i>
-      <span class="text-[10px] font-medium mt-1">Pass</span>
+      <span class="text-[10px] font-medium mt-0.5">Pass</span>
     </button>
-    <button onclick="switchView('profile')" id="mobile-nav-profile" class="mobile-nav-item flex flex-col items-center justify-center py-1 px-3 text-slate-400">
+    <button onclick="switchView('profile')" id="mobile-nav-profile" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 transition">
       <i data-lucide="user" class="w-5 h-5"></i>
-      <span class="text-[10px] font-medium mt-1">Profile</span>
+      <span class="text-[10px] font-medium mt-0.5">Profile</span>
     </button>
   </nav>
 
@@ -1223,7 +1259,7 @@
 
   <!-- ==================== MODAL: CREATE A TRIP PLAN ==================== -->
   <div id="create-trip-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-slate-100 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
           <h3 class="text-lg font-bold text-slate-900">Post a Live Trip Plan</h3>
@@ -1299,7 +1335,7 @@
 
   <!-- ==================== MODAL: LIVE WEBCAM SELFIE VERIFICATION ==================== -->
   <div id="selfie-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2">
           <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
@@ -1386,7 +1422,7 @@
 
   <!-- ==================== MODAL: TRAVELER DETAIL INSPECT MODAL (From Map) ==================== -->
   <div id="traveler-detail-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="relative bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 my-auto">
+    <div class="relative bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="flex items-start justify-between gap-3">
         <div class="flex items-center space-x-3 min-w-0">
           <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 border-2 border-white shadow-md flex-shrink-0">
@@ -1426,7 +1462,7 @@
 
   <!-- ==================== MODAL: REPORT & BLOCK TRAVELER ==================== -->
   <div id="report-block-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">
           <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
@@ -1487,7 +1523,7 @@
   
   <!-- ==================== MODAL: FEEDBACK & FEATURE SUGGESTION HUB ==================== -->
   <div id="feedback-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[92vh] flex flex-col">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain flex flex-col">
       <!-- Header -->
       <div class="flex items-start justify-between pb-3 border-b border-slate-100 flex-shrink-0">
         <div class="flex items-center space-x-2.5">
@@ -1599,7 +1635,7 @@
   
   <!-- ==================== MODAL: IDENTITY VERIFICATION APPROVED CELEBRATION ==================== -->
   <div id="verification-approved-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center space-y-4 my-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 text-center space-y-4 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
         <i data-lucide="shield-check" class="w-8 h-8"></i>
       </div>
@@ -1623,7 +1659,7 @@
 
   <!-- ==================== MODAL: IDENTITY VERIFICATION REJECTED ACTION ==================== -->
   <div id="verification-rejected-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-rose-100 space-y-4 text-center my-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-rose-100 space-y-4 text-center my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
         <i data-lucide="shield-alert" class="w-8 h-8"></i>
       </div>
@@ -1663,7 +1699,7 @@
 
   <!-- ==================== MODAL: PAYMENT APPROVED CELEBRATION ==================== -->
   <div id="payment-approved-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center space-y-4 my-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 text-center space-y-4 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
         <i data-lucide="crown" class="w-8 h-8"></i>
       </div>
@@ -1687,7 +1723,7 @@
 
   <!-- ==================== MODAL: PAYMENT REJECTED WARNING ==================== -->
   <div id="payment-rejected-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-amber-200 space-y-4 text-center my-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-amber-200 space-y-4 text-center my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
         <i data-lucide="alert-triangle" class="w-8 h-8"></i>
       </div>
