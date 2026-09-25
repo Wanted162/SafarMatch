@@ -112,6 +112,464 @@
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased overflow-hidden h-[100dvh] flex flex-col">
 
+  <!-- ==================== LANDING PAGE WITH GOOGLE ID LOGIN ==================== -->
+  <div id="landing-page" class="fixed inset-0 z-[100] bg-[#070b14] text-slate-100 flex flex-col overflow-y-auto overflow-x-hidden selection:bg-rose-500 selection:text-white scroll-smooth">
+    <!-- Ambient Atmospheric Glows -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-rose-600/15 rounded-full blur-3xl pointer-events-none -translate-y-1/2"></div>
+    <div class="fixed top-1/3 right-10 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="fixed bottom-10 left-10 w-80 h-80 bg-amber-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- LANDING HEADER -->
+    <header class="w-full border-b border-white/10 bg-[#070b14]/90 backdrop-blur-xl sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-safar-600 via-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
+          <i data-lucide="compass" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-black text-lg tracking-tight text-white">SafarMatch</span>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full">Bharat Edition</span>
+          </div>
+          <p class="text-[10px] text-slate-400 hidden sm:block">India's Verified Travel Dating & Companion Platform</p>
+        </div>
+      </div>
+
+      <!-- Quick Nav Links -->
+      <nav class="hidden lg:flex items-center space-x-6 text-xs font-semibold text-slate-300">
+        <a href="#landing-benefits" class="hover:text-white transition">Benefits</a>
+        <a href="#landing-how-it-works" class="hover:text-white transition">How It Works</a>
+        <a href="#landing-who-is-it-for" class="hover:text-white transition">Who It's For</a>
+        <a href="#landing-reviews" class="hover:text-white transition">Traveler Stories</a>
+      </nav>
+
+      <!-- Google Sign In Header Button -->
+      <div class="flex items-center space-x-3">
+        <button 
+          onclick="loginWithGoogleFromLanding()" 
+          class="group relative inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold transition shadow-md hover:shadow-lg cursor-pointer border border-slate-200"
+        >
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Sign In with Google</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative pt-12 sm:pt-20 pb-16 px-4 sm:px-6 max-w-6xl mx-auto text-center flex flex-col items-center">
+      <!-- Badge -->
+      <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-rose-500/15 via-amber-500/15 to-emerald-500/15 border border-white/15 text-xs font-semibold text-rose-300 mb-6 backdrop-blur-md">
+        <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+        <span>🇮🇳 Bharat's #1 Verified Travel Companion Network</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white max-w-4xl leading-[1.15]">
+        Stop Traveling Solo. <br class="hidden sm:inline" />
+        <span class="bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-400 bg-clip-text text-transparent">
+          Connect With Verified Companions.
+        </span>
+      </h1>
+
+      <p class="mt-5 text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl font-normal leading-relaxed">
+        Find like-minded companions heading to Goa, Himachal, Uttarakhand, Ladakh & beyond. Split airport cabs, share cliffside hostels, and travel safely with <strong class="text-rose-400 font-semibold">Suraksha Shield</strong>.
+      </p>
+
+      <!-- GOOGLE LOGIN CARD (THE CORE REQUIREMENT) -->
+      <div class="mt-8 w-full max-w-md bg-gradient-to-b from-white/10 to-white/5 border border-white/20 p-6 sm:p-7 rounded-3xl backdrop-blur-xl shadow-2xl relative overflow-hidden">
+        <div class="text-center space-y-4">
+          <div class="flex items-center justify-center space-x-2 text-xs font-bold text-emerald-400">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Login with Google ID to Enter</span>
+          </div>
+
+          <!-- PRIMARY GOOGLE LOGIN BUTTON -->
+          <button 
+            id="landing-google-btn-main"
+            onclick="loginWithGoogleFromLanding()" 
+            class="w-full py-4 px-5 rounded-2xl bg-white hover:bg-slate-100 active:scale-[0.99] text-slate-900 font-black text-sm sm:text-base shadow-xl hover:shadow-2xl transition flex items-center justify-center space-x-3 cursor-pointer border border-slate-200"
+          >
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="landing-google-btn-text">Sign in with Google ID</span>
+            <div id="landing-google-spinner" class="hidden w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+          </button>
+
+          <p class="text-[11px] text-slate-400">
+            ⚡ Instant 1-Click Verification • No Password Needed • 100% Free
+          </p>
+
+          <!-- Divider -->
+          <div class="flex items-center space-x-2 text-slate-500 text-[10px]">
+            <div class="h-px bg-white/10 flex-1"></div>
+            <span>EXPLORE PREVIEW</span>
+            <div class="h-px bg-white/10 flex-1"></div>
+          </div>
+
+          <!-- Preview as guest button -->
+          <button 
+            onclick="handleGuestLoginFromLanding()" 
+            class="text-xs font-semibold text-slate-300 hover:text-white transition flex items-center justify-center space-x-1.5 w-full py-1.5 cursor-pointer"
+          >
+            <span>Take a Quick Tour as Guest Explorer</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Trust footer on card -->
+        <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-around text-[10px] text-slate-400 font-medium">
+          <span class="flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3 text-emerald-400"></i> Govt ID Verified</span>
+          <span class="flex items-center gap-1"><i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i> Encrypted Cloud Vault</span>
+          <span class="flex items-center gap-1"><i data-lucide="phone-off" class="w-3 h-3 text-emerald-400"></i> Zero Spam Calls</span>
+        </div>
+      </div>
+
+      <!-- Authentic Core Pillars Bar -->
+      <div class="mt-12 w-full grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-4xl text-left">
+        <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center space-x-3.5">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Verified Companions Only</h4>
+            <p class="text-[11px] text-slate-400">Google ID authentication & optional Govt ID badge</p>
+          </div>
+        </div>
+        <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center space-x-3.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="calculator" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Direct Cost Splitting</h4>
+            <p class="text-[11px] text-slate-400">Split airport taxis & hostel rooms directly via UPI</p>
+          </div>
+        </div>
+        <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center space-x-3.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-white">Zero Brokerage & Commission</h4>
+            <p class="text-[11px] text-slate-400">100% peer-to-peer connection for travelers</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION: WHY SAFARMATCH / BENEFITS ==================== -->
+    <section id="landing-benefits" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-rose-400 mb-2">Why Solo Travelers Choose SafarMatch</h2>
+        <h3 class="text-2xl sm:text-4xl font-extrabold text-white">Core Benefits of Our Platform</h3>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">Solving the real-world problems solo explorers face across Bharat: high private cab costs, safety concerns, and solitude.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Benefit 1: Airport Cab & Transit Splitting -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="calculator" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-bold text-white">Cut Transit & Airport Cab Costs by 50%+</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Arriving at distant airports like MOPA Goa, Dehradun (Jolly Grant), Kochi, or Bagdogra? Solo taxis can cost ₹1,500–₹3,000. Connect with co-travelers landing at similar times, share the cab ride, and split fares directly via UPI with zero commissions.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] text-emerald-300 font-semibold flex items-center gap-1">
+            <span>Direct UPI settlements • No middleman markups</span>
+          </div>
+        </div>
+
+        <!-- Benefit 2: Suraksha Shield for Solo Women -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-rose-500/40 transition flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center">
+              <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-bold text-white">Suraksha Shield (सुरक्षा) for Women</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Travel independently with total confidence. Turn on Women-First Safe Mode to connect strictly with verified female companions for remote mountain trails, night transit, and hostel sharing. Includes emergency SOS hotlines (112, 1091).
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] text-rose-300 font-semibold flex items-center gap-1">
+            <span>Govt ID badges & live selfie verification</span>
+          </div>
+        </div>
+
+        <!-- Benefit 3: In-App Chat with Zero Contact Leakage -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-sky-500/40 transition flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
+              <i data-lucide="message-circle" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-bold text-white">In-App Chat with Peace Themes</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              No need to hand over your personal phone number or social media profiles to strangers before you meet. Chat directly within the app using calming lotus zen wallpapers, real-time message delivery ticks, and typing indicators.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] text-sky-300 font-semibold flex items-center gap-1">
+            <span>Built-in anti-scam phone & UPI protection</span>
+          </div>
+        </div>
+
+        <!-- Benefit 4: Share Stays & Homestays -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-amber-500/40 transition flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+              <i data-lucide="home" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-bold text-white">Share Cliffside Stays & Homestays</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Want a private cottage in Old Manali, a heritage haveli in Pushkar, or a sea-view beach shack in Gokarna? Split private rooms and scenic homestays with verified companions to enjoy premium comfort at hostel dorm prices.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] text-amber-300 font-semibold flex items-center gap-1">
+            <span>Stay longer for less across Bharat</span>
+          </div>
+        </div>
+
+        <!-- Benefit 5: Match by Travel Vibe & Rhythm -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-purple-500/40 transition flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+              <i data-lucide="compass" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-bold text-white">Match Your Exact Travel Rhythm</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Filter companions by distinct travel vibes: Backpacker (budget & hostels), Digital Nomad (co-working cafes with Wi-Fi), Trekker (dawn hikes & summit passes), or Cultural Explorer (temples & heritage walks). No awkward mismatches.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] text-purple-300 font-semibold flex items-center gap-1">
+            <span>Sync interests, upcoming dates & destinations</span>
+          </div>
+        </div>
+
+        <!-- Benefit 6: Spontaneous Meetups & Safe Sightseeing -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-cyan-500/40 transition flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+              <i data-lucide="map-pin" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-bold text-white">Live GPS Bharat Map & Meetups</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Already in Kasol, Arambol, or Rishikesh? Open the live map to see who is nearby, check their profile bio, and coordinate sunset beach walks, café chai sessions, scooter convoys, or group rafting trips with fellow travelers.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] text-cyan-300 font-semibold flex items-center gap-1">
+            <span>Real-time companion radar across 50+ hubs</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION: WHO IS SAFARMATCH FOR ==================== -->
+    <section id="landing-who-is-it-for" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full border-t border-white/10">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-amber-400 mb-2">Built For Bharat Explorers</h2>
+        <h3 class="text-2xl sm:text-4xl font-extrabold text-white">Who Should Use SafarMatch?</h3>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">Whether you're exploring the Himalayas or relaxing on the Konkan coast, SafarMatch is built for every solo traveler.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl">
+            👩‍🦰
+          </div>
+          <h4 class="text-sm font-bold text-white">Solo Women Travelers</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Find verified female companions for Kheerganga treks, night trains, or sharing homestay rooms with total safety.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+            🎒
+          </div>
+          <h4 class="text-sm font-bold text-white">Budget Backpackers</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Split ₹2,000 airport taxi fares, share scooter rentals, and team up for boat rides to make long travels pocket-friendly.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-xl">
+            💻
+          </div>
+          <h4 class="text-sm font-bold text-white">Digital Nomads</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Connect with peers working out of cafes in Goa, Dharamshala, or Bir Billing with high-speed Wi-Fi and evening meetups.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+            🏔️
+          </div>
+          <h4 class="text-sm font-bold text-white">Trekkers & Adventurers</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Never hike unfamiliar Himalayan passes alone. Group up for Parvati Valley, Chopta-Tungnath, and high-altitude circuits.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="landing-how-it-works" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full border-t border-white/10">
+      <div class="text-center max-w-xl mx-auto mb-12">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-1">Simple 3-Step Process</h2>
+        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">How SafarMatch Works</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Step 1 -->
+        <div class="text-center space-y-3 p-6 rounded-3xl bg-white/5 border border-white/10">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500 text-white font-black text-lg flex items-center justify-center mx-auto shadow-md">1</div>
+          <h4 class="text-base font-bold text-white">Sign In with Google ID</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            One click authenticates your profile securely without passwords. Your Google display photo and name populate instantly.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="text-center space-y-3 p-6 rounded-3xl bg-white/5 border border-white/10">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white font-black text-lg flex items-center justify-center mx-auto shadow-md">2</div>
+          <h4 class="text-base font-bold text-white">Set Your Travel Preferences</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Pick your upcoming destination and vibe: Backpacker, Digital Nomad, Trekker, or Cultural Explorer in 60 seconds.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="text-center space-y-3 p-6 rounded-3xl bg-white/5 border border-white/10">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white font-black text-lg flex items-center justify-center mx-auto shadow-md">3</div>
+          <h4 class="text-base font-bold text-white">Match, Split & Explore</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Connect directly in real-time chat, share cab rides from airports, split stays, and explore India safely together.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAVELER TESTIMONIALS -->
+    <section id="landing-reviews" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full border-t border-white/10">
+      <div class="text-center max-w-xl mx-auto mb-12">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-rose-400 mb-1">Real Stories</h2>
+        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Loved by Solo Explorers Across India</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Review 1 -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-4 flex flex-col justify-between">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            "First time going solo to Himachal! I turned on Suraksha Shield and connected with Priya for Kheerganga. Having another verified female companion made the whole journey stress-free and magical."
+          </p>
+          <div class="flex items-center space-x-3 pt-3 border-t border-white/10">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" class="w-10 h-10 rounded-full object-cover border border-rose-400" />
+            <div>
+              <div class="text-xs font-bold text-white">Priya Patel</div>
+              <div class="text-[10px] text-rose-300">Mumbai • Kheerganga Trek</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 2 -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-4 flex flex-col justify-between">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            "Landing at MOPA Goa late night used to cost ₹2,200 alone. With SafarMatch's Cab Splitter, I matched with two other backpackers heading to Arambol. Saved ₹1,500 immediately and gained friends for the week!"
+          </p>
+          <div class="flex items-center space-x-3 pt-3 border-t border-white/10">
+            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=120&q=80" class="w-10 h-10 rounded-full object-cover border border-amber-400" />
+            <div>
+              <div class="text-xs font-bold text-white">Aarav Sharma</div>
+              <div class="text-[10px] text-amber-300">Delhi • North Goa Circuit</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-4 flex flex-col justify-between">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            "As a freelance photographer, traveling with heavy gear can be intimidating. The ID verification and selfie badge made me feel completely safe meeting travel buddies in Pushkar and Jodhpur."
+          </p>
+          <div class="flex items-center space-x-3 pt-3 border-t border-white/10">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" class="w-10 h-10 rounded-full object-cover border border-emerald-400" />
+            <div>
+              <div class="text-xs font-bold text-white">Ananya Sen</div>
+              <div class="text-[10px] text-emerald-300">Kolkata • Rajasthan Circuit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA BANNER -->
+    <section class="py-16 px-4 sm:px-6 max-w-4xl mx-auto w-full text-center">
+      <div class="p-8 sm:p-12 rounded-3xl bg-gradient-to-tr from-rose-950 via-slate-900 to-emerald-950 border border-white/20 relative overflow-hidden shadow-2xl">
+        <h3 class="text-2xl sm:text-4xl font-black text-white">Ready For Your Next Journey?</h3>
+        <p class="text-xs sm:text-sm text-slate-300 mt-3 max-w-md mx-auto">
+          Login using your Google ID to enter the live map, explore active trip itineraries, and match with verified companions across Bharat.
+        </p>
+
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button 
+            onclick="loginWithGoogleFromLanding()" 
+            class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-sm sm:text-base shadow-xl hover:shadow-2xl transition flex items-center justify-center space-x-3 cursor-pointer"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Sign in with Google ID</span>
+          </button>
+
+          <button 
+            onclick="handleGuestLoginFromLanding()" 
+            class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm border border-white/20 transition cursor-pointer"
+          >
+            <span>Explore Map as Guest</span>
+          </button>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-[10px] text-slate-400">
+          <span>🇮🇳 Made for Indian Travelers</span>
+          <span>•</span>
+          <span>🚨 Women Helpline: 1091</span>
+          <span>•</span>
+          <span>🚓 National Emergency: 112</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-white/10 bg-[#05080f] px-4 sm:px-8 py-8 text-center text-xs text-slate-500">
+      <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 rounded-lg bg-rose-600 flex items-center justify-center text-white">
+            <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+          </div>
+          <span class="font-bold text-slate-300">SafarMatch Bharat Edition</span>
+        </div>
+        <p class="text-[11px] text-slate-500">
+          Encrypted Cloud Vault & Anti-Harassment Safeguards Active. Contact: <a href="mailto:safarmatch@gmail.com" class="text-rose-400 hover:underline">safarmatch@gmail.com</a>
+        </p>
+        <p class="text-[11px] text-slate-600">
+          © 2026 SafarMatch. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  </div>
+
   <!-- ==================== TOP NAVIGATION HEADER ==================== -->
   <header class="h-16 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-30 flex-shrink-0 shadow-xs">
     <!-- Brand -->
@@ -210,7 +668,7 @@
           </button>
 
           <!-- 3. Real-Time Chat (Explorer Pass Gated) -->
-          <button onclick="switchView('chat')" id="nav-btn-chat" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100 relative">
+          <button onclick="navigateToChatTab()" id="nav-btn-chat" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100 relative">
             <i data-lucide="message-circle" class="w-4 h-4"></i>
             <span>Real-time Chat</span>
             <span id="sidebar-chat-unread-dot" class="hidden w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
@@ -512,15 +970,15 @@
           </div>
         </div>
 
-        <!-- UNLOCKED CHAT INTERFACE (Two Panels) -->
-        <div id="chat-content-unlocked" class="w-full h-full flex flex-col md:flex-row overflow-hidden">
-          <!-- Left Panel: Conversations & Handshakes -->
-          <div class="w-full md:w-80 border-r border-slate-200 flex flex-col bg-slate-50 flex-shrink-0 h-64 sm:h-72 md:h-full overflow-hidden">
+        <!-- UNLOCKED CHAT INTERFACE (Two Dedicated Panels) -->
+        <div id="chat-content-unlocked" class="w-full h-full flex flex-col md:flex-row overflow-hidden relative">
+          <!-- Left Panel: Conversations & Handshakes (Dedicated full view on mobile, sidebar on desktop) -->
+          <div id="chat-conversations-panel" class="w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-slate-50 flex-shrink-0 h-full overflow-hidden pb-16 md:pb-0">
             <!-- Header -->
             <div class="p-3.5 border-b border-slate-200 bg-white flex items-center justify-between">
               <div>
                 <h3 class="text-sm font-extrabold text-slate-900">Conversations</h3>
-                <p class="text-[11px] text-slate-500">Verified Indian travelers</p>
+                <p class="text-[11px] text-slate-500">Tap any verified traveler to open chat</p>
               </div>
               <div class="flex items-center space-x-1.5">
                 <span id="chat-active-count" class="text-[10px] font-bold bg-rose-100 text-safar-700 px-2 py-0.5 rounded-full">
@@ -570,31 +1028,36 @@
             </div>
           </div>
 
-          <!-- Right Panel: Message Thread & Active Conversation -->
-          <div class="flex-1 flex flex-col bg-white overflow-hidden h-full">
+          <!-- Right Panel: Dedicated Active Chat Thread (Takes full screen on mobile when opened, side panel on desktop) -->
+          <div id="chat-thread-panel" class="w-full md:flex-1 hidden md:flex flex-col bg-white overflow-hidden h-full">
             <!-- Active Chat Header -->
-            <div id="chat-header-bar" class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-white z-10 flex-shrink-0">
-              <div class="flex items-center space-x-3">
-                <div class="relative w-10 h-10 rounded-full overflow-hidden bg-slate-200 border border-slate-300">
+            <div id="chat-header-bar" class="px-3 py-2.5 sm:px-4 sm:py-3 border-b border-slate-200 flex items-center justify-between bg-white z-10 flex-shrink-0">
+              <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 mr-2">
+                <!-- Mobile Back Button to return to Conversations -->
+                <button type="button" onclick="backToConversationList()" class="md:hidden flex items-center space-x-1 py-1.5 px-2.5 -ml-1 text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-xl transition cursor-pointer flex-shrink-0 font-bold text-xs shadow-2xs" title="Back to conversations">
+                  <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                  <span>Chats</span>
+                </button>
+                <div class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-slate-200 border border-slate-300 flex-shrink-0">
                   <img id="active-chat-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar" class="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <div class="flex items-center space-x-2">
-                    <h4 id="active-chat-name" class="text-sm font-bold text-slate-900">Select a traveler</h4>
-                    <span id="active-chat-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">⚪ Unverified</span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center space-x-1.5 truncate">
+                    <h4 id="active-chat-name" class="text-xs sm:text-sm font-bold text-slate-900 truncate">Select a companion</h4>
+                    <span id="active-chat-badge" class="text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0">⚪ Unverified</span>
                   </div>
-                  <p id="active-chat-meta" class="text-[11px] text-slate-500">Click a traveler on the Explore Map or in conversations to chat</p>
+                  <p id="active-chat-meta" class="text-[10px] sm:text-[11px] text-slate-500 truncate">Select a traveler from conversations to chat</p>
                 </div>
               </div>
 
               <!-- Safety, Theme & Action Buttons -->
-              <div class="flex items-center space-x-1.5">
+              <div class="flex items-center space-x-1 sm:space-x-1.5 flex-shrink-0">
                 <!-- Chat Wallpaper & Theme Dropdown -->
                 <div class="relative">
-                  <button type="button" id="chat-theme-toggle-btn" onclick="toggleChatThemeDropdown(event)" class="px-2.5 py-1 text-xs font-bold text-slate-700 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 rounded-xl border border-slate-200 transition flex items-center space-x-1.5 cursor-pointer shadow-2xs" title="Select Chat Wallpaper & Theme">
-                    <i data-lucide="palette" class="w-3.5 h-3.5 text-emerald-600"></i>
-                    <span class="hidden md:inline" id="chat-theme-active-name">Peace</span>
-                    <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                  <button type="button" id="chat-theme-toggle-btn" onclick="toggleChatThemeDropdown(event)" class="p-1.5 sm:px-2.5 sm:py-1 text-xs font-bold text-slate-700 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 rounded-xl border border-slate-200 transition flex items-center space-x-1 cursor-pointer shadow-2xs" title="Select Chat Wallpaper & Theme">
+                    <i data-lucide="palette" class="w-4 h-4 text-emerald-600"></i>
+                    <span class="hidden lg:inline text-[11px]" id="chat-theme-active-name">Peace</span>
+                    <i data-lucide="chevron-down" class="hidden sm:inline w-3 h-3 text-slate-400"></i>
                   </button>
                   <div id="chat-theme-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-2 z-50 animate-in fade-in">
                     <div class="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between mb-1">
@@ -606,18 +1069,18 @@
                   </div>
                 </div>
 
-                <button type="button" onclick="openSurakshaEmergencyModal()" title="Suraksha Safety Shield & Emergency SOS" class="px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition flex items-center space-x-1 cursor-pointer">
-                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
-                  <span class="hidden sm:inline">Suraksha</span> <span>Shield</span>
+                <button type="button" onclick="openSurakshaEmergencyModal()" title="Suraksha Safety Shield & Emergency SOS" class="p-1.5 sm:px-2.5 sm:py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition flex items-center space-x-1 cursor-pointer">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-rose-600 flex-shrink-0"></i>
+                  <span class="hidden sm:inline text-[11px]">Suraksha</span>
                 </button>
-                <button onclick="openReportModalFromChat()" title="Report or Block Traveler" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition cursor-pointer">
+                <button onclick="openReportModalFromChat()" title="Report or Block Traveler" class="p-1.5 sm:p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition cursor-pointer">
                   <i data-lucide="flag" class="w-4 h-4"></i>
                 </button>
               </div>
             </div>
 
             <!-- Anti-Bypass Safety Notice -->
-            <div class="bg-amber-50/70 border-b border-amber-200/60 px-4 py-1.5 flex items-center justify-between text-[11px] text-amber-800">
+            <div class="bg-amber-50/70 border-b border-amber-200/60 px-4 py-1.5 flex items-center justify-between text-[11px] text-amber-800 flex-shrink-0">
               <div class="flex items-center space-x-1.5">
                 <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-600 flex-shrink-0"></i>
                 <span>Anti-Scam Filter: Phone numbers, UPI IDs, and external links are automatically filtered for safety.</span>
@@ -625,7 +1088,7 @@
             </div>
 
             <!-- WhatsApp Prompt: Continue Chatting Choice -->
-            <div id="chat-whatsapp-prompt-banner" class="hidden bg-white border-b border-slate-200/90 px-4 py-3 shadow-xs">
+            <div id="chat-whatsapp-prompt-banner" class="hidden bg-white border-b border-slate-200/90 px-4 py-3 shadow-xs flex-shrink-0">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center space-x-3 min-w-0">
                   <div class="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0">
@@ -654,7 +1117,7 @@
             </div>
 
             <!-- Conversation Paused Banner (Option to Resume) -->
-            <div id="chat-declined-banner" class="hidden bg-slate-100 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between text-xs text-slate-600">
+            <div id="chat-declined-banner" class="hidden bg-slate-100 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between text-xs text-slate-600 flex-shrink-0">
               <div class="flex items-center space-x-2">
                 <i data-lucide="message-square-off" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
                 <span id="chat-declined-text">You chose not to continue chatting with this traveler.</span>
@@ -665,7 +1128,7 @@
             </div>
 
             <!-- Messages Stream Container with Peace Zen Theme Wallpaper -->
-            <div id="chat-messages-container" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 w-full chat-theme-peace transition-colors duration-200 relative select-text">
+            <div id="chat-messages-container" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 w-full chat-theme-peace transition-colors duration-200 relative select-text min-h-0">
               <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-6 space-y-2">
                 <div class="w-12 h-12 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-slate-500">
                   <i data-lucide="message-square" class="w-6 h-6"></i>
@@ -696,7 +1159,7 @@
             </div>
 
             <!-- Message Input Form with Hardened Moderation -->
-            <form id="chat-input-form" onsubmit="handleSendMessage(event)" class="p-2.5 sm:p-3 bg-white border-t border-slate-200 flex items-center gap-2 flex-shrink-0">
+            <form id="chat-input-form" onsubmit="handleSendMessage(event)" class="p-2 sm:p-3 bg-white border-t border-slate-200 flex items-center gap-2 flex-shrink-0 pb-safe">
               <input 
                 type="text" 
                 id="chat-message-input" 
@@ -1429,7 +1892,7 @@
   </div>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION BAR ==================== -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-around py-1.5 px-1 z-40 shadow-lg pb-safe">
+  <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-around py-1.5 px-1 z-40 shadow-lg pb-safe">
     <button onclick="switchView('map')" id="mobile-nav-map" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-safar-600 transition">
       <i data-lucide="map-pin" class="w-5 h-5"></i>
       <span class="text-[10px] font-bold mt-0.5">Map</span>
@@ -1438,7 +1901,7 @@
       <i data-lucide="calendar" class="w-5 h-5"></i>
       <span class="text-[10px] font-medium mt-0.5">Trips</span>
     </button>
-    <button onclick="switchView('chat')" id="mobile-nav-chat" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 relative transition">
+    <button onclick="navigateToChatTab()" id="mobile-nav-chat" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 relative transition">
       <i data-lucide="message-circle" class="w-5 h-5"></i>
       <span class="text-[10px] font-medium mt-0.5">Chat</span>
       <span id="mobile-chat-unread-dot" class="hidden absolute top-1 right-4 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
@@ -5468,6 +5931,7 @@
 
       activeChatPartner = traveler;
       switchView('chat');
+      showActiveChatOnMobile();
 
       // Update Chat Header Bar
       const nameEl = document.getElementById('active-chat-name');
@@ -5549,6 +6013,7 @@
         }
       }
     };
+
     window.closeActiveChat = function() {
       if (typeof activeChatUnsubscribe === 'function') {
         try { activeChatUnsubscribe(); } catch (err) {}
@@ -5558,9 +6023,105 @@
         try { activeChatDocUnsubscribe(); } catch (err) {}
         activeChatDocUnsubscribe = null;
       }
-      activeChatPartner = null;
-      renderConversationList();
+      backToConversationList();
     };
+
+    window.backToConversationList = function() {
+      activeChatPartner = null;
+      if (typeof activeChatUnsubscribe === 'function') {
+        try { activeChatUnsubscribe(); } catch (err) {}
+        activeChatUnsubscribe = null;
+      }
+      if (typeof activeChatDocUnsubscribe === 'function') {
+        try { activeChatDocUnsubscribe(); } catch (err) {}
+        activeChatDocUnsubscribe = null;
+      }
+      const convPanel = document.getElementById('chat-conversations-panel');
+      const threadPanel = document.getElementById('chat-thread-panel');
+      const mobileNav = document.getElementById('mobile-bottom-nav');
+
+      if (convPanel) {
+        convPanel.classList.remove('hidden');
+        convPanel.classList.add('flex');
+      }
+      if (threadPanel) {
+        threadPanel.classList.add('hidden');
+        threadPanel.classList.remove('flex');
+      }
+      if (mobileNav) {
+        mobileNav.classList.remove('hidden');
+      }
+      renderConversationList();
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    window.showActiveChatOnMobile = function() {
+      const convPanel = document.getElementById('chat-conversations-panel');
+      const threadPanel = document.getElementById('chat-thread-panel');
+      const mobileNav = document.getElementById('mobile-bottom-nav');
+
+      if (window.innerWidth < 768) {
+        if (convPanel) {
+          convPanel.classList.add('hidden');
+          convPanel.classList.remove('flex');
+        }
+        if (threadPanel) {
+          threadPanel.classList.remove('hidden');
+          threadPanel.classList.add('flex');
+        }
+        if (mobileNav) {
+          mobileNav.classList.add('hidden');
+        }
+      } else {
+        if (convPanel) {
+          convPanel.classList.remove('hidden');
+          convPanel.classList.add('flex');
+        }
+        if (threadPanel) {
+          threadPanel.classList.remove('hidden');
+          threadPanel.classList.add('flex');
+        }
+      }
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    // Auto-adapt chat layout when screen size or orientation changes
+    window.addEventListener('resize', () => {
+      if (typeof currentView !== 'undefined' && currentView === 'chat') {
+        const convPanel = document.getElementById('chat-conversations-panel');
+        const threadPanel = document.getElementById('chat-thread-panel');
+        const mobileNav = document.getElementById('mobile-bottom-nav');
+        if (window.innerWidth >= 768) {
+          if (convPanel) {
+            convPanel.classList.remove('hidden');
+            convPanel.classList.add('flex');
+          }
+          if (threadPanel) {
+            threadPanel.classList.remove('hidden');
+            threadPanel.classList.add('flex');
+          }
+          if (mobileNav) {
+            mobileNav.classList.remove('hidden');
+          }
+        } else {
+          if (!activeChatPartner) {
+            if (convPanel) {
+              convPanel.classList.remove('hidden');
+              convPanel.classList.add('flex');
+            }
+            if (threadPanel) {
+              threadPanel.classList.add('hidden');
+              threadPanel.classList.remove('flex');
+            }
+            if (mobileNav) {
+              mobileNav.classList.remove('hidden');
+            }
+          } else {
+            showActiveChatOnMobile();
+          }
+        }
+      }
+    });
 
     window.openChatWithTravelerById = function(partnerUid) {
       if (!partnerUid) return;
@@ -6630,15 +7191,7 @@
         renderConversationList();
 
         if (activeChatPartner && activeChatPartner.uid === targetUid) {
-          if (typeof activeChatUnsubscribe === 'function') {
-            try { activeChatUnsubscribe(); } catch (e) {}
-            activeChatUnsubscribe = null;
-          }
-          activeChatPartner = null;
-          const header = document.getElementById('chat-active-header');
-          const empty = document.getElementById('chat-empty-state');
-          if (header) header.classList.add('hidden');
-          if (empty) empty.classList.remove('hidden');
+          window.closeActiveChat();
         }
 
         showToast("🚫 " + targetName + " blocked & reported. They will no longer appear on your map or chats.", "success");
@@ -6891,6 +7444,42 @@
       if (viewName === 'chat') {
         applyChatThemeToUI();
         renderConversationList();
+
+        const convPanel = document.getElementById('chat-conversations-panel');
+        const threadPanel = document.getElementById('chat-thread-panel');
+        const mobileNav = document.getElementById('mobile-bottom-nav');
+
+        if (window.innerWidth < 768) {
+          if (!activeChatPartner) {
+            if (convPanel) {
+              convPanel.classList.remove('hidden');
+              convPanel.classList.add('flex');
+            }
+            if (threadPanel) {
+              threadPanel.classList.add('hidden');
+              threadPanel.classList.remove('flex');
+            }
+            if (mobileNav) {
+              mobileNav.classList.remove('hidden');
+            }
+          } else {
+            showActiveChatOnMobile();
+          }
+        } else {
+          if (convPanel) {
+            convPanel.classList.remove('hidden');
+            convPanel.classList.add('flex');
+          }
+          if (threadPanel) {
+            threadPanel.classList.remove('hidden');
+            threadPanel.classList.add('flex');
+          }
+        }
+      } else {
+        const mobileNav = document.getElementById('mobile-bottom-nav');
+        if (mobileNav) {
+          mobileNav.classList.remove('hidden');
+        }
       }
 
       if (viewName === 'profile') {
@@ -6903,6 +7492,13 @@
 
       updateJourneyStatusUI();
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    };
+
+    window.navigateToChatTab = function() {
+      if (window.innerWidth < 768) {
+        backToConversationList();
+      }
+      switchView('chat');
     };
 
     // Toast Notification Utility
@@ -6924,11 +7520,132 @@
       }, 3500);
     };
 
+    // ==================== LANDING PAGE & GOOGLE LOGIN CONTROLLERS ====================
+    window.showLandingPage = function() {
+      const landing = document.getElementById('landing-page');
+      if (landing) {
+        landing.classList.remove('hidden');
+        landing.scrollTop = 0;
+      }
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
+    };
+
+    window.hideLandingPage = function() {
+      const landing = document.getElementById('landing-page');
+      if (landing) {
+        landing.classList.add('hidden');
+      }
+      // Re-trigger map resize so map renders smoothly
+      setTimeout(() => {
+        if (googleMapInstance && window.google && window.google.maps) {
+          google.maps.event.trigger(googleMapInstance, 'resize');
+        } else if (mapInstance && mapInstance.invalidateSize) {
+          mapInstance.invalidateSize();
+        }
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+          lucide.createIcons();
+        }
+      }, 120);
+    };
+
+    window.loginWithGoogleFromLanding = async function() {
+      const mainBtn = document.getElementById('landing-google-btn-main');
+      const btnText = document.getElementById('landing-google-btn-text');
+      const spinner = document.getElementById('landing-google-spinner');
+
+      if (btnText) btnText.textContent = "Connecting to Google...";
+      if (spinner) spinner.classList.remove('hidden');
+      if (mainBtn) mainBtn.disabled = true;
+
+      try {
+        if (isLiveFirebase && auth) {
+          const provider = new GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          const res = await signInWithPopup(auth, provider);
+          currentUser = res.user;
+
+          if (currentProfile) {
+            currentProfile.uid = res.user.uid;
+            if (!currentProfile.name || currentProfile.name.trim() === "") {
+              currentProfile.name = res.user.displayName || "";
+            }
+            if (res.user.photoURL && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
+              currentProfile.photoUrl = res.user.photoURL;
+            }
+          }
+
+          // Load / Merge profile from Firestore "profiles" collection if exists
+          if (isLiveFirebase && db) {
+            try {
+              const docSnap = await getDoc(doc(db, "profiles", res.user.uid));
+              if (docSnap.exists()) {
+                currentProfile = { ...currentProfile, ...docSnap.data(), uid: res.user.uid };
+              } else {
+                await setDoc(doc(db, "profiles", res.user.uid), currentProfile, { merge: true });
+              }
+            } catch (e) {
+              console.warn("Firestore profile fetch error on auth:", e);
+            }
+          }
+
+          try {
+            localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+            localStorage.setItem('safarmatch_logged_in_user', JSON.stringify({
+              uid: res.user.uid,
+              displayName: res.user.displayName,
+              email: res.user.email,
+              photoURL: res.user.photoURL
+            }));
+          } catch (e) {}
+
+          initRealWorldSession();
+          const authBtnText = document.getElementById('btn-auth-text');
+          if (authBtnText) authBtnText.textContent = "Sign Out";
+
+          if (btnText) btnText.textContent = "Sign in with Google ID";
+          if (spinner) spinner.classList.add('hidden');
+          if (mainBtn) mainBtn.disabled = false;
+
+          window.hideLandingPage();
+          showToast(`Namaste, ${res.user.displayName || 'Explorer'}! Welcome to SafarMatch.`, "success");
+        } else {
+          // If offline or Firebase init issue, continue with session
+          window.handleGuestLoginFromLanding();
+          if (btnText) btnText.textContent = "Sign in with Google ID";
+          if (spinner) spinner.classList.add('hidden');
+          if (mainBtn) mainBtn.disabled = false;
+        }
+      } catch (err) {
+        console.warn("Google Sign-In popup error:", err);
+        if (btnText) btnText.textContent = "Sign in with Google ID";
+        if (spinner) spinner.classList.add('hidden');
+        if (mainBtn) mainBtn.disabled = false;
+
+        if (err.code === 'auth/popup-blocked') {
+          showToast("Browser popup blocked. Please allow popups or use guest preview.", "error");
+        } else if (err.code === 'auth/popup-closed-by-user') {
+          showToast("Sign in was cancelled. Click to try signing in with Google ID.", "info");
+        } else {
+          showToast(`Google Sign-In: ${err.message || "Failed to authenticate"}`, "error");
+        }
+      }
+    };
+
+    window.handleGuestLoginFromLanding = function() {
+      window.hideLandingPage();
+      showToast("Exploring SafarMatch in Preview Mode. Sign in with Google anytime to save your profile.", "info");
+    };
+
     // Google / Guest Auth Toggle
     window.handleAuthAction = function() {
       if (currentUser) {
         if (auth) signOut(auth);
         currentUser = null;
+        try {
+          localStorage.removeItem('safarmatch_logged_in_user');
+        } catch (e) {}
         if (profileSnapshotUnsubscribe) {
           try { profileSnapshotUnsubscribe(); } catch (e) {}
           profileSnapshotUnsubscribe = null;
@@ -6936,54 +7653,12 @@
         lastKnownVerificationStatus = null;
         lastKnownSubscriptionStatus = null;
         initRealWorldSession();
-        document.getElementById('btn-auth-text').textContent = "Sign In";
-        showToast("Signed out. Switched to guest session.", "info");
+        const authBtnText = document.getElementById('btn-auth-text');
+        if (authBtnText) authBtnText.textContent = "Sign In";
+        showToast("Signed out. Switched to landing page.", "info");
+        window.showLandingPage();
       } else {
-        if (isLiveFirebase && auth) {
-          const provider = new GoogleAuthProvider();
-          signInWithPopup(auth, provider)
-            .then(async res => {
-              currentUser = res.user;
-              if (currentProfile) {
-                currentProfile.uid = res.user.uid;
-                if (!currentProfile.name || currentProfile.name.trim() === "") {
-                  currentProfile.name = res.user.displayName || "";
-                }
-                if (res.user.photoURL && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
-                  currentProfile.photoUrl = res.user.photoURL;
-                }
-              }
-
-              // Load profile from Firestore "profiles" collection if exists
-              if (isLiveFirebase && db) {
-                try {
-                  const docSnap = await getDoc(doc(db, "profiles", res.user.uid));
-                  if (docSnap.exists()) {
-                    currentProfile = { ...currentProfile, ...docSnap.data(), uid: res.user.uid };
-                  } else {
-                    await setDoc(doc(db, "profiles", res.user.uid), currentProfile, { merge: true });
-                  }
-                } catch (e) {
-                  console.warn("Firestore profile fetch error on auth:", e);
-                }
-              }
-
-              try {
-                localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-              } catch (e) {}
-
-              initRealWorldSession();
-              document.getElementById('btn-auth-text').textContent = "Sign Out";
-              showToast(`Welcome, ${res.user.displayName || 'Explorer'}!`, "success");
-            })
-            .catch(err => {
-              console.warn("Auth popup failed, continuing session:", err);
-              initRealWorldSession();
-            });
-        } else {
-          initRealWorldSession();
-          showToast("Active in Bharat Guest Explorer Mode.", "info");
-        }
+        window.loginWithGoogleFromLanding();
       }
     };
 
@@ -7198,10 +7873,15 @@
                 }
               }
               attachProfileRealtimeListener(user.uid); setupGlobalChatsListener(user.uid);
+              window.hideLandingPage();
             } else {
+              currentUser = null;
+              const authBtnText = document.getElementById('btn-auth-text');
+              if (authBtnText) authBtnText.textContent = "Sign In";
               if (currentProfile && currentProfile.uid) {
                 attachProfileRealtimeListener(currentProfile.uid);
               }
+              window.showLandingPage();
             }
           });
         }
@@ -7215,6 +7895,13 @@
       initMap();
       switchView('map');
       updateUnreadChatIndicators();
+
+      // Take user first to the landing page before seeing the main page
+      if (!currentUser) {
+        window.showLandingPage();
+      } else {
+        window.hideLandingPage();
+      }
 
       // Real-time input listeners to update progress gauge dynamically
       const trackedInputs = ['input-full-name', 'input-age', 'input-gender', 'input-home-city', 'input-upcoming-circuit', 'input-bio'];
