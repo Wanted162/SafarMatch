@@ -40,7 +40,7 @@
   <!-- Performance Preconnects & Stylesheet -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/src/index.css" />
+  <link rel="stylesheet" href="./src/index.css" />
 
   <!-- Leaflet CSS & JS for 100% Zero-Cost Interactive Map (No Google Maps Dependency) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -125,7 +125,7 @@
     <header class="w-full border-b border-white/10 bg-[#070b14]/90 backdrop-blur-xl sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-safar-600 via-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
-          <i data-lucide="compass" class="w-5 h-5"></i>
+          <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
         </div>
         <div>
           <div class="flex items-center space-x-2">
@@ -185,7 +185,7 @@
       <div class="mt-8 w-full max-w-md bg-gradient-to-b from-white/10 to-white/5 border border-white/20 p-6 sm:p-7 rounded-3xl backdrop-blur-xl shadow-2xl relative overflow-hidden">
         <div class="text-center space-y-4">
           <div class="flex items-center justify-center space-x-2 text-xs font-bold text-emerald-400">
-            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
             <span>Login with Google ID to Enter</span>
           </div>
 
@@ -214,9 +214,9 @@
 
         <!-- Trust footer on card -->
         <div class="mt-5 pt-4 border-t border-white/10 flex flex-wrap items-center justify-around gap-2 text-[11px] text-slate-300 font-medium">
-          <span class="inline-flex items-center gap-1.5"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> <span>Govt ID Verified</span></span>
-          <span class="inline-flex items-center gap-1.5"><i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> <span>Cloud Vault</span></span>
-          <span class="inline-flex items-center gap-1.5"><i data-lucide="phone-off" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> <span>Zero Spam Calls</span></span>
+          <span class="inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> <span>Govt ID Verified</span></span>
+          <span class="inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Cloud Vault</span></span>
+          <span class="inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-6-6 19.8 19.8 0 0 1-3.11-8.69A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="22" x2="2" y1="2" y2="22"/></svg> <span>Zero Spam Calls</span></span>
         </div>
       </div>
 
@@ -224,7 +224,7 @@
       <div class="mt-12 w-full grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-4xl text-left">
         <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center space-x-3.5">
           <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
           </div>
           <div>
             <h4 class="text-xs font-bold text-white">Verified Companions Only</h4>
@@ -233,7 +233,7 @@
         </div>
         <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center space-x-3.5">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="calculator" class="w-5 h-5"></i>
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
           </div>
           <div>
             <h4 class="text-xs font-bold text-white">Direct Cost Splitting</h4>
@@ -242,7 +242,7 @@
         </div>
         <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center space-x-3.5">
           <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="sparkles" class="w-5 h-5"></i>
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
           </div>
           <div>
             <h4 class="text-xs font-bold text-white">Zero Brokerage & Commission</h4>
@@ -265,7 +265,7 @@
         <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-emerald-500/40 transition flex flex-col justify-between">
           <div class="space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <i data-lucide="calculator" class="w-6 h-6"></i>
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
             </div>
             <h4 class="text-base font-bold text-white">Cut Transit & Airport Cab Costs by 50%+</h4>
             <p class="text-xs text-slate-300 leading-relaxed">
@@ -281,7 +281,7 @@
         <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-rose-500/40 transition flex flex-col justify-between">
           <div class="space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center">
-              <i data-lucide="shield-check" class="w-6 h-6"></i>
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
             </div>
             <h4 class="text-base font-bold text-white">Suraksha Shield (सुरक्षा) for Women</h4>
             <p class="text-xs text-slate-300 leading-relaxed">
@@ -297,7 +297,7 @@
         <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-sky-500/40 transition flex flex-col justify-between">
           <div class="space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
-              <i data-lucide="message-circle" class="w-6 h-6"></i>
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
             </div>
             <h4 class="text-base font-bold text-white">In-App Chat with Peace Themes</h4>
             <p class="text-xs text-slate-300 leading-relaxed">
@@ -313,7 +313,7 @@
         <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-amber-500/40 transition flex flex-col justify-between">
           <div class="space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-              <i data-lucide="home" class="w-6 h-6"></i>
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
             <h4 class="text-base font-bold text-white">Share Cliffside Stays & Homestays</h4>
             <p class="text-xs text-slate-300 leading-relaxed">
@@ -329,7 +329,7 @@
         <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-purple-500/40 transition flex flex-col justify-between">
           <div class="space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
-              <i data-lucide="compass" class="w-6 h-6"></i>
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
             </div>
             <h4 class="text-base font-bold text-white">Match Your Exact Travel Rhythm</h4>
             <p class="text-xs text-slate-300 leading-relaxed">
@@ -345,7 +345,7 @@
         <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-cyan-500/40 transition flex flex-col justify-between">
           <div class="space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
-              <i data-lucide="map-pin" class="w-6 h-6"></i>
+              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             </div>
             <h4 class="text-base font-bold text-white">Live GPS Bharat Map & Meetups</h4>
             <p class="text-xs text-slate-300 leading-relaxed">
@@ -489,7 +489,7 @@
       <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center space-x-2">
           <div class="w-6 h-6 rounded-lg bg-rose-600 flex items-center justify-center text-white">
-            <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           </div>
           <span class="font-bold text-slate-300">SafarMatch Bharat Edition</span>
         </div>
@@ -508,7 +508,7 @@
     <!-- Brand -->
     <div class="flex items-center space-x-3">
       <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-safar-600 via-rose-500 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-200">
-        <i data-lucide="compass" class="w-6 h-6"></i>
+        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       </div>
       <div>
         <div class="flex items-center space-x-2">
@@ -540,17 +540,17 @@
     <div class="flex items-center space-x-3">
             <!-- Feedback & Feature Ideas Trigger -->
       <button onclick="openFeedbackModal()" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition cursor-pointer shadow-2xs flex-shrink-0" title="Suggest Features or Send Feedback">
-        <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-600"></i>
+        <svg class="w-3.5 h-3.5 text-amber-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
         <span class="hidden sm:inline">Feedback & Ideas</span>
       </button>
       <!-- Cab & Stay Expense Splitter Tool Button -->
       <button onclick="openCabSplitModal()" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer shadow-xs flex-shrink-0" title="Split Cab & Stay Costs">
-        <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
         <span class="hidden sm:inline">Split Cab / Stay</span>
       </button>
       <!-- Live Verification Status Badge -->
       <div id="header-verification-badge" class="hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-slate-500"></i>
+        <svg class="w-3.5 h-3.5 text-slate-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
         <span id="header-verification-text">Unverified</span>
       </div>
 
@@ -572,7 +572,7 @@
 
       <!-- Google / Auth Button -->
       <button id="btn-auth" onclick="handleAuthAction()" class="flex-shrink-0 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 sm:px-3.5 sm:py-2 rounded-xl transition flex items-center space-x-1.5 shadow-xs">
-        <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
         <span id="btn-auth-text">Sign In</span>
       </button>
     </div>
@@ -588,38 +588,38 @@
         <nav class="space-y-1.5">
           <!-- 1. Explore Map -->
           <button onclick="switchView('map')" id="nav-btn-map" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition bg-safar-50 text-safar-700">
-            <i data-lucide="map" class="w-4 h-4"></i>
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
             <span>Explore Map</span>
             <span class="ml-auto text-[10px] bg-rose-100 text-safar-700 font-bold px-2 py-0.5 rounded-full">Live</span>
           </button>
 
           <!-- 2. Trip Board (Read-only for Onboarded, Posting/Joining gated) -->
           <button onclick="switchView('trips')" id="nav-btn-trips" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
-            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
             <span>Trip Board</span>
             <span id="trips-count-badge" class="ml-auto text-xs bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded-full">Feed</span>
           </button>
 
           <!-- 3. Real-Time Chat (Explorer Pass Gated) -->
           <button onclick="navigateToChatTab()" id="nav-btn-chat" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100 relative">
-            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
             <span>Real-time Chat</span>
             <span id="sidebar-chat-unread-dot" class="hidden w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
             <span id="sidebar-chat-badge" class="ml-auto text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-              <i data-lucide="lock" class="w-2.5 h-2.5"></i> Pass
+              <svg class="w-2.5 h-2.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pass
             </span>
           </button>
 
           <!-- 4. Explorer Pass & Monetization -->
           <button onclick="switchView('monetization')" id="nav-btn-monetization" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
-            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+            <svg class="w-4 h-4 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             <span>Explorer Pass</span>
             <span class="ml-auto text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">₹299</span>
           </button>
 
           <!-- 5. Profile & Verification -->
           <button onclick="switchView('profile')" id="nav-btn-profile" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition text-slate-600 hover:bg-slate-100">
-            <i data-lucide="user-check" class="w-4 h-4"></i>
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
             <span>Travel Profile</span>
             <span id="sidebar-profile-pct" class="ml-auto text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full">50%</span>
           </button>
@@ -628,7 +628,7 @@
         <!-- Safety Card: Suraksha Shield -->
         <div class="p-3.5 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 space-y-2">
           <div class="flex items-center space-x-2 text-rose-800">
-            <i data-lucide="shield-check" class="w-4 h-4 text-rose-600"></i>
+            <svg class="w-4 h-4 text-rose-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
             <span class="text-xs font-bold">Suraksha Shield</span>
           </div>
           <p class="text-[11px] text-slate-600 leading-relaxed">
@@ -680,7 +680,7 @@
               </button>
             </div>
             <button onclick="handleMapSearchSubmit()" class="bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition flex items-center space-x-1 flex-shrink-0">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
               <span>Fly To</span>
             </button>
           </div>
@@ -688,7 +688,7 @@
           <!-- Quick Circuit Hotspots (Non-restricted, expandable) -->
           <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-0.5 text-xs">
             <span class="text-slate-400 font-semibold px-1 flex-shrink-0 flex items-center gap-1 text-[11px]">
-              <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i> Hotspots:
+              <svg class="w-3 h-3 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg> Hotspots:
             </span>
             <button onclick="filterMapCircuit('all')" class="circuit-pill px-3 py-1 rounded-full font-bold bg-safar-600 text-white flex-shrink-0 shadow-xs" data-circuit="all">All Explorers</button>
             <button onclick="filterMapCircuit('Goa')" class="circuit-pill px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 flex-shrink-0" data-circuit="Goa">🏖️ Goa</button>
@@ -727,7 +727,7 @@
                 class="px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center space-x-1 cursor-pointer transition flex-shrink-0"
                 title="Toggle Suraksha Shield Safe Mode (Highlights Verified & Female Travelers)"
               >
-                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+                <svg class="w-3.5 h-3.5 text-rose-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                 <span class="hidden sm:inline">Suraksha</span> <span>Shield</span>
               </button>
             </div>
@@ -742,7 +742,7 @@
         <!-- Floating Active Suraksha Shield Banner (Shown when Safe Mode is active) -->
         <div id="map-suraksha-banner" class="hidden absolute top-24 left-1/2 -translate-x-1/2 z-[24] bg-slate-900/90 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border border-rose-500/40 flex items-center space-x-2 animate-fadeIn cursor-pointer" onclick="openSurakshaEmergencyModal()">
           <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-          <i data-lucide="shield-check" class="w-4 h-4 text-rose-400"></i>
+          <svg class="w-4 h-4 text-rose-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
           <span>Suraksha Shield Active • Verified Explorers Only</span>
         </div>
 
@@ -769,15 +769,15 @@
         <!-- Mobile Quick-Actions Banner (Feedback, Cab Splitter & Suraksha Shield) -->
         <div class="flex md:hidden items-center justify-between gap-2 pb-1 border-b border-slate-100">
           <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-1.5 px-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
-            <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
             <span>Split Cab</span>
           </button>
           <button onclick="toggleSurakshaMode(!currentProfile.surakshaShield)" id="mobile-suraksha-toggle" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-1.5 px-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 transition">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+            <svg class="w-3.5 h-3.5 text-rose-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
             <span>Suraksha</span>
           </button>
           <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-1.5 px-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
-            <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
             <span>Feedback</span>
           </button>
         </div>
@@ -836,7 +836,7 @@
           <div id="trips-pass-banner" class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-50 via-rose-50 to-orange-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
             <div class="flex items-start space-x-3">
               <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
-                <i data-lucide="zap" class="w-5 h-5"></i>
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
               <div>
                 <h4 class="text-xs sm:text-sm font-bold text-slate-900">Explorer Pass Interaction Gate</h4>
@@ -867,7 +867,7 @@
         <div id="chat-paywall-locked" class="hidden absolute inset-0 z-20 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
           <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl border border-slate-100 space-y-4">
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-rose-200">
-              <i data-lucide="lock" class="w-7 h-7"></i>
+              <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
             <div>
               <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-900 px-3 py-1 rounded-full">Explorer Pass Required</span>
@@ -879,7 +879,7 @@
 
             <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-2 text-xs">
               <div class="flex items-center space-x-2 text-slate-700">
-                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                 <span>Anti-Spam & Contact Protection Active</span>
               </div>
               <div class="flex items-center space-x-2 text-slate-700">
@@ -1003,7 +1003,7 @@
                 </div>
 
                 <button type="button" onclick="openSurakshaEmergencyModal()" title="Suraksha Safety Shield & Emergency SOS" class="p-1.5 sm:px-2.5 sm:py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition flex items-center space-x-1 cursor-pointer">
-                  <i data-lucide="shield-check" class="w-4 h-4 text-rose-600 flex-shrink-0"></i>
+                  <svg class="w-4 h-4 text-rose-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                   <span class="hidden sm:inline text-[11px]">Suraksha</span>
                 </button>
                 <button onclick="openReportModalFromChat()" title="Report or Block Traveler" class="p-1.5 sm:p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition cursor-pointer">
@@ -1025,7 +1025,7 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center space-x-3 min-w-0">
                   <div class="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
                   </div>
                   <div class="min-w-0">
                     <p class="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">
@@ -1074,7 +1074,7 @@
             <!-- Suggested Quick Travel Prompts Bar -->
             <div id="chat-quick-prompts-bar" class="px-3 py-1.5 bg-white/95 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
               <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex-shrink-0 mr-0.5 flex items-center gap-1">
-                <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i>
+                <svg class="w-3 h-3 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
                 <span>Quick:</span>
               </span>
               <button type="button" onclick="sendQuickChatMessage('Hey! Are you looking to split a cab for the circuit? 🚖')" class="px-2.5 py-1 text-[11px] font-semibold bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-lg transition whitespace-nowrap cursor-pointer border border-slate-200/60 shadow-2xs">
@@ -1118,11 +1118,11 @@
           <!-- Mobile Quick-Actions Banner (Cab Splitter & Feedback) -->
           <div class="flex md:hidden items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
             <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
-              <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
               <span>Split Cab / Stay</span>
             </button>
             <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1.5 text-xs font-semibold py-2 px-3 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
-              <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
               <span>Feedback & Ideas</span>
             </button>
           </div>
@@ -1162,7 +1162,7 @@
             <div id="monetization-free-card" class="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-emerald-400 shadow-xl shadow-emerald-50 flex flex-col justify-between">
               <!-- Active Plan Badge -->
               <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[10px] font-extrabold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md flex items-center space-x-1">
-                <i data-lucide="check-circle" class="w-3 h-3 text-emerald-100"></i>
+                <svg class="w-3 h-3 text-emerald-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 <span id="free-tier-badge-text">Your Current Active Plan</span>
               </div>
 
@@ -1183,7 +1183,7 @@
 
                 <div class="p-2.5 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl flex items-center space-x-2.5 text-xs text-emerald-900">
                   <div class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
                   </div>
                   <div class="min-w-0">
                     <p class="font-bold text-[11px] leading-tight">Current Benefits Included</p>
@@ -1321,7 +1321,7 @@
                   onclick="openUpiModal('boost', 99)" 
                   class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-2 cursor-pointer"
                 >
-                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                  <svg class="w-4 h-4 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
                   <span>Boost My Circuit • ₹99</span>
                 </button>
               </div>
@@ -1339,15 +1339,15 @@
           <!-- Mobile Quick-Actions Banner (Cab Splitter, Suraksha Shield & Feedback) -->
           <div class="flex md:hidden items-center justify-between gap-2 bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-xs">
             <button onclick="openCabSplitModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-2 px-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
-              <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
               <span>Split Cab</span>
             </button>
             <button onclick="toggleSurakshaMode(!currentProfile.surakshaShield)" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-2 px-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 transition">
-              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+              <svg class="w-3.5 h-3.5 text-rose-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
               <span>Suraksha</span>
             </button>
             <button onclick="openFeedbackModal()" class="flex-1 flex items-center justify-center space-x-1 text-xs font-semibold py-2 px-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 transition">
-              <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
               <span>Feedback</span>
             </button>
           </div>
@@ -1357,7 +1357,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="flex items-center space-x-3">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-md shadow-rose-200 flex-shrink-0">
-                  <i data-lucide="shield-check" class="w-6 h-6"></i>
+                  <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                 </div>
                 <div>
                   <div class="flex items-center space-x-2">
@@ -1389,7 +1389,7 @@
               </div>
               <div class="p-3 bg-white/80 rounded-2xl border border-rose-100/80 space-y-1">
                 <div class="font-bold text-rose-900 flex items-center space-x-1.5">
-                  <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-600"></i>
+                  <svg class="w-3.5 h-3.5 text-rose-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                   <span>Anti-Scam Vault</span>
                 </div>
                 <p class="text-[10px] text-slate-500 leading-relaxed">Restricts off-platform phone numbers, fake UPI IDs, and unverified chat requests.</p>
@@ -1426,7 +1426,7 @@
                   <h2 id="profile-display-name" class="text-xl sm:text-2xl font-extrabold text-slate-900">Your Traveler Profile</h2>
                   <!-- Verification Pipeline Badge -->
                   <div id="profile-verification-status-pill" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center space-x-1">
-                    <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                     <span id="profile-verification-label">Unverified</span>
                   </div>
                 </div>
@@ -1452,7 +1452,7 @@
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
               <div class="flex items-center space-x-2.5">
                 <div class="w-8 h-8 rounded-xl bg-rose-100 text-safar-600 flex items-center justify-center">
-                  <i data-lucide="shield-check" class="w-4 h-4"></i>
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                 </div>
                 <div>
                   <h3 class="text-sm font-bold text-slate-900">Safety & Trust Verification Pipeline</h3>
@@ -1561,7 +1561,7 @@
                     oninput="handleHomeCityInput(this.value)"
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white pl-9" 
                   />
-                  <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
+                  <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <p class="text-[11px] text-slate-400 mt-1">Search all destinations across Bharat.</p>
               </div>
@@ -1577,7 +1577,7 @@
                     oninput="handleUpcomingDestinationInput(this.value)"
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white pl-9" 
                   />
-                  <i data-lucide="compass" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
+                  <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
                 </div>
                 <p class="text-[11px] text-slate-400 mt-1">No restrictions — type any village, valley, or town in India.</p>
               </div>
@@ -1587,7 +1587,7 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between text-xs">
                 <span class="font-bold text-slate-700 flex items-center gap-1.5">
-                  <i data-lucide="map" class="w-3.5 h-3.5 text-safar-600"></i>
+                  <svg class="w-3.5 h-3.5 text-safar-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
                   <span>Live Location Pin Preview (Safar GPS)</span>
                 </span>
                 <span id="home-city-coords-text" class="text-slate-400 font-mono text-[11px]">Lat: 18.5204, Lng: 73.8567</span>
@@ -1720,7 +1720,7 @@
         </div>
 
         <button type="button" onclick="submitUtrVerification()" class="w-full py-3 rounded-2xl bg-safar-600 hover:bg-safar-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
-          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           <span>Submit UTR for Verification</span>
         </button>
 
@@ -1732,7 +1732,7 @@
   <div id="paywall-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-4 sm:p-6 shadow-2xl border border-slate-100 text-center space-y-4 max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-14 h-14 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center mx-auto shadow-xs">
-        <i data-lucide="sparkles" class="w-7 h-7"></i>
+        <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
       </div>
       <div>
         <span class="text-[10px] font-extrabold uppercase tracking-widest bg-rose-100 text-safar-800 px-2.5 py-0.5 rounded-full">Monthly Free Limit Reached</span>
@@ -1760,7 +1760,7 @@
       <div class="flex items-start justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">
           <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <i data-lucide="calculator" class="w-5 h-5"></i>
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
           </div>
           <div>
             <h3 class="text-base font-bold text-slate-900">Cab & Stay Splitter</h3>
@@ -1827,21 +1827,21 @@
   <!-- ==================== MOBILE BOTTOM NAVIGATION BAR ==================== -->
   <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-around py-1.5 px-1 z-40 shadow-lg pb-safe">
     <button onclick="switchView('map')" id="mobile-nav-map" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-safar-600 transition">
-      <i data-lucide="map-pin" class="w-5 h-5"></i>
+      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
       <span class="text-[10px] font-bold mt-0.5">Map</span>
     </button>
     <button onclick="switchView('trips')" id="mobile-nav-trips" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 transition">
-      <i data-lucide="calendar" class="w-5 h-5"></i>
+      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
       <span class="text-[10px] font-medium mt-0.5">Trips</span>
     </button>
     <button onclick="navigateToChatTab()" id="mobile-nav-chat" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 relative transition">
-      <i data-lucide="message-circle" class="w-5 h-5"></i>
+      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
       <span class="text-[10px] font-medium mt-0.5">Chat</span>
       <span id="mobile-chat-unread-dot" class="hidden absolute top-1 right-4 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
       <span id="mobile-chat-lock-badge" class="absolute top-1 right-3 text-[9px]">🔒</span>
     </button>
     <button onclick="switchView('monetization')" id="mobile-nav-monetization" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 transition">
-      <i data-lucide="zap" class="w-5 h-5"></i>
+      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       <span class="text-[10px] font-medium mt-0.5">Pass</span>
     </button>
     <button onclick="switchView('profile')" id="mobile-nav-profile" class="mobile-nav-item flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] text-slate-400 transition">
@@ -2079,7 +2079,7 @@
           onclick="uploadCapturedSelfie()" 
           class="hidden flex-1 py-3 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5"
         >
-          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           <span>Submit for Verification</span>
         </button>
       </div>
@@ -2116,11 +2116,11 @@
       <!-- Action Buttons -->
       <div class="pt-2 flex gap-2">
         <button id="modal-traveler-msg-btn" onclick="startChatWithInspectedTraveler()" class="flex-1 py-2.5 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center justify-center space-x-1.5 cursor-pointer">
-          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
           <span>Message Traveler</span>
         </button>
         <button type="button" onclick="reportInspectedTraveler()" title="Report or Block" class="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer">
-          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
         </button>
       </div>
     </div>
@@ -2132,7 +2132,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">
           <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
-            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
           </div>
           <div>
             <h3 class="text-base font-bold text-slate-900">Safety & Trust Shield</h3>
@@ -2192,7 +2192,7 @@
       <div class="flex items-start justify-between pb-3 border-b border-slate-100 flex-shrink-0">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-rose-200">
-            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
           </div>
           <div>
             <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
@@ -2209,7 +2209,7 @@
       <!-- Safe Mode Status & Toggle Banner -->
       <div class="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 flex items-center justify-between">
         <div class="flex items-center space-x-2.5">
-          <i data-lucide="shield-check" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+          <svg class="w-5 h-5 text-rose-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
           <div>
             <div class="text-xs font-bold text-slate-900">Safe Mode Filter</div>
             <div class="text-[11px] text-slate-500">Hides pins & trips from non-female profiles</div>
@@ -2259,7 +2259,7 @@
       <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-safar-600"></i>
+            <svg class="w-3.5 h-3.5 text-safar-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             <span>Share My Travel Location</span>
           </span>
           <button type="button" onclick="copyMyLocationSummary()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
@@ -2275,7 +2275,7 @@
       <!-- Verified Traveler Protocol Advice -->
       <div class="space-y-1.5 text-[11px] text-slate-600 bg-emerald-50/70 p-3 rounded-2xl border border-emerald-200/80">
         <div class="font-bold text-emerald-900 flex items-center space-x-1.5">
-          <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <svg class="w-3.5 h-3.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           <span>Safar Safety Guidelines for Travelers</span>
         </div>
         <ul class="list-disc list-inside space-y-0.5 text-slate-600 pl-1">
@@ -2298,7 +2298,7 @@
       <div class="flex items-start justify-between pb-3 border-b border-slate-100 flex-shrink-0">
         <div class="flex items-center space-x-2.5">
           <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
           </div>
           <div>
             <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5">
@@ -2407,7 +2407,7 @@
   <div id="verification-approved-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 text-center space-y-4 my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
-        <i data-lucide="shield-check" class="w-8 h-8"></i>
+        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
       </div>
       <div class="space-y-2">
         <span class="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
@@ -2420,7 +2420,7 @@
       </div>
       <div class="pt-2">
         <button type="button" onclick="closeVerificationApprovedModal()" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
-          <i data-lucide="compass" class="w-4 h-4"></i>
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           <span>Start Exploring Bharat</span>
         </button>
       </div>
@@ -2431,7 +2431,7 @@
   <div id="verification-rejected-modal" class="hidden fixed inset-0 z-[1100] bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-rose-100 space-y-4 text-center my-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
       <div class="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
-        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
       </div>
       <div class="space-y-1.5">
         <span class="text-[10px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-800 px-3 py-1 rounded-full">
@@ -2484,7 +2484,7 @@
       </div>
       <div class="pt-2">
         <button type="button" onclick="closePaymentApprovedModal()" class="w-full py-3.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
           <span>Awesome! Let's Go</span>
         </button>
       </div>
@@ -2542,6 +2542,6 @@
 
 
   <!-- Application Entry Point (Modular Business Architecture) -->
-  <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
