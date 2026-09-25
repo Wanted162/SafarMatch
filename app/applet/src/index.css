@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-safar-50: #fff1f2;
+  --color-safar-100: #ffe4e6;
+  --color-safar-200: #fecdd3;
+  --color-safar-400: #fb7185;
+  --color-safar-500: #f43f5e;
+  --color-safar-600: #e11d48;
+  --color-safar-700: #be123c;
+  --color-safar-800: #9f1239;
+  --color-safar-900: #881337;
+
+  --color-saffron-500: #f97316;
+  --color-saffron-600: #ea580c;
+}
+
+/* Lucide Icon Enhancements — Ensure SVGs always render with crisp stroke and proper inline sizing */
+svg.lucide, i[data-lucide] {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.w-3 { width: 0.875rem !important; }
+.h-3 { height: 0.875rem !important; }
+.w-3\.5 { width: 0.9375rem !important; }
+.h-3\.5 { height: 0.9375rem !important; }

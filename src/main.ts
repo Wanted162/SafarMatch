@@ -3,8 +3,36 @@
  * Orchestrates modules, manages global event bindings, and connects UI with services.
  */
 
+import './index.css';
+import { createIcons, icons } from 'lucide';
+
+// Ensure bundled Lucide icons are immediately available globally without network dependency
+(window as any).lucide = {
+  createIcons: (options: any = {}) => {
+    try {
+      createIcons({
+        icons,
+        attrs: {
+          'stroke-width': '2',
+          ...options.attrs
+        },
+        ...options
+      });
+    } catch (e) {
+      console.warn("createIcons error:", e);
+    }
+  },
+  icons
+};
+
+// Immediate icon hydration
+try {
+  (window as any).lucide.createIcons();
+} catch (e) {}
+
 import { isLiveFirebase, db, auth } from './config/firebase';
 import { getDocs, collection } from 'firebase/firestore';
+
 
 // Types & Config
 import { UPI_CONFIG, INDIAN_CIRCUITS_LOOKUP } from './config/constants';
@@ -533,8 +561,11 @@ function bootApp(): void {
     }
   });
 
+  // Reliable icon hydration passes
   if ((window as any).lucide && (window as any).lucide.createIcons) {
     (window as any).lucide.createIcons();
+    setTimeout(() => (window as any).lucide?.createIcons(), 50);
+    setTimeout(() => (window as any).lucide?.createIcons(), 250);
   }
 }
 
@@ -544,3 +575,4 @@ if (document.readyState === 'loading') {
 } else {
   bootApp();
 }
+
