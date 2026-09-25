@@ -81,6 +81,33 @@
     .pin-pulse {
       animation: pulse-ring 2s infinite ease-in-out;
     }
+
+    /* ==================== PEACE & ADVENTURE CHAT THEME WALLPAPERS ==================== */
+    .chat-theme-peace {
+      background-color: #f3f6f3 !important;
+      background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%234b6b54' stroke-width='1.15' stroke-linecap='round' stroke-linejoin='round' opacity='0.15'%3E%3C!-- Sacred Lotus Blossom --%3E%3Cpath d='M60 28 c-6-10 -14-10 -16 2 c5 6 12 10 16 10 c4 0 11-4 16-10 c-2-12 -10-12 -16-2 z'/%3E%3Cpath d='M44 30 c-8 1 -14 8 -10 14 c6 4 14 2 18 -2'/%3E%3Cpath d='M76 30 c8 1 14 8 10 14 c-6 4 -14 2 -18 -2'/%3E%3C!-- Zen Balance Stones --%3E%3Cellipse cx='25' cy='85' rx='12' ry='5'/%3E%3Cellipse cx='25' cy='77' rx='9' ry='4'/%3E%3Cellipse cx='25' cy='70' rx='6' ry='3'/%3E%3C!-- Gentle River Ripple / Waves --%3E%3Cpath d='M75 80 q10-5 20 0 t20 0'/%3E%3Cpath d='M70 88 q10-5 20 0 t20 0'/%3E%3C!-- Peaceful Olive Sprig / Bamboo Leaves --%3E%3Cpath d='M95 20 c-5 8 -12 12 -20 10 c6-7 12-10 20-10 z'/%3E%3Cpath d='M100 24 c-3 6 -8 8 -14 7'/%3E%3C!-- Meditative Sun & Mountain Aura --%3E%3Ccircle cx='60' cy='60' r='6'/%3E%3Cpath d='M48 68 c6-4 18-4 24 0'/%3E%3C/svg%3E") !important;
+      background-size: 120px 120px !important;
+    }
+    .chat-theme-emerald {
+      background-color: #f0fdf4 !important;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23059669' stroke-width='1.1' opacity='0.13'%3E%3Ccircle cx='50' cy='50' r='22'/%3E%3Cpath d='M50 32 l5 14 13 4 -13 4 -5 14 -5-14 -13-4 13-4 z'/%3E%3C/svg%3E") !important;
+      background-size: 100px 100px !important;
+    }
+    .chat-theme-sunset {
+      background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 60%, #ffe4e6 100%) !important;
+      background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23ea580c' stroke-width='1.1' opacity='0.14'%3E%3Ccircle cx='30' cy='30' r='12'/%3E%3Cpath d='M10 85 q15-12 30 0 t30 0'/%3E%3Cpath d='M85 30 l8 12 -16 0 z'/%3E%3Cpath d='M85 75 c5-8 15-8 20 0'/%3E%3C/svg%3E") !important;
+      background-size: 120px 120px !important;
+    }
+    .chat-theme-mist {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #e0e7ff 100%) !important;
+      background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%234f46e5' stroke-width='1.1' opacity='0.13'%3E%3Cpath d='M10 50 l25-30 25 30 z'/%3E%3Cpath d='M50 50 l20-22 20 22 z'/%3E%3Cpath d='M30 90 c10-15 30-15 40 0'/%3E%3C/svg%3E") !important;
+      background-size: 120px 120px !important;
+    }
+    .chat-theme-midnight {
+      background-color: #0b141a !important;
+      background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23324652' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.5'%3E%3Cpath d='M15 25 l10-15 10 15 z'/%3E%3Ccircle cx='75' cy='25' r='10'/%3E%3Cpath d='M75 18 v7 l5 3'/%3E%3Cpath d='M20 75 c4-5 10-5 14 0 l-7 12 z'/%3E%3Cpath d='M50 85 h18 v12 h-18 z'/%3E%3Ccircle cx='70' cy='105' r='6'/%3E%3C/svg%3E") !important;
+      background-size: 120px 120px !important;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased overflow-hidden h-[100dvh] flex flex-col">
@@ -502,24 +529,20 @@
               </div>
             </div>
 
-            <!-- WhatsApp Status Legend & Info -->
-            <div class="px-3 py-1.5 bg-gradient-to-r from-slate-50 via-white to-slate-50 border-b border-slate-200/80 flex items-center justify-between text-[10px]">
-              <span class="font-bold text-slate-700 flex items-center gap-1">
-                <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-600"></i>
-                <span>Status:</span>
+            <!-- Live WhatsApp Delivery Indicators -->
+            <div class="px-3 py-1.5 bg-slate-50/70 border-b border-slate-200/80 flex items-center justify-between text-[11px]">
+              <span class="font-medium text-slate-500 text-[10px] flex items-center gap-1">
+                <span>Direct Chats</span>
               </span>
-              <div class="flex items-center space-x-1.5 text-[9px] font-semibold">
-                <span class="flex items-center space-x-0.5 text-amber-700 bg-amber-50 px-1 py-0.5 rounded border border-amber-200/70" title="Pending: Sending / Queued">
-                  <span>⏳</span> <span>Pending</span>
+              <div class="flex items-center space-x-2 text-[10px] text-slate-400">
+                <span class="inline-flex items-center space-x-0.5 text-slate-400" title="Sent">
+                  <svg class="w-3 h-3 text-slate-400" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3.5 8.5l3 3L12.5 5"/></svg>
                 </span>
-                <span class="flex items-center space-x-0.5 text-slate-600 bg-slate-100 px-1 py-0.5 rounded border border-slate-200" title="Sent: 1 Grey Check">
-                  <span>✓</span> <span>Sent</span>
+                <span class="inline-flex items-center space-x-0.5 text-slate-400" title="Delivered">
+                  <svg class="w-3.5 h-3 text-slate-400" viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.5 8.5l3.5 3.5L11.5 4.5"/><path d="M7 8.5l3.5 3.5L17 4.5"/></svg>
                 </span>
-                <span class="flex items-center space-x-0.5 text-slate-700 bg-slate-100 px-1 py-0.5 rounded border border-slate-200" title="Delivered: 2 Grey Checks">
-                  <span>✓✓</span> <span>Delivered</span>
-                </span>
-                <span class="flex items-center space-x-0.5 text-sky-700 bg-sky-50 px-1 py-0.5 rounded border border-sky-200 font-extrabold" title="Read: WhatsApp Double Blue Checks">
-                  <span class="text-sky-500 font-black">✓✓</span> <span>Read</span>
+                <span class="inline-flex items-center space-x-0.5" title="Read by companion">
+                  <svg class="w-3.5 h-3 text-sky-500" viewBox="0 0 20 16" fill="none" stroke="#0284c7" stroke-width="2.3" stroke-linecap="round"><path d="M1.5 8.5l3.5 3.5L11.5 4.5"/><path d="M7 8.5l3.5 3.5L17 4.5"/></svg>
                 </span>
               </div>
             </div>
@@ -564,8 +587,25 @@
                 </div>
               </div>
 
-              <!-- Safety & Action Buttons -->
+              <!-- Safety, Theme & Action Buttons -->
               <div class="flex items-center space-x-1.5">
+                <!-- Chat Wallpaper & Theme Dropdown -->
+                <div class="relative">
+                  <button type="button" id="chat-theme-toggle-btn" onclick="toggleChatThemeDropdown(event)" class="px-2.5 py-1 text-xs font-bold text-slate-700 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 rounded-xl border border-slate-200 transition flex items-center space-x-1.5 cursor-pointer shadow-2xs" title="Select Chat Wallpaper & Theme">
+                    <i data-lucide="palette" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span class="hidden md:inline" id="chat-theme-active-name">Peace</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                  </button>
+                  <div id="chat-theme-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-2 z-50 animate-in fade-in">
+                    <div class="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between mb-1">
+                      <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Chat Wallpaper & Theme</span>
+                    </div>
+                    <div class="space-y-1" id="chat-theme-options-list">
+                      <!-- Rendered dynamically by renderThemeDropdownOptions() -->
+                    </div>
+                  </div>
+                </div>
+
                 <button type="button" onclick="openSurakshaEmergencyModal()" title="Suraksha Safety Shield & Emergency SOS" class="px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 transition flex items-center space-x-1 cursor-pointer">
                   <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
                   <span class="hidden sm:inline">Suraksha</span> <span>Shield</span>
@@ -624,19 +664,39 @@
               </button>
             </div>
 
-            <!-- Messages Stream Container -->
-            <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
+            <!-- Messages Stream Container with Peace Zen Theme Wallpaper -->
+            <div id="chat-messages-container" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 w-full chat-theme-peace transition-colors duration-200 relative select-text">
               <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-6 space-y-2">
-                <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+                <div class="w-12 h-12 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-slate-500">
                   <i data-lucide="message-square" class="w-6 h-6"></i>
                 </div>
-                <p class="text-xs font-semibold text-slate-600">Start an in-app conversation</p>
-                <p class="text-[11px] max-w-xs">All messages are delivered in real-time. Share circuits, split stays, and plan travel meetups safely.</p>
+                <p class="text-xs font-semibold text-slate-700">Start an in-app conversation</p>
+                <p class="text-[11px] text-slate-500 max-w-xs">All messages are delivered in real-time. Share circuits, split stays, and plan travel meetups safely.</p>
               </div>
             </div>
 
+            <!-- Suggested Quick Travel Prompts Bar -->
+            <div id="chat-quick-prompts-bar" class="px-3 py-1.5 bg-white/95 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex-shrink-0 mr-0.5 flex items-center gap-1">
+                <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i>
+                <span>Quick:</span>
+              </span>
+              <button type="button" onclick="sendQuickChatMessage('Hey! Are you looking to split a cab for the circuit? 🚖')" class="px-2.5 py-1 text-[11px] font-semibold bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-lg transition whitespace-nowrap cursor-pointer border border-slate-200/60 shadow-2xs">
+                Split a cab? 🚖
+              </button>
+              <button type="button" onclick="sendQuickChatMessage('Want to grab chai and sync our circuit plans? ☕')" class="px-2.5 py-1 text-[11px] font-semibold bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-lg transition whitespace-nowrap cursor-pointer border border-slate-200/60 shadow-2xs">
+                Chai & circuit? ☕
+              </button>
+              <button type="button" onclick="sendQuickChatMessage('What time are you starting tomorrow morning? ⏰')" class="px-2.5 py-1 text-[11px] font-semibold bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-lg transition whitespace-nowrap cursor-pointer border border-slate-200/60 shadow-2xs">
+                Start timing? ⏰
+              </button>
+              <button type="button" onclick="sendQuickChatMessage('Have you booked a hostel or stay yet? 🏖️')" class="px-2.5 py-1 text-[11px] font-semibold bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-lg transition whitespace-nowrap cursor-pointer border border-slate-200/60 shadow-2xs">
+                Hostel booking? 🏖️
+              </button>
+            </div>
+
             <!-- Message Input Form with Hardened Moderation -->
-            <form id="chat-input-form" onsubmit="handleSendMessage(event)" class="p-3 bg-white border-t border-slate-200 flex items-center gap-2 flex-shrink-0">
+            <form id="chat-input-form" onsubmit="handleSendMessage(event)" class="p-2.5 sm:p-3 bg-white border-t border-slate-200 flex items-center gap-2 flex-shrink-0">
               <input 
                 type="text" 
                 id="chat-message-input" 
@@ -740,11 +800,7 @@
                 <ul class="space-y-3 text-xs text-slate-700">
                   <li class="flex items-start space-x-2.5">
                     <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>2 Direct Companion Connects Daily:</strong> Reach out and message 2 new travelers every day at zero cost.</span>
-                  </li>
-                  <li class="flex items-start space-x-2.5">
-                    <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                    <span><strong>WhatsApp Message Status:</strong> Live Pending (⏳), Sent (✓), Delivered (✓✓), and Read (double blue ticks).</span>
+                    <span><strong>2 Companion Connects per Month:</strong> Reach out and message 2 new travel companions every month at zero cost.</span>
                   </li>
                   <li class="flex items-start space-x-2.5">
                     <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
@@ -1283,10 +1339,10 @@
         <i data-lucide="sparkles" class="w-7 h-7"></i>
       </div>
       <div>
-        <span class="text-[10px] font-extrabold uppercase tracking-widest bg-rose-100 text-safar-800 px-2.5 py-0.5 rounded-full">Daily Free Limit Reached</span>
-        <h3 class="text-base font-extrabold text-slate-900 mt-2">2 Free Connections Used Today</h3>
+        <span class="text-[10px] font-extrabold uppercase tracking-widest bg-rose-100 text-safar-800 px-2.5 py-0.5 rounded-full">Monthly Free Limit Reached</span>
+        <h3 class="text-base font-extrabold text-slate-900 mt-2">2 Free Connections Used This Month</h3>
         <p id="paywall-modal-text" class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-          You have used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.
+          You have used your 2 free companion connects for this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.
         </p>
       </div>
 
@@ -2641,40 +2697,45 @@
     window.handleFeedbackSubmit = window.submitUserFeedback;
 
     
-    // ==================== DAILY FREE CONNECTS & VIRAL RETENTION ====================
-    window.getDailyConnects = function() {
-      const today = new Date().toISOString().slice(0, 10);
+    // ==================== MONTHLY FREE COMPANION CONNECTS (2 PER MONTH) ====================
+    window.getMonthlyConnects = function() {
+      const thisMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-09"
       try {
-        const raw = localStorage.getItem('safarmatch_daily_connects');
+        const raw = localStorage.getItem('safarmatch_monthly_connects');
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed.date === today && typeof parsed.remaining === 'number') {
+          if (parsed.month === thisMonth && typeof parsed.remaining === 'number') {
             return parsed.remaining;
           }
         }
       } catch (e) {}
-      window.setDailyConnects(2);
+      window.setMonthlyConnects(2);
       return 2;
     };
 
-    window.setDailyConnects = function(count) {
-      const today = new Date().toISOString().slice(0, 10);
+    window.setMonthlyConnects = function(count) {
+      const thisMonth = new Date().toISOString().slice(0, 7);
       try {
-        localStorage.setItem('safarmatch_daily_connects', JSON.stringify({ date: today, remaining: Math.max(0, count) }));
+        localStorage.setItem('safarmatch_monthly_connects', JSON.stringify({ month: thisMonth, remaining: Math.max(0, count) }));
       } catch (e) {}
     };
 
-    window.consumeDailyConnect = function() {
+    window.consumeMonthlyConnect = function() {
       if (hasActiveExplorerPass()) return true;
-      const current = window.getDailyConnects();
+      const current = window.getMonthlyConnects();
       if (current > 0) {
         const next = current - 1;
-        window.setDailyConnects(next);
-        showToast(`🤝 Free connect used! (${next} free ${next === 1 ? 'connect' : 'connects'} remaining today)`, "info");
+        window.setMonthlyConnects(next);
+        showToast(`🤝 Free companion connect used! (${next} free ${next === 1 ? 'connect' : 'connects'} remaining this month)`, "info");
         return true;
       }
       return false;
     };
+
+    // Backward-compatible aliases for all callers
+    window.getDailyConnects = window.getMonthlyConnects;
+    window.setDailyConnects = window.setMonthlyConnects;
+    window.consumeDailyConnect = window.consumeMonthlyConnect;
 
     window.checkConnectQuotaOrPaywall = function(actionDesc = "companion connects") {
       if (hasActiveExplorerPass()) return true;
@@ -2683,9 +2744,9 @@
         switchView('profile');
         return false;
       }
-      const remaining = window.getDailyConnects();
+      const remaining = window.getMonthlyConnects();
       if (remaining <= 0) {
-        window.openPaywallModal(`You have used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.`);
+        window.openPaywallModal(`You have used your 2 free companion connects for this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.`);
         return false;
       }
       return true;
@@ -4488,97 +4549,279 @@
     // ==================== WHATSAPP MESSAGE STATUS & NOTIFICATION ENGINE ====================
     let currentChatFilter = 'all';
 
+    // ==================== CHAT WALLPAPER & THEME SYSTEM ====================
+    const CHAT_THEMES = {
+      peace: {
+        id: 'peace',
+        name: 'Peace & Serenity',
+        desc: 'Sacred lotus sage, zen harmony & calming seafoam',
+        containerClass: 'chat-theme-peace',
+        isDark: false,
+        outBubble: 'bg-[#d8edd9] text-[#14321e] shadow-2xs border border-[#bfe2c4]/90',
+        outText: 'text-[#14321e]',
+        outTime: 'text-[#486b51]',
+        outTail: '#d8edd9',
+        outTickColor: '#0d9488',
+        inBubble: 'bg-white text-[#1e293b] shadow-2xs border border-[#e2e8f0]',
+        inText: 'text-[#1e293b]',
+        inTime: 'text-[#64748b]',
+        inTail: '#ffffff',
+        swatchBg: '#f3f6f3',
+        swatchAccent: '#14b8a6'
+      },
+      emerald: {
+        id: 'emerald',
+        name: 'Bharat Emerald',
+        desc: 'SafarMatch signature mint & emerald',
+        containerClass: 'chat-theme-emerald',
+        isDark: false,
+        outBubble: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs',
+        outText: 'text-white',
+        outTime: 'text-emerald-100/90',
+        outTail: '#059669',
+        outTickColor: '#67e8f9',
+        inBubble: 'bg-white text-slate-800 shadow-xs border border-emerald-100',
+        inText: 'text-slate-800',
+        inTime: 'text-slate-400',
+        inTail: '#ffffff',
+        swatchBg: '#f0fdf4',
+        swatchAccent: '#059669'
+      },
+      sunset: {
+        id: 'sunset',
+        name: 'Goa Sunset',
+        desc: 'Golden sunset glow & coral warmth',
+        containerClass: 'chat-theme-sunset',
+        isDark: false,
+        outBubble: 'bg-gradient-to-r from-rose-500 via-rose-600 to-amber-500 text-white shadow-xs',
+        outText: 'text-white',
+        outTime: 'text-rose-100/90',
+        outTail: '#e11d48',
+        outTickColor: '#fef08a',
+        inBubble: 'bg-white text-slate-800 shadow-xs border border-rose-100',
+        inText: 'text-slate-800',
+        inTime: 'text-slate-400',
+        inTail: '#ffffff',
+        swatchBg: '#fff7ed',
+        swatchAccent: '#ea580c'
+      },
+      mist: {
+        id: 'mist',
+        name: 'Himalayan Mist',
+        desc: 'Cool alpine slate & mountain indigo',
+        containerClass: 'chat-theme-mist',
+        isDark: false,
+        outBubble: 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xs',
+        outText: 'text-white',
+        outTime: 'text-indigo-100/90',
+        outTail: '#4f46e5',
+        outTickColor: '#93c5fd',
+        inBubble: 'bg-white text-slate-800 shadow-xs border border-indigo-100',
+        inText: 'text-slate-800',
+        inTime: 'text-slate-400',
+        inTail: '#ffffff',
+        swatchBg: '#f8fafc',
+        swatchAccent: '#4f46e5'
+      },
+      midnight: {
+        id: 'midnight',
+        name: 'Midnight Nomad',
+        desc: 'Dark mode AMOLED & deep obsidian',
+        containerClass: 'chat-theme-midnight',
+        isDark: true,
+        outBubble: 'bg-[#005c4b] text-[#e9edef] shadow-xs border border-[#025144]',
+        outText: 'text-[#e9edef]',
+        outTime: 'text-[#8696a0]',
+        outTail: '#005c4b',
+        outTickColor: '#53bdeb',
+        inBubble: 'bg-[#202c33] text-[#e9edef] shadow-xs border border-[#2a3942]',
+        inText: 'text-[#e9edef]',
+        inTime: 'text-[#8696a0]',
+        inTail: '#202c33',
+        swatchBg: '#0b141a',
+        swatchAccent: '#005c4b'
+      }
+    };
+
+    let currentChatTheme = localStorage.getItem('safarmatch_active_theme') || 'peace';
+    if (!CHAT_THEMES[currentChatTheme] || currentChatTheme === 'whatsapp') currentChatTheme = 'peace';
+
+    function getActiveChatTheme() {
+      return CHAT_THEMES[currentChatTheme] || CHAT_THEMES.peace;
+    }
+
+    window.setChatTheme = function(themeId) {
+      if (!CHAT_THEMES[themeId]) return;
+      currentChatTheme = themeId;
+      try {
+        localStorage.setItem('safarmatch_active_theme', themeId);
+      } catch (e) {}
+
+      applyChatThemeToUI();
+      closeChatThemeDropdown();
+      showToast(`🎨 Chat Theme: ${CHAT_THEMES[themeId].name}`, "info");
+
+      // Re-render currently open messages
+      if (activeChatPartner) {
+        renderMessagesForPartner(activeChatPartner.uid);
+      }
+    };
+
+    function applyChatThemeToUI() {
+      const theme = getActiveChatTheme();
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        // Remove all theme classes
+        Object.values(CHAT_THEMES).forEach(t => container.classList.remove(t.containerClass));
+        container.classList.add(theme.containerClass);
+      }
+      const label = document.getElementById('chat-theme-active-name');
+      if (label) {
+        label.textContent = theme.name.replace(' & Serenity', '').replace('Bharat ', '').replace('Goa ', '').replace('Himalayan ', '');
+      }
+      renderThemeDropdownOptions();
+    }
+
+    window.toggleChatThemeDropdown = function(e) {
+      if (e) e.stopPropagation();
+      const dropdown = document.getElementById('chat-theme-dropdown');
+      if (!dropdown) return;
+      if (dropdown.classList.contains('hidden')) {
+        renderThemeDropdownOptions();
+        dropdown.classList.remove('hidden');
+        setTimeout(() => {
+          document.addEventListener('click', closeChatThemeDropdownOnClickOutside);
+        }, 10);
+      } else {
+        dropdown.classList.add('hidden');
+        document.removeEventListener('click', closeChatThemeDropdownOnClickOutside);
+      }
+    };
+
+    function closeChatThemeDropdown() {
+      const dropdown = document.getElementById('chat-theme-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+      document.removeEventListener('click', closeChatThemeDropdownOnClickOutside);
+    }
+
+    function closeChatThemeDropdownOnClickOutside(e) {
+      const dropdown = document.getElementById('chat-theme-dropdown');
+      const btn = document.getElementById('chat-theme-toggle-btn');
+      if (dropdown && !dropdown.contains(e.target) && btn && !btn.contains(e.target)) {
+        closeChatThemeDropdown();
+      }
+    }
+
+    function renderThemeDropdownOptions() {
+      const list = document.getElementById('chat-theme-options-list');
+      if (!list) return;
+      list.innerHTML = Object.values(CHAT_THEMES).map(t => {
+        const isCurrent = t.id === currentChatTheme;
+        return `
+          <button type="button" onclick="setChatTheme('${t.id}')" class="w-full text-left p-2 rounded-xl transition flex items-center justify-between cursor-pointer ${
+            isCurrent ? 'bg-emerald-50 border border-emerald-200 shadow-2xs' : 'hover:bg-slate-100 border border-transparent'
+          }">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center border border-slate-300 shadow-2xs" style="background: ${t.swatchBg};">
+                <span class="w-2.5 h-2.5 rounded-full" style="background: ${t.swatchAccent};"></span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold ${isCurrent ? 'text-emerald-900' : 'text-slate-800'}">${escapeHtml(t.name)}</p>
+                <p class="text-[10px] text-slate-500 truncate">${escapeHtml(t.desc)}</p>
+              </div>
+            </div>
+            ${isCurrent ? '<i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 ml-1"></i>' : ''}
+          </button>
+        `;
+      }).join('');
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    }
+
+    // Quick Conversation Message Sender
+    window.sendQuickChatMessage = function(promptText) {
+      const input = document.getElementById('chat-message-input');
+      if (input) {
+        input.value = promptText;
+        const form = document.getElementById('chat-input-form');
+        if (form) {
+          if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+          } else {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.click();
+          }
+        }
+      }
+    };
+
     function getWhatsAppClockSvg(className = "w-3 h-3") {
-      return `<svg class="${className} inline-block flex-shrink-0 animate-spin" style="animation-duration: 4s;" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="8" cy="8" r="6" />
-        <polyline points="8 4.5 8 8 10.5 9.5" />
+      return `<svg class="${className} inline-block flex-shrink-0 animate-spin" style="animation-duration: 3s;" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="8" cy="8" r="6" stroke-opacity="0.35" />
+        <path d="M8 4.5V8l2 1.5" stroke-linecap="round" />
       </svg>`;
     }
 
     function getWhatsAppSingleCheckSvg(className = "w-3.5 h-3.5") {
-      return `<svg class="${className} inline-block flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 8.5l3.5 3.5L13 4.5" />
+      return `<svg class="${className} inline-block flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3.5 8.5l3 3L12.5 5" />
       </svg>`;
     }
 
     function getWhatsAppDoubleCheckSvg(className = "w-4 h-3.5", isRead = false) {
-      const strokeColor = isRead ? "#0284c7" : "currentColor";
-      return `<svg class="${className} inline-block flex-shrink-0" viewBox="0 0 20 16" fill="none" stroke="${strokeColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      const strokeColor = isRead ? "#53bdeb" : "currentColor";
+      const glow = isRead ? "drop-shadow-[0_0_1.5px_rgba(83,189,235,0.6)]" : "";
+      return `<svg class="${className} ${glow} inline-block flex-shrink-0" viewBox="0 0 20 16" fill="none" stroke="${strokeColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M1.5 8.5l3.5 3.5L11.5 4.5" />
         <path d="M7 8.5l3.5 3.5L17 4.5" />
       </svg>`;
     }
 
-    function getWhatsAppStatusIconHtml(status, isMeBubble = false) {
+    function getWhatsAppStatusIconHtml(status, isMeBubble = false, customTickColor = null) {
       const st = status || 'read';
       if (st === 'pending') {
-        const col = isMeBubble ? 'text-amber-200' : 'text-amber-500';
-        return `<span class="inline-flex items-center ${col}" title="Pending / Queued">${getWhatsAppClockSvg('w-3 h-3')}</span>`;
+        const col = isMeBubble ? 'text-emerald-600/70 dark:text-emerald-200/90' : 'text-amber-500';
+        return `<span class="inline-flex items-center ${col}" title="Sending...">${getWhatsAppClockSvg('w-2.5 h-2.5')}</span>`;
       }
       if (st === 'sent') {
-        const col = isMeBubble ? 'text-white/80' : 'text-slate-400';
-        return `<span class="inline-flex items-center ${col}" title="Sent (1 Grey Check)">${getWhatsAppSingleCheckSvg('w-3.5 h-3.5')}</span>`;
+        const col = isMeBubble ? 'text-slate-500/80 dark:text-emerald-200/80' : 'text-slate-400';
+        return `<span class="inline-flex items-center ${col}" title="Sent">${getWhatsAppSingleCheckSvg('w-3.5 h-3.5')}</span>`;
       }
       if (st === 'delivered') {
-        const col = isMeBubble ? 'text-white/90' : 'text-slate-400';
-        return `<span class="inline-flex items-center ${col}" title="Delivered (2 Grey Checks)">${getWhatsAppDoubleCheckSvg('w-4 h-3.5', false)}</span>`;
+        const col = isMeBubble ? 'text-slate-500/80 dark:text-emerald-100/90' : 'text-slate-400';
+        return `<span class="inline-flex items-center ${col}" title="Delivered">${getWhatsAppDoubleCheckSvg('w-4 h-3.5', false)}</span>`;
       }
       if (st === 'read') {
-        const col = isMeBubble ? 'text-sky-200' : 'text-sky-500';
-        return `<span class="inline-flex items-center ${col}" title="Read (WhatsApp 2 Blue Checks)">${getWhatsAppDoubleCheckSvg('w-4 h-3.5', true)}</span>`;
+        const strokeColor = customTickColor || (isMeBubble ? "#53bdeb" : "#0284c7");
+        const filterStyle = `filter: drop-shadow(0 0 1.5px ${strokeColor}90);`;
+        return `<span class="inline-flex items-center" style="color: ${strokeColor}; ${filterStyle}" title="Read">
+          <svg class="w-4 h-3.5 inline-block flex-shrink-0" viewBox="0 0 20 16" fill="none" stroke="${strokeColor}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1.5 8.5l3.5 3.5L11.5 4.5" />
+            <path d="M7 8.5l3.5 3.5L17 4.5" />
+          </svg>
+        </span>`;
       }
       return `<span class="inline-flex items-center text-slate-400">${getWhatsAppSingleCheckSvg('w-3.5 h-3.5')}</span>`;
     }
 
     function getWhatsAppStatusBadgeText(status) {
-      const st = status || 'read';
-      if (st === 'pending') {
-        return `<span class="inline-flex items-center space-x-1 text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">${getWhatsAppClockSvg('w-2.5 h-2.5 text-amber-600')} <span>Pending</span></span>`;
-      }
-      if (st === 'sent') {
-        return `<span class="inline-flex items-center space-x-1 text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${getWhatsAppSingleCheckSvg('w-3 h-3 text-slate-500')} <span>Sent</span></span>`;
-      }
-      if (st === 'delivered') {
-        return `<span class="inline-flex items-center space-x-1 text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${getWhatsAppDoubleCheckSvg('w-3.5 h-3 text-slate-500', false)} <span>Delivered</span></span>`;
-      }
-      if (st === 'read') {
-        return `<span class="inline-flex items-center space-x-1 text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200 font-extrabold">${getWhatsAppDoubleCheckSvg('w-3.5 h-3 text-sky-500', true)} <span>Read</span></span>`;
-      }
-      return '';
+      return getWhatsAppStatusIconHtml(status, false);
     }
 
     function getWhatsAppChatNotificationBadgeHtml(lastMsg, meta, myUid) {
       const hasUnread = meta && Array.isArray(meta.unreadBy) && meta.unreadBy.includes(myUid);
       const unreadCount = (meta && meta.unreadCount) ? meta.unreadCount : (hasUnread ? 1 : 0);
 
-      // 1. WhatsApp unread notification counter badge (Green circle)
+      // 1. WhatsApp unread notification counter badge (Minimal green circle)
       if (hasUnread || unreadCount > 0) {
-        return `<span class="inline-flex items-center justify-center bg-emerald-500 text-white text-[10px] font-black px-1.5 py-0.2 min-w-[20px] rounded-full shadow-xs ring-2 ring-emerald-100 animate-pulse" title="${unreadCount} unread message(s)">${unreadCount}</span>`;
+        return `<span class="inline-flex items-center justify-center bg-emerald-500 text-white text-[10px] font-black px-1.5 py-0.2 min-w-[18px] rounded-full shadow-2xs ring-2 ring-emerald-100 animate-pulse" title="${unreadCount} unread message(s)">${unreadCount}</span>`;
       }
 
-      // 2. Outgoing message delivery state pill beside chat
-      if (lastMsg && lastMsg.sender === 'me') {
+      // 2. Creative yet minimal delivery icon for outgoing messages
+      if (lastMsg && (lastMsg.sender === 'me' || lastMsg.senderUid === myUid)) {
         const st = lastMsg.status || (meta ? meta.lastMessageStatus : null) || 'read';
-        if (st === 'pending') {
-          return `<span class="inline-flex items-center space-x-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200" title="Message is pending delivery">
-            ${getWhatsAppClockSvg('w-2.5 h-2.5 text-amber-600')} <span>Pending</span>
-          </span>`;
-        }
-        if (st === 'sent') {
-          return `<span class="inline-flex items-center space-x-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200" title="Message sent to server">
-            ${getWhatsAppSingleCheckSvg('w-3 h-3 text-slate-500')} <span>Sent</span>
-          </span>`;
-        }
-        if (st === 'delivered') {
-          return `<span class="inline-flex items-center space-x-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200" title="Delivered to companion">
-            ${getWhatsAppDoubleCheckSvg('w-3.5 h-3 text-slate-500', false)} <span>Delivered</span>
-          </span>`;
-        }
-        if (st === 'read') {
-          return `<span class="inline-flex items-center space-x-1 text-[9px] font-black px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200" title="Read by companion (WhatsApp double blue tick)">
-            ${getWhatsAppDoubleCheckSvg('w-3.5 h-3 text-sky-500', true)} <span>Read</span>
-          </span>`;
-        }
+        return `<span class="inline-flex items-center p-0.5 rounded-full" title="${st}">
+          ${getWhatsAppStatusIconHtml(st, false)}
+        </span>`;
       }
 
       // 3. WhatsApp conversation status
@@ -4605,6 +4848,32 @@
       return '';
     }
 
+    // Bulletproof Message Sender Origin Helper (WhatsApp Left vs Right Alignment)
+    function isMessageFromMe(m, myUid, partnerUid) {
+      if (!m) return false;
+      if (m.sender === 'system') return false;
+      if (m.isMe === true) return true;
+      if (m.isMe === false) return false;
+
+      // If message is explicitly marked as partner, it's definitely LEFT
+      if (m.sender === 'partner') return false;
+      if (partnerUid && (m.sender === partnerUid || m.senderUid === partnerUid)) return false;
+
+      // If sender matches current user's UID, it's definitely RIGHT
+      if (m.senderUid && myUid && m.senderUid === myUid) return true;
+
+      // If sender string is 'me'
+      if (m.sender === 'me') {
+        if (m.senderUid && myUid && m.senderUid !== myUid) return false;
+        return true;
+      }
+
+      // If sender string matches current profile UID
+      if (myUid && myUid !== 'guest' && m.sender === myUid) return true;
+
+      return false;
+    }
+
     window.setChatFilter = function(filter) {
       currentChatFilter = filter;
       document.querySelectorAll('.chat-filter-btn').forEach(btn => {
@@ -4621,175 +4890,282 @@
 
     function ensureInitialSeedChats() {
       try {
-        const initializedKey = 'safarmatch_chat_seed_v5';
+        const initializedKey = 'safarmatch_chat_seed_v9';
         if (localStorage.getItem(initializedKey)) return;
 
         const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
 
-        // 1. Priya Patel: Unread incoming message from partner (WhatsApp green badge '1')
+        // 1. Priya Patel: Kasol & Kheerganga (Two-way chat: Partner on LEFT, User on RIGHT)
         const priyaUid = "seed_priya_02";
         const priyaChatId = [myUid, priyaUid].sort().join('_');
-        if (!localStorage.getItem('safarmatch_chatmeta_' + priyaChatId)) {
-          saveChatMeta(priyaChatId, {
-            initiatorUid: myUid,
-            recipientUid: priyaUid,
-            status: "accepted",
-            unreadBy: [myUid],
-            unreadCount: 1,
-            lastMessage: "Hi there! Kheerganga trek sounds awesome! When are you starting from Kasol?",
-            lastMessageTime: "10:14 AM",
-            lastSender: "partner",
-            lastMessageStatus: "delivered"
-          });
-          saveMessagesForPartner(priyaUid, [
-            {
-              id: "seed_msg_p1",
-              sender: "me",
-              text: "Hey Priya! Saw you are prepping for Kheerganga trek next week. Want to coordinate the trail?",
-              timestamp: "10:05 AM",
-              status: "read"
-            },
-            {
-              id: "seed_msg_p2",
-              sender: "partner",
-              text: "Hi there! Kheerganga trek sounds awesome! When are you starting from Kasol?",
-              timestamp: "10:14 AM",
-              unread: true,
-              status: "delivered"
-            }
-          ]);
-        }
+        saveChatMeta(priyaChatId, {
+          initiatorUid: myUid,
+          recipientUid: priyaUid,
+          status: "accepted",
+          unreadBy: [myUid],
+          unreadCount: 1,
+          lastMessage: "Perfect! Let's sync up over chai in Old Kasol Monday evening.",
+          lastMessageTime: "10:25 AM",
+          lastSender: "partner",
+          lastMessageStatus: "delivered"
+        });
+        saveMessagesForPartner(priyaUid, [
+          {
+            id: "seed_msg_p1",
+            sender: "me",
+            senderUid: myUid,
+            text: "Hey Priya! Saw you are prepping for Kheerganga trek next week. Want to coordinate the trail?",
+            timestamp: "10:05 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_p2",
+            sender: "partner",
+            senderUid: priyaUid,
+            text: "Hi there! Kheerganga trek sounds awesome! When are you starting from Kasol?",
+            timestamp: "10:14 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_p3",
+            sender: "me",
+            senderUid: myUid,
+            text: "Planning an early start Tuesday around 7 AM from Barshaini to reach the hot springs by noon.",
+            timestamp: "10:18 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_p4",
+            sender: "partner",
+            senderUid: priyaUid,
+            text: "Perfect! Let's sync up over chai in Old Kasol Monday evening.",
+            timestamp: "10:25 AM",
+            unread: true,
+            status: "delivered"
+          }
+        ]);
 
-        // 2. Aarav Sharma: Message read by partner (WhatsApp double blue tick ✓✓ Read)
+        // 2. Aarav Sharma: Goa Circuit (Two-way chat: Partner on LEFT, User on RIGHT)
         const aaravUid = "seed_aarav_01";
         const aaravChatId = [myUid, aaravUid].sort().join('_');
-        if (!localStorage.getItem('safarmatch_chatmeta_' + aaravChatId)) {
-          saveChatMeta(aaravChatId, {
-            initiatorUid: myUid,
-            recipientUid: aaravUid,
-            status: "accepted",
-            unreadBy: [],
-            unreadCount: 0,
-            lastMessage: "Hey Aarav, are you renting a scooter in Morjim today?",
-            lastMessageTime: "09:30 AM",
-            lastSender: "me",
-            lastMessageStatus: "read"
-          });
-          saveMessagesForPartner(aaravUid, [
-            {
-              id: "seed_msg_a1",
-              sender: "me",
-              text: "Hey Aarav, are you renting a scooter in Morjim today?",
-              timestamp: "09:30 AM",
-              status: "read"
-            }
-          ]);
-        }
+        saveChatMeta(aaravChatId, {
+          initiatorUid: myUid,
+          recipientUid: aaravUid,
+          status: "accepted",
+          unreadBy: [],
+          unreadCount: 0,
+          lastMessage: "See you there! I will keep an extra helmet ready.",
+          lastMessageTime: "10:08 AM",
+          lastSender: "partner",
+          lastMessageStatus: "read"
+        });
+        saveMessagesForPartner(aaravUid, [
+          {
+            id: "seed_msg_a1",
+            sender: "me",
+            senderUid: myUid,
+            text: "Hey Aarav, are you renting a scooter in Morjim today?",
+            timestamp: "09:30 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_a2",
+            sender: "partner",
+            senderUid: aaravUid,
+            text: "Hey! Yes, just picked up an Activa near Ashwem beach. Are you looking to ride up to Arambol for the drum circle sunset?",
+            timestamp: "09:45 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_a3",
+            sender: "me",
+            senderUid: myUid,
+            text: "Sounds perfect! Let's meet at 4:30 PM outside Burger Factory.",
+            timestamp: "10:05 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_a4",
+            sender: "partner",
+            senderUid: aaravUid,
+            text: "See you there! I will keep an extra helmet ready.",
+            timestamp: "10:08 AM",
+            status: "read"
+          }
+        ]);
 
-        // 3. Rohan Verma: Message delivered to partner (WhatsApp double grey tick ✓✓ Delivered)
+        // 3. Rohan Verma: Rishikesh Rafting (Two-way chat: Partner on LEFT, User on RIGHT)
         const rohanUid = "seed_rohan_03";
         const rohanChatId = [myUid, rohanUid].sort().join('_');
-        if (!localStorage.getItem('safarmatch_chatmeta_' + rohanChatId)) {
-          saveChatMeta(rohanChatId, {
-            initiatorUid: myUid,
-            recipientUid: rohanUid,
-            status: "accepted",
-            unreadBy: [],
-            unreadCount: 0,
-            lastMessage: "White water rafting tomorrow at 9 AM, want to team up?",
-            lastMessageTime: "Yesterday",
-            lastSender: "me",
-            lastMessageStatus: "delivered"
-          });
-          saveMessagesForPartner(rohanUid, [
-            {
-              id: "seed_msg_r1",
-              sender: "me",
-              text: "White water rafting tomorrow at 9 AM, want to team up?",
-              timestamp: "Yesterday",
-              status: "delivered"
-            }
-          ]);
-        }
+        saveChatMeta(rohanChatId, {
+          initiatorUid: myUid,
+          recipientUid: rohanUid,
+          status: "accepted",
+          unreadBy: [],
+          unreadCount: 0,
+          lastMessage: "Awesome! Let's meet at Laxman Jhula bridge at 8:15 AM tomorrow.",
+          lastMessageTime: "Yesterday",
+          lastSender: "partner",
+          lastMessageStatus: "delivered"
+        });
+        saveMessagesForPartner(rohanUid, [
+          {
+            id: "seed_msg_r1",
+            sender: "me",
+            senderUid: myUid,
+            text: "White water rafting tomorrow at 9 AM, want to team up?",
+            timestamp: "Yesterday",
+            status: "delivered"
+          },
+          {
+            id: "seed_msg_r2",
+            sender: "partner",
+            senderUid: rohanUid,
+            text: "Count me in! Doing the 16 km stretch from Shivpuri. Have you booked the raft or should we split one?",
+            timestamp: "Yesterday",
+            status: "delivered"
+          },
+          {
+            id: "seed_msg_r3",
+            sender: "me",
+            senderUid: myUid,
+            text: "Let's split a private raft at Marine Drive, coming out to ₹750 each!",
+            timestamp: "Yesterday",
+            status: "delivered"
+          },
+          {
+            id: "seed_msg_r4",
+            sender: "partner",
+            senderUid: rohanUid,
+            text: "Awesome! Let's meet at Laxman Jhula bridge at 8:15 AM tomorrow.",
+            timestamp: "Yesterday",
+            status: "delivered"
+          }
+        ]);
 
-        // 4. Ananya Sen: Message sent (WhatsApp single grey tick ✓ Sent)
+        // 4. Ananya Sen: Jaipur Amber Fort (Two-way chat: Partner on LEFT, User on RIGHT)
         const ananyaUid = "seed_ananya_04";
         const ananyaChatId = [myUid, ananyaUid].sort().join('_');
-        if (!localStorage.getItem('safarmatch_chatmeta_' + ananyaChatId)) {
-          saveChatMeta(ananyaChatId, {
-            initiatorUid: myUid,
-            recipientUid: ananyaUid,
-            status: "accepted",
-            unreadBy: [],
-            unreadCount: 0,
-            lastMessage: "Visiting the Amber Fort sunset point! Let me know if you want to join.",
-            lastMessageTime: "Yesterday",
-            lastSender: "me",
-            lastMessageStatus: "sent"
-          });
-          saveMessagesForPartner(ananyaUid, [
-            {
-              id: "seed_msg_an1",
-              sender: "me",
-              text: "Visiting the Amber Fort sunset point! Let me know if you want to join.",
-              timestamp: "Yesterday",
-              status: "sent"
-            }
-          ]);
-        }
+        saveChatMeta(ananyaChatId, {
+          initiatorUid: myUid,
+          recipientUid: ananyaUid,
+          status: "accepted",
+          unreadBy: [],
+          unreadCount: 0,
+          lastMessage: "Deal! The golden hour light for photography will be magical.",
+          lastMessageTime: "Yesterday",
+          lastSender: "partner",
+          lastMessageStatus: "sent"
+        });
+        saveMessagesForPartner(ananyaUid, [
+          {
+            id: "seed_msg_an1",
+            sender: "me",
+            senderUid: myUid,
+            text: "Visiting the Amber Fort sunset point! Let me know if you want to join.",
+            timestamp: "Yesterday",
+            status: "sent"
+          },
+          {
+            id: "seed_msg_an2",
+            sender: "partner",
+            senderUid: ananyaUid,
+            text: "Hey! That sounds wonderful. I'm taking architecture photos at Hawa Mahal until 4 PM. We can grab an auto together!",
+            timestamp: "Yesterday",
+            status: "sent"
+          },
+          {
+            id: "seed_msg_an3",
+            sender: "me",
+            senderUid: myUid,
+            text: "Great! I'll swing by the Hawa Mahal cafe around 4:15 PM.",
+            timestamp: "Yesterday",
+            status: "sent"
+          },
+          {
+            id: "seed_msg_an4",
+            sender: "partner",
+            senderUid: ananyaUid,
+            text: "Deal! The golden hour light for photography will be magical.",
+            timestamp: "Yesterday",
+            status: "sent"
+          }
+        ]);
 
-        // 5. Kabir Mehta: Pending message (WhatsApp clock ⏳ Pending)
+        // 5. Kabir Mehta: Leh-Ladakh (Two-way chat: Partner on LEFT, User on RIGHT)
         const kabirUid = "seed_kabir_05";
         const kabirChatId = [myUid, kabirUid].sort().join('_');
-        if (!localStorage.getItem('safarmatch_chatmeta_' + kabirChatId)) {
-          saveChatMeta(kabirChatId, {
-            initiatorUid: myUid,
-            recipientUid: kabirUid,
-            status: "pending",
-            unreadBy: [kabirUid],
-            unreadCount: 0,
-            lastMessage: "Hey Kabir! Are you riding Rohtang Pass this Thursday?",
-            lastMessageTime: "Just now",
-            lastSender: "me",
-            lastMessageStatus: "pending"
-          });
-          saveMessagesForPartner(kabirUid, [
-            {
-              id: "seed_msg_k1",
-              sender: "me",
-              text: "Hey Kabir! Are you riding Rohtang Pass this Thursday?",
-              timestamp: "Just now",
-              status: "pending"
-            }
-          ]);
-        }
+        saveChatMeta(kabirChatId, {
+          initiatorUid: kabirUid,
+          recipientUid: myUid,
+          status: "accepted",
+          unreadBy: [],
+          unreadCount: 0,
+          lastMessage: "Count me in, my Himalayan is serviced and ready to roll!",
+          lastMessageTime: "Just now",
+          lastSender: "me",
+          lastMessageStatus: "pending"
+        });
+        saveMessagesForPartner(kabirUid, [
+          {
+            id: "seed_msg_k0",
+            sender: "partner",
+            senderUid: kabirUid,
+            text: "Riding to Pangong Tso via Chang La pass this weekend. Anyone up for an early morning departure?",
+            timestamp: "Yesterday",
+            status: "read"
+          },
+          {
+            id: "seed_msg_k1",
+            sender: "me",
+            senderUid: myUid,
+            text: "Hey Kabir! Are you riding Rohtang Pass this Thursday?",
+            timestamp: "10:00 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_k2",
+            sender: "partner",
+            senderUid: kabirUid,
+            text: "Yes! Starting 6 AM sharp from Manali before the tourist permit rush.",
+            timestamp: "10:15 AM",
+            status: "read"
+          },
+          {
+            id: "seed_msg_k3",
+            sender: "me",
+            senderUid: myUid,
+            text: "Count me in, my Himalayan is serviced and ready to roll!",
+            timestamp: "Just now",
+            status: "pending"
+          }
+        ]);
 
-        // 6. Meera Nair: Incoming message awaiting user's choice to continue chat (WhatsApp prompt: Yes / No)
+        // 6. Meera Nair: Gokarna Beach Walk (Two-way chat: Partner on LEFT, User on RIGHT)
         const meeraUid = "seed_meera_06";
         const meeraChatId = [myUid, meeraUid].sort().join('_');
-        if (!localStorage.getItem('safarmatch_chatmeta_' + meeraChatId)) {
-          saveChatMeta(meeraChatId, {
-            initiatorUid: meeraUid,
-            recipientUid: myUid,
-            status: "pending",
-            unreadBy: [myUid],
-            unreadCount: 1,
-            lastMessage: "Hey! Are you heading to Om Beach for the sunset cliff walk this weekend?",
-            lastMessageTime: "11:20 AM",
-            lastSender: "partner",
-            lastMessageStatus: "delivered"
-          });
-          saveMessagesForPartner(meeraUid, [
-            {
-              id: "seed_msg_m1",
-              sender: "partner",
-              text: "Hey! Are you heading to Om Beach for the sunset cliff walk this weekend?",
-              timestamp: "11:20 AM",
-              unread: true,
-              status: "delivered"
-            }
-          ]);
-        }
+        saveChatMeta(meeraChatId, {
+          initiatorUid: meeraUid,
+          recipientUid: myUid,
+          status: "pending",
+          unreadBy: [myUid],
+          unreadCount: 1,
+          lastMessage: "Hey! Are you heading to Om Beach for the sunset cliff walk this weekend?",
+          lastMessageTime: "11:20 AM",
+          lastSender: "partner",
+          lastMessageStatus: "delivered"
+        });
+        saveMessagesForPartner(meeraUid, [
+          {
+            id: "seed_msg_m1",
+            sender: "partner",
+            senderUid: meeraUid,
+            text: "Hey! Are you heading to Om Beach for the sunset cliff walk this weekend?",
+            timestamp: "11:20 AM",
+            unread: true,
+            status: "delivered"
+          }
+        ]);
 
         localStorage.setItem(initializedKey, 'true');
       } catch (e) {
@@ -5010,14 +5386,14 @@
           const isExisting = existingPartners.includes(partnerUid);
 
           if (!hasPass && !isExisting) {
-            const remaining = window.getDailyConnects();
+            const remaining = window.getMonthlyConnects();
             if (remaining <= 0) {
-              window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+              window.openPaywallModal("You've used your 2 free companion connects for this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
               return;
             }
-            window.consumeDailyConnect();
+            window.consumeMonthlyConnect();
             window.recordChatPartner(partnerUid);
-            showToast("💬 Chat started with " + traveler.name + "! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
+            showToast("💬 Chat started with " + traveler.name + "! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining this month)", "success");
           } else {
             window.recordChatPartner(partnerUid);
           }
@@ -5143,7 +5519,7 @@
             const liveMsgs = [];
             snapshot.forEach(docSnap => {
               const data = docSnap.data();
-              const isFromMe = data.senderUid === myUid || data.sender === 'me';
+              const isFromMe = (data.senderUid && data.senderUid === myUid) || (!data.senderUid && data.sender === myUid) || (!data.senderUid && data.sender === 'me');
               let timeStr = data.timestamp;
               if (!timeStr && data.createdAt) {
                 try {
@@ -5155,8 +5531,10 @@
               liveMsgs.push({
                 id: docSnap.id,
                 sender: isFromMe ? 'me' : 'partner',
+                senderUid: data.senderUid || (isFromMe ? myUid : partnerUid),
                 text: data.text || "",
-                timestamp: timeStr || "Just now"
+                timestamp: timeStr || "Just now",
+                status: data.status || 'read'
               });
             });
             if (liveMsgs.length > 0) {
@@ -5355,51 +5733,155 @@
       }
     }
 
+    // Typing Indicator UI Helpers
+    function showChatTypingIndicator(partner) {
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+      hideChatTypingIndicator();
+
+      const partnerPhoto = (partner && partner.photoUrl && partner.photoUrl !== DEFAULT_AVATAR) ? partner.photoUrl : DEFAULT_AVATAR;
+      const partnerName = partner ? partner.name : "Traveler";
+      const theme = getActiveChatTheme();
+
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'chat-typing-indicator';
+      typingDiv.className = 'w-full flex justify-start items-end gap-2 my-1.5 animate-in fade-in duration-200';
+      typingDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-200 border border-slate-300 flex-shrink-0 mb-0.5 shadow-2xs" title="${escapeHtml(partnerName)}">
+          <img src="${partnerPhoto}" alt="${escapeHtml(partnerName)}" class="w-full h-full object-cover" />
+        </div>
+        <div class="relative px-3.5 py-2.5 rounded-2xl rounded-tl-xs text-xs ${theme.inBubble} flex items-center space-x-2 shadow-2xs">
+          <span class="absolute -left-1.5 top-0 w-2.5 h-3 overflow-hidden pointer-events-none" style="color: ${theme.inTail};">
+            <svg viewBox="0 0 10 12" class="w-full h-full fill-current">
+              <path d="M10 0 L0 0 C4 2 8 6 10 12 Z" />
+            </svg>
+          </span>
+          <div class="flex items-center space-x-1 py-0.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 0s;"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 0.18s;"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 0.36s;"></span>
+          </div>
+          <span class="text-[10px] ${theme.inTime} font-medium">${escapeHtml(partnerName)} is typing...</span>
+        </div>
+      `;
+      container.appendChild(typingDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function hideChatTypingIndicator() {
+      const existing = document.getElementById('chat-typing-indicator');
+      if (existing) existing.remove();
+    }
+
+    // Render Full Message Stream with WhatsApp Theme & Left/Right Separation
     function renderMessagesList(msgs) {
       const container = document.getElementById('chat-messages-container');
       if (!container) return;
+      applyChatThemeToUI();
+
       if (!msgs || msgs.length === 0) {
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-8 space-y-3">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
+            <div class="w-12 h-12 rounded-2xl bg-white/90 shadow-sm text-emerald-600 flex items-center justify-center">
               <i data-lucide="shield-check" class="w-6 h-6"></i>
             </div>
-            <p class="text-xs font-bold text-slate-700">Protected In-App Chat</p>
+            <p class="text-xs font-bold text-slate-800">Protected In-App Chat</p>
             <p class="text-[11px] text-slate-500 max-w-xs leading-relaxed">
-              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? escapeHtml(activeChatPartner.name) : 'this explorer'}! Messages are verified and 256-bit safe.
+              Coordinate routes, split cabs or book hostels with ${activeChatPartner ? escapeHtml(activeChatPartner.name) : 'this explorer'}! Messages are verified and encrypted.
             </p>
           </div>
         `;
         if (window.lucide) window.lucide.createIcons();
         return;
       }
-      container.innerHTML = msgs.map(m => {
+
+      const myUid = (currentProfile && currentProfile.uid) ? currentProfile.uid : (currentUser ? currentUser.uid : 'guest');
+      const partnerUid = activeChatPartner ? activeChatPartner.uid : null;
+      const partnerPhoto = (activeChatPartner && activeChatPartner.photoUrl && activeChatPartner.photoUrl !== DEFAULT_AVATAR) 
+        ? activeChatPartner.photoUrl 
+        : DEFAULT_AVATAR;
+      const partnerName = activeChatPartner ? activeChatPartner.name : 'Traveler';
+      const theme = getActiveChatTheme();
+
+      let html = '';
+      
+      // WhatsApp Centered Date Divider ("Today")
+      html += `
+        <div class="w-full flex justify-center my-2 select-none">
+          <span class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs text-[10px] font-bold text-slate-500 uppercase px-3 py-0.5 rounded-full shadow-2xs border border-slate-200/50">
+            Today
+          </span>
+        </div>
+      `;
+
+      html += msgs.map(m => {
         if (m.sender === 'system') {
           return `
-            <div class="flex justify-center my-2.5">
-              <div class="bg-slate-100/95 border border-slate-200 text-slate-600 text-[11px] font-semibold px-3.5 py-1.5 rounded-full flex items-center space-x-1.5 shadow-2xs">
+            <div class="w-full flex justify-center my-2">
+              <div class="bg-white/90 border border-slate-200/90 text-slate-600 text-[11px] font-semibold px-3.5 py-1.5 rounded-full flex items-center space-x-1.5 shadow-2xs">
                 <span>${escapeHtml(m.text)}</span>
               </div>
             </div>
           `;
         }
-        const isMe = m.sender === 'me';
+
+        // Precise Origin Determination: User on RIGHT, Partner on LEFT
+        const isMe = isMessageFromMe(m, myUid, partnerUid);
         const st = m.status || 'read';
-        return `
-          <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} my-1">
-            <div class="max-w-[85%] sm:max-w-md px-3.5 py-2.5 rounded-2xl text-xs shadow-xs ${
-              isMe ? 'bg-safar-600 text-white rounded-br-xs' : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
-            }">
-              <p class="leading-relaxed break-words whitespace-pre-wrap">${escapeHtml(m.text)}</p>
-              
-              <div class="flex items-center justify-end space-x-1 mt-1 text-[10px] ${isMe ? 'text-rose-100/90' : 'text-slate-400'}">
-                <span>${m.timestamp || ''}</span>
-                ${isMe ? getWhatsAppStatusIconHtml(st, true) : ''}
+
+        if (isMe) {
+          // ==================== USER MESSAGE (RIGHT SIDE) ====================
+          return `
+            <div class="w-full flex justify-end items-end gap-2 my-1.5 select-text">
+              <div class="max-w-[80%] sm:max-w-md flex flex-col items-end">
+                <div class="relative px-3.5 py-2 rounded-2xl rounded-tr-xs text-xs transition-all ${theme.outBubble}">
+                  <!-- WhatsApp Speech Tail (Right) -->
+                  <span class="absolute -right-1.5 top-0 w-2.5 h-3 overflow-hidden pointer-events-none" style="color: ${theme.outTail};">
+                    <svg viewBox="0 0 10 12" class="w-full h-full fill-current">
+                      <path d="M0 0 L10 0 C6 2 2 6 0 12 Z" />
+                    </svg>
+                  </span>
+                  
+                  <p class="leading-relaxed break-words whitespace-pre-wrap ${theme.outText}">${escapeHtml(m.text)}</p>
+                  
+                  <div class="flex items-center justify-end space-x-1 mt-0.5 text-[10px] select-none ${theme.outTime}">
+                    <span>${m.timestamp || ''}</span>
+                    ${getWhatsAppStatusIconHtml(st, true, theme.outTickColor)}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        } else {
+          // ==================== PARTNER MESSAGE (LEFT SIDE) ====================
+          return `
+            <div class="w-full flex justify-start items-end gap-2 my-1.5 select-text">
+              <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-200 border border-slate-300 flex-shrink-0 mb-0.5 shadow-2xs" title="${escapeHtml(partnerName)}">
+                <img src="${partnerPhoto}" alt="${escapeHtml(partnerName)}" class="w-full h-full object-cover" />
+              </div>
+              
+              <div class="max-w-[80%] sm:max-w-md flex flex-col items-start">
+                <div class="relative px-3.5 py-2 rounded-2xl rounded-tl-xs text-xs transition-all ${theme.inBubble}">
+                  <!-- WhatsApp Speech Tail (Left) -->
+                  <span class="absolute -left-1.5 top-0 w-2.5 h-3 overflow-hidden pointer-events-none" style="color: ${theme.inTail};">
+                    <svg viewBox="0 0 10 12" class="w-full h-full fill-current">
+                      <path d="M10 0 L0 0 C4 2 8 6 10 12 Z" />
+                    </svg>
+                  </span>
+                  
+                  <p class="leading-relaxed break-words whitespace-pre-wrap ${theme.inText}">${escapeHtml(m.text)}</p>
+                  
+                  <div class="flex items-center justify-end space-x-1 mt-0.5 text-[10px] select-none ${theme.inTime}">
+                    <span>${m.timestamp || ''}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
       }).join('');
+
+      container.innerHTML = html;
       container.scrollTop = container.scrollHeight;
       if (window.lucide) window.lucide.createIcons();
     }
@@ -5409,7 +5891,7 @@
       renderMessagesList(msgs);
     }
 
-    // Send Message with Hardened Moderation & WhatsApp Chat Continuation
+    // Send Message with Hardened Moderation, WhatsApp Live Status & Companion Typing/Reply
     window.handleSendMessage = async function(e) {
       e.preventDefault();
       if (!activeChatPartner) {
@@ -5454,20 +5936,20 @@
         showToast("💬 Reply sent! Continuing chat.", "success");
       }
 
-      // Check daily connect quotas on first intro message by initiator
+      // Check monthly companion connect quotas on first intro message by initiator
       const hasPass = hasActiveExplorerPass();
       const existingPartners = window.getExistingChatPartnerIds();
       const isExisting = existingPartners.includes(partnerUid);
 
       if (isFirstMessage && !hasPass && !isExisting) {
-        const remaining = window.getDailyConnects();
+        const remaining = window.getMonthlyConnects();
         if (remaining <= 0) {
-          window.openPaywallModal("You've used your 2 free companion connects for today! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+          window.openPaywallModal("You've used your 2 free companion connects for this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
           return;
         }
-        window.consumeDailyConnect();
+        window.consumeMonthlyConnect();
         window.recordChatPartner(partnerUid);
-        showToast("💬 Message sent! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining today)", "success");
+        showToast("💬 Message sent! (" + (remaining - 1) + " free connect" + (remaining - 1 === 1 ? "" : "s") + " remaining this month)", "success");
       } else {
         window.recordChatPartner(partnerUid);
       }
@@ -5475,9 +5957,11 @@
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+      // Outgoing message: sender = 'me', senderUid = myUid (RIGHT SIDE)
       const newMsg = {
         id: "msg_" + Date.now(),
         sender: "me",
+        senderUid: myUid,
         text,
         timestamp: timeStr,
         status: "pending"
@@ -5511,7 +5995,7 @@
       updateHandshakeUI(meta, activeChatPartner);
       renderConversationList();
 
-      // Step 2: Transition from Pending -> Sent (Single Grey Tick ✓) at 450ms
+      // Step 2: Transition from Pending -> Sent (Single Tick ✓) at 400ms
       setTimeout(() => {
         const liveMsgs = getMessagesForPartner(partnerUid);
         const target = liveMsgs.find(m => m.id === newMsg.id);
@@ -5528,9 +6012,9 @@
             renderConversationList();
           }
         }
-      }, 450);
+      }, 400);
 
-      // Step 3: Transition from Sent -> Delivered (Double Grey Ticks ✓✓) at 1200ms
+      // Step 3: Transition from Sent -> Delivered (Double Ticks ✓✓) at 1000ms
       setTimeout(() => {
         const liveMsgs = getMessagesForPartner(partnerUid);
         const target = liveMsgs.find(m => m.id === newMsg.id);
@@ -5547,14 +6031,14 @@
             renderConversationList();
           }
         }
-      }, 1200);
+      }, 1000);
 
-      // Step 4: Transition to Read (WhatsApp Double Blue Ticks ✓✓) at 2200ms
+      // Step 4: Transition to Read (WhatsApp Blue Ticks ✓✓) at 1800ms
       setTimeout(() => {
         const liveMsgs = getMessagesForPartner(partnerUid);
         let changed = false;
         liveMsgs.forEach(m => {
-          if (m.sender === 'me' && m.status !== 'read') {
+          if (isMessageFromMe(m, myUid, partnerUid) && m.status !== 'read') {
             m.status = 'read';
             changed = true;
           }
@@ -5571,7 +6055,7 @@
             renderConversationList();
           }
         }
-      }, 2200);
+      }, 1800);
 
       // Save to Firestore in real-time
       if (isLiveFirebase && db) {
@@ -5580,7 +6064,7 @@
             text,
             senderUid: myUid,
             receiverUid: partnerUid,
-            sender: "me",
+            sender: myUid,
             timestamp: timeStr,
             status: "pending",
             createdAt: serverTimestamp()
@@ -5595,55 +6079,67 @@
         }
       }
 
-      // Realistic Seed Ambassador Acceptance & Interactive Reply
-      if (partnerUid.startsWith('seed_') && meta.status === 'pending') {
+      // Step 5: Realistic Travel Companion Auto-Reply with Typing Indicator (LEFT SIDE)
+      const shouldSimulateReply = partnerUid.startsWith('seed_') || !isLiveFirebase;
+      if (shouldSimulateReply) {
+        const targetPartner = activeChatPartner;
+        
+        // Show Typing Indicator on LEFT side at 1500ms
         setTimeout(() => {
-          if (!activeChatPartner || activeChatPartner.uid !== partnerUid) return;
-          meta.status = "accepted";
-          meta.updatedAt = new Date().toISOString();
-          saveChatMeta(chatId, meta);
+          if (activeChatPartner && activeChatPartner.uid === partnerUid) {
+            showChatTypingIndicator(targetPartner);
+          }
 
-          // Add chat confirmation to messages
-          const currentMsgs = getMessagesForPartner(partnerUid);
-          currentMsgs.push({
-            id: "sys_" + Date.now(),
-            sender: "system",
-            text: `💬 ${activeChatPartner.name} joined the chat!`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          });
-          saveMessagesForPartner(partnerUid, currentMsgs);
-          renderMessagesList(currentMsgs);
-          updateHandshakeUI(meta, activeChatPartner);
-          renderConversationList();
-          showToast(`💬 ${activeChatPartner.name} joined the chat!`, "success");
-
-          // Ambassador sends a tailored, contextual travel reply
+          // Companion sends reply at 3000ms
           setTimeout(() => {
-            const replies = {
-              "seed_aarav_01": "Hey! Great to connect! I'm based in Morjim this week, exploring cafes and sunsets. Are you looking to split a scooter or grab seafood tonight?",
-              "seed_priya_02": "Hi there! Nice to meet you! I'm prepping for the Kheerganga trek next week. Have you packed warm layers? Let's definitely coordinate trails!",
-              "seed_rohan_03": "Hello fellow traveler! Doing a heritage and photography trail across Jaipur & Udaipur. Happy to split a cab for the fort circuits!",
-              "seed_meera_04": "Hey! Doing backwaters kayaking and working from Varkala cliffs. The weather is lovely here! What does your circuit look like?",
-              "seed_kabir_05": "Hi! Exploring the living root bridges and Dawki river this week. Always glad to connect with a fellow backpacker!",
-              "seed_ananya_06": "Namaste! Capturing dawn boat rides along the ghats and classical music evenings. Happy to share good local food spots!"
-            };
-            const replyText = replies[partnerUid] || `Hey! Glad to connect on SafarMatch! What are your travel plans for ${activeChatPartner ? activeChatPartner.upcomingCircuit || 'this circuit' : 'this circuit'}?`;
+            hideChatTypingIndicator();
+
+            // Intelligent Contextual Travel Replies
+            const lowerText = text.toLowerCase();
+            let replyText = "";
+
+            if (lowerText.includes("cab") || lowerText.includes("taxi") || lowerText.includes("split") || lowerText.includes("share")) {
+              replyText = "Yes! Splitting a cab is so much cheaper. Let me know where and when to meet, happy to split 50/50!";
+            } else if (lowerText.includes("trek") || lowerText.includes("trail") || lowerText.includes("hike") || lowerText.includes("walk")) {
+              replyText = "I'm totally ready for the trail! Starting early morning is definitely best to beat the afternoon clouds.";
+            } else if (lowerText.includes("chai") || lowerText.includes("coffee") || lowerText.includes("cafe") || lowerText.includes("food")) {
+              replyText = "Sounds great! There is a peaceful cafe nearby with great views. Let's sync up there!";
+            } else if (lowerText.includes("scooter") || lowerText.includes("bike") || lowerText.includes("rent")) {
+              replyText = "Renting two-wheelers makes exploring so convenient. The coastal/mountain views are fantastic right now!";
+            } else if (lowerText.includes("hostel") || lowerText.includes("stay") || lowerText.includes("room")) {
+              replyText = "I checked into a cozy backpacker hostel near the center, great travel community vibe!";
+            } else {
+              const defaultReplies = {
+                "seed_aarav_01": "Hey! Great to connect. I'm exploring cafes and coastal sunset spots in Morjim. Looking to team up for scenic rides and good food!",
+                "seed_priya_02": "Hi there! So excited for the Kheerganga trek next week. Have you packed warm layers? Let's definitely coordinate our trail start!",
+                "seed_rohan_03": "Hello fellow traveler! Doing a heritage trail & rafting this week. Happy to split cabs and team up for excursions!",
+                "seed_meera_04": "Hey! Doing coastal cliff walks and cafe hopping in Gokarna/Varkala. The sunset views here are pure bliss!",
+                "seed_kabir_05": "Hi! Riding through the mountain passes this week. Always glad to connect with another adventure backpacker!",
+                "seed_ananya_06": "Namaste! Capturing dawn photos along the circuits and heritage streets. Happy to share great local spots!"
+              };
+              replyText = defaultReplies[partnerUid] || `Hey! Glad to connect on SafarMatch! What are your travel plans for ${targetPartner ? targetPartner.upcomingCircuit || 'this circuit' : 'this circuit'}?`;
+            }
+
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
             const isCurrentlyOpen = activeChatPartner && activeChatPartner.uid === partnerUid;
             const updatedMsgs = getMessagesForPartner(partnerUid);
-            // Mark all prior user messages as read since companion is actively replying
+
+            // Mark prior messages as read
             updatedMsgs.forEach(m => {
-              if (m.sender === 'me') m.status = 'read';
+              if (isMessageFromMe(m, myUid, partnerUid)) m.status = 'read';
             });
+
+            // Companion message: sender = 'partner', senderUid = partnerUid (LEFT SIDE)
             updatedMsgs.push({
               id: "msg_" + Date.now(),
               sender: "partner",
+              senderUid: partnerUid,
               text: replyText,
               timestamp: replyTime,
               unread: !isCurrentlyOpen,
               status: isCurrentlyOpen ? "read" : "delivered"
             });
+
             saveMessagesForPartner(partnerUid, updatedMsgs);
             if (isCurrentlyOpen) {
               renderMessagesList(updatedMsgs);
@@ -5656,7 +6152,7 @@
             if (!isCurrentlyOpen) {
               meta.unreadBy = [myUid];
               meta.unreadCount = (meta.unreadCount || 0) + 1;
-              showToast(`💬 New message from ${activeChatPartner ? activeChatPartner.name : 'traveler'}`, "info");
+              showToast(`💬 New message from ${targetPartner ? targetPartner.name : 'traveler'}`, "info");
             } else {
               meta.unreadBy = [];
               meta.unreadCount = 0;
@@ -5664,8 +6160,8 @@
             saveChatMeta(chatId, meta);
             renderConversationList();
             window.updateUnreadChatIndicators();
-          }, 900);
-        }, 1400);
+          }, 1400);
+        }, 1200);
       }
     };
     
@@ -6393,6 +6889,7 @@
       }
 
       if (viewName === 'chat') {
+        applyChatThemeToUI();
         renderConversationList();
       }
 
