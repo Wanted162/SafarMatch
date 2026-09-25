@@ -42,7 +42,10 @@ import {
   getCurrentUser, 
   loginWithGoogle, 
   signOutUser, 
-  initAuthListener 
+  initAuthListener,
+  authenticateWithGoogleIdentity,
+  openGoogleSignInModal,
+  closeGoogleSignInModal
 } from './services/authService';
 
 import {
@@ -219,6 +222,31 @@ globalObj.navigateToChatTab = () => {
 globalObj.showLandingPage = showLandingPage;
 globalObj.hideLandingPage = hideLandingPage;
 
+globalObj.openGoogleSignInModal = openGoogleSignInModal;
+globalObj.closeGoogleSignInModal = closeGoogleSignInModal;
+
+globalObj.authenticateWithGoogleIdentity = (name: string, email: string, photoUrl?: string) => {
+  const profile = getCurrentProfile();
+  const user = authenticateWithGoogleIdentity(name, email, photoUrl, profile, (merged) => {
+    setCurrentProfile(merged);
+    populateProfileForm();
+    updateJourneyStatusUI();
+    updateVerificationBadgeUI(merged.verificationStatus);
+  });
+  if (user) {
+    attachProfileRealtimeListener(user.uid);
+  }
+};
+
+globalObj.handleCustomGoogleSignIn = (e: Event) => {
+  e.preventDefault();
+  const nameInput = document.getElementById('google-custom-name') as HTMLInputElement | null;
+  const emailInput = document.getElementById('google-custom-email') as HTMLInputElement | null;
+  const name = nameInput?.value.trim() || 'Google Traveler';
+  const email = emailInput?.value.trim() || 'traveler@gmail.com';
+  globalObj.authenticateWithGoogleIdentity(name, email);
+};
+
 globalObj.loginWithGoogleFromLanding = async () => {
   const mainBtn = document.getElementById('landing-google-btn-main') as HTMLButtonElement | null;
   const btnText = document.getElementById('landing-google-btn-text');
@@ -233,6 +261,7 @@ globalObj.loginWithGoogleFromLanding = async () => {
       setCurrentProfile(merged);
       populateProfileForm();
       updateJourneyStatusUI();
+      updateVerificationBadgeUI(merged.verificationStatus);
     });
 
     if (user) {
@@ -243,13 +272,7 @@ globalObj.loginWithGoogleFromLanding = async () => {
       showToast(`Namaste, ${user.displayName || 'Explorer'}! Welcome to SafarMatch.`, "success");
     }
   } catch (err: any) {
-    console.warn("Google sign-in error:", err);
-    if (err.code === 'auth/popup-blocked') {
-      showToast("Browser popup blocked. Please allow popups or use guest preview.", "error");
-    } else {
-      showToast("Exploring in preview mode.", "info");
-      hideLandingPage();
-    }
+    console.warn("Google sign-in flow:", err);
   } finally {
     if (btnText) btnText.textContent = "Sign in with Google ID";
     if (spinner) spinner.classList.add('hidden');

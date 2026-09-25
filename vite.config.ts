@@ -10,14 +10,14 @@ export default defineConfig(() => {
 
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve('.'),
       },
     },
     build: {
       rollupOptions: {
         input: {
-          main: path.resolve(__dirname, 'index.html'),
-          admin: path.resolve(__dirname, 'admin-portal.html'),
+          main: path.resolve('index.html'),
+          admin: path.resolve('admin-portal.html'),
         },
       },
     },
