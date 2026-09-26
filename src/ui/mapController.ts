@@ -252,11 +252,13 @@ export function locateUserPosition(): void {
 }
 
 export function initHomeCityMiniMap(initialLat: number, initialLng: number): void {
-  const miniEl = document.getElementById('profile-home-minimap');
+  const miniEl = document.getElementById('home-city-mini-map') || document.getElementById('profile-home-minimap');
   if (!miniEl || typeof L === 'undefined') return;
 
-  const lat = (initialLat && !isNaN(Number(initialLat))) ? Number(initialLat) : 28.6139;
-  const lng = (initialLng && !isNaN(Number(initialLng))) ? Number(initialLng) : 77.2090;
+  const lat = (initialLat && !isNaN(Number(initialLat))) ? Number(initialLat) : 18.5204;
+  const lng = (initialLng && !isNaN(Number(initialLng))) ? Number(initialLng) : 73.8567;
+
+  const targetId = miniEl.id;
 
   if (homeCityMiniMap) {
     homeCityMiniMap.invalidateSize();
@@ -265,7 +267,7 @@ export function initHomeCityMiniMap(initialLat: number, initialLng: number): voi
     return;
   }
 
-  homeCityMiniMap = L.map('profile-home-minimap', {
+  homeCityMiniMap = L.map(targetId, {
     center: [lat, lng],
     zoom: 10,
     zoomControl: false,
@@ -276,5 +278,26 @@ export function initHomeCityMiniMap(initialLat: number, initialLng: number): voi
     maxZoom: 18
   }).addTo(homeCityMiniMap);
 
-  homeCityMiniMarker = L.marker([lat, lng]).addTo(homeCityMiniMap);
+  homeCityMiniMarker = L.marker([lat, lng], { draggable: true }).addTo(homeCityMiniMap);
+
+  const coordsLabel = document.getElementById('home-city-coords-text');
+  if (coordsLabel) {
+    coordsLabel.textContent = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+  }
+
+  homeCityMiniMarker.on('dragend', (e: any) => {
+    const position = e.target.getLatLng();
+    if (coordsLabel) {
+      coordsLabel.textContent = `Lat: ${position.lat.toFixed(4)}, Lng: ${position.lng.toFixed(4)}`;
+    }
+  });
+
+  homeCityMiniMap.on('click', (e: any) => {
+    if (homeCityMiniMarker) {
+      homeCityMiniMarker.setLatLng(e.latlng);
+    }
+    if (coordsLabel) {
+      coordsLabel.textContent = `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
+    }
+  });
 }

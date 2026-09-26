@@ -318,6 +318,9 @@ globalObj.handleMapSearchSubmit = () => {
   if (!val) return;
   filterMapCircuit(val);
 };
+globalObj.applyMapFilters = () => {
+  renderTravelerPins();
+};
 globalObj.clearMapDestinationSearch = () => {
   const input = document.getElementById('map-destination-search-input') as HTMLInputElement | null;
   if (input) input.value = '';
@@ -391,6 +394,23 @@ globalObj.handleAvatarFileSelected = handleAvatarFileSelected;
 globalObj.selectTravelIntent = selectTravelIntent;
 globalObj.toggleStyleTag = toggleStyleTag;
 globalObj.handleSaveProfile = handleSaveProfile;
+globalObj.handleHomeCityInput = (val: string) => {
+  const city = (val || '').trim();
+  if (city && INDIAN_CIRCUITS_LOOKUP[city]) {
+    const coords = INDIAN_CIRCUITS_LOOKUP[city];
+    initHomeCityMiniMap(coords.lat, coords.lng);
+  }
+};
+globalObj.handleUpcomingDestinationInput = (val: string) => {
+  const dest = (val || '').trim();
+  if (dest && INDIAN_CIRCUITS_LOOKUP[dest]) {
+    const coords = INDIAN_CIRCUITS_LOOKUP[dest];
+    const coordsLabel = document.getElementById('home-city-coords-text');
+    if (coordsLabel) {
+      coordsLabel.textContent = `Destination: ${dest} (Lat: ${coords.lat.toFixed(4)}, Lng: ${coords.lng.toFixed(4)})`;
+    }
+  }
+};
 globalObj.openSelfieModal = openSelfieModal;
 globalObj.closeSelfieModal = closeSelfieModal;
 globalObj.captureSelfieFrame = captureSelfieFrame;
