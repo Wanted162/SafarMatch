@@ -158,7 +158,8 @@ import {
   setChatTheme,
   toggleChatThemeDropdown,
   setChatFilter,
-  handleSendMessage
+  handleSendMessage,
+  continueWhatsAppChat
 } from './ui/chatController';
 
 import {
@@ -342,6 +343,7 @@ globalObj.setChatTheme = setChatTheme;
 globalObj.toggleChatThemeDropdown = toggleChatThemeDropdown;
 globalObj.setChatFilter = setChatFilter;
 globalObj.handleSendMessage = handleSendMessage;
+globalObj.continueWhatsAppChat = continueWhatsAppChat;
 globalObj.getExistingChatPartnerIds = getExistingChatPartnerIds;
 globalObj.recordChatPartner = recordChatPartner;
 globalObj.startChatWithInspectedTraveler = () => {

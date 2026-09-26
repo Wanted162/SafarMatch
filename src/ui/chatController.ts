@@ -108,7 +108,7 @@ export function setChatFilter(filter: string): void {
 }
 
 export function renderConversationList(): void {
-  const container = document.getElementById('chat-conversation-items');
+  const container = document.getElementById('chat-conversations-list') || document.getElementById('chat-conversation-items');
   if (!container) return;
 
   const currentProfile = getCurrentProfile();
@@ -367,15 +367,23 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
   setActiveChatPartner(traveler);
   recordChatPartner(partnerUid);
 
-  // Update Chat Header Bar
-  const headerAvatar = document.getElementById('chat-partner-avatar') as HTMLImageElement | null;
-  const headerName = document.getElementById('chat-partner-name');
-  const headerCircuit = document.getElementById('chat-partner-circuit');
-  const headerBadge = document.getElementById('chat-partner-badge');
+  // Update Chat Header Bar (support both active-chat-* and chat-partner-* IDs)
+  const headerAvatar = (document.getElementById('active-chat-avatar') || document.getElementById('chat-partner-avatar')) as HTMLImageElement | null;
+  const headerName = document.getElementById('active-chat-name') || document.getElementById('chat-partner-name');
+  const headerCircuit = document.getElementById('active-chat-meta') || document.getElementById('chat-partner-circuit');
+  const headerBadge = document.getElementById('active-chat-badge') || document.getElementById('chat-partner-badge');
 
-  if (headerAvatar) headerAvatar.src = traveler.photoUrl || traveler.photo || DEFAULT_AVATAR;
-  if (headerName) headerName.textContent = traveler.name || 'Traveler';
-  if (headerCircuit) headerCircuit.textContent = `${traveler.upcomingCircuit || traveler.currentCircuit || 'India'} Circuit • Active Now`;
+  const travelerName = traveler.name || 'Traveler';
+  const travelerPhoto = traveler.photoUrl || traveler.photo || DEFAULT_AVATAR;
+  const circuitText = `${traveler.upcomingCircuit || traveler.currentCircuit || 'India'} Circuit • Active Now`;
+
+  if (headerAvatar) headerAvatar.src = travelerPhoto;
+  if (headerName) headerName.textContent = travelerName;
+  if (headerCircuit) headerCircuit.textContent = circuitText;
+
+  // Also update prompt banner name
+  const promptName = document.getElementById('chat-whatsapp-prompt-name');
+  if (promptName) promptName.textContent = travelerName;
 
   if (headerBadge) {
     if (traveler.verificationStatus === 'verified' || traveler.verified) {
@@ -385,6 +393,35 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
       headerBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex items-center gap-1";
       headerBadge.innerHTML = `⚪ Unverified`;
     }
+  }
+
+  // Restore or reset chat prompt status
+  const promptBanner = document.getElementById('chat-whatsapp-prompt-banner');
+  const declinedBanner = document.getElementById('chat-declined-banner');
+  const chatInput = document.getElementById('chat-message-input') as HTMLInputElement | null;
+  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+  
+  let consentStatus: string | null = null;
+  try {
+    consentStatus = localStorage.getItem('safarmatch_chat_consent_' + partnerUid);
+  } catch (e) {}
+
+  if (consentStatus === 'declined') {
+    if (promptBanner) promptBanner.classList.add('hidden');
+    if (declinedBanner) declinedBanner.classList.remove('hidden');
+    if (chatInput) {
+      chatInput.disabled = true;
+      chatInput.placeholder = "Conversation paused. Click 'Resume Chat' above to continue.";
+    }
+    if (sendBtn) sendBtn.disabled = true;
+  } else {
+    if (promptBanner) promptBanner.classList.add('hidden');
+    if (declinedBanner) declinedBanner.classList.add('hidden');
+    if (chatInput) {
+      chatInput.disabled = false;
+      chatInput.placeholder = "Type a message... (Anti-scam filter active)";
+    }
+    if (sendBtn) sendBtn.disabled = false;
   }
 
   // Clear unread in meta
@@ -404,6 +441,45 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
   }
 
   if ((window as any).lucide) (window as any).lucide.createIcons();
+}
+
+export function continueWhatsAppChat(accept: boolean): void {
+  const promptBanner = document.getElementById('chat-whatsapp-prompt-banner');
+  const declinedBanner = document.getElementById('chat-declined-banner');
+  const chatInput = document.getElementById('chat-message-input') as HTMLInputElement | null;
+  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+  const activePartner = getActiveChatPartner();
+
+  if (accept) {
+    if (promptBanner) promptBanner.classList.add('hidden');
+    if (declinedBanner) declinedBanner.classList.add('hidden');
+    if (chatInput) {
+      chatInput.disabled = false;
+      chatInput.placeholder = "Type a message... (Anti-scam filter active)";
+      chatInput.focus();
+    }
+    if (sendBtn) sendBtn.disabled = false;
+    if (activePartner) {
+      try {
+        localStorage.setItem('safarmatch_chat_consent_' + activePartner.uid, 'accepted');
+      } catch (e) {}
+    }
+    showToast("Chat active. Enjoy safe travels!", "success");
+  } else {
+    if (promptBanner) promptBanner.classList.add('hidden');
+    if (declinedBanner) declinedBanner.classList.remove('hidden');
+    if (chatInput) {
+      chatInput.disabled = true;
+      chatInput.placeholder = "Conversation paused. Click 'Resume Chat' above to continue.";
+    }
+    if (sendBtn) sendBtn.disabled = true;
+    if (activePartner) {
+      try {
+        localStorage.setItem('safarmatch_chat_consent_' + activePartner.uid, 'declined');
+      } catch (e) {}
+    }
+    showToast("Conversation paused.", "info");
+  }
 }
 
 export async function handleSendMessage(e: Event): Promise<void> {
