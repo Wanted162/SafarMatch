@@ -78,11 +78,17 @@ export function switchView(
 }
 
 export function showLandingPage(): void {
-  const landing = document.getElementById('landing-overlay');
-  if (landing) landing.classList.remove('hidden');
+  const landing = document.getElementById('landing-page') || document.getElementById('landing-overlay');
+  if (landing) {
+    landing.classList.remove('hidden');
+    landing.style.display = 'flex';
+  }
 }
 
 export function hideLandingPage(): void {
-  const landing = document.getElementById('landing-overlay');
-  if (landing) landing.classList.add('hidden');
+  const landing = document.getElementById('landing-page') || document.getElementById('landing-overlay');
+  if (landing) {
+    landing.classList.add('hidden');
+    landing.style.display = 'none';
+  }
 }

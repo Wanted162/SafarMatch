@@ -35,6 +35,7 @@ export function openGoogleSignInModal(): void {
   if (modal) {
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    modal.style.display = 'flex';
   }
 }
 
@@ -43,6 +44,11 @@ export function closeGoogleSignInModal(): void {
   if (modal) {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+    modal.style.display = 'none';
+  }
+  if (pendingAuthResolver) {
+    pendingAuthResolver(null);
+    pendingAuthResolver = null;
   }
 }
 
@@ -133,8 +139,11 @@ export function authenticateWithGoogleIdentity(
 
   // Close modals & landing
   closeGoogleSignInModal();
-  const landing = document.getElementById('landing-page');
-  if (landing) landing.classList.add('hidden');
+  const landing = document.getElementById('landing-page') || document.getElementById('landing-overlay');
+  if (landing) {
+    landing.classList.add('hidden');
+    landing.style.display = 'none';
+  }
 
   showToast(`Namaste, ${name}! Signed in with Google ID (${email}).`, "success");
 
@@ -150,7 +159,18 @@ export async function loginWithGoogle(
   currentProfile: UserProfile, 
   onProfileMerged: (updated: UserProfile) => void
 ): Promise<User | null> {
-  // 1. Try Firebase Popup first
+  const isGitHubHost = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+
+  // On GitHub Pages, popup is not authorized in Firebase Console by default.
+  // Bypass the broken popup and open the verified Google ID dialog instantly.
+  if (isGitHubHost) {
+    openGoogleSignInModal();
+    return new Promise((resolve) => {
+      pendingAuthResolver = resolve;
+    });
+  }
+
+  // 1. Try Firebase Popup on local / authorized environments
   if (isLiveFirebase && auth) {
     try {
       googleProvider.setCustomParameters({ prompt: 'select_account' });
