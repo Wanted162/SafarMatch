@@ -1,0 +1,287 @@
+/**
+ * SafarMatch — Tri-Mode Theme System
+ * Supports 'light', 'safarbloom' (pleasantly balanced twilight bloom), and 'dark'.
+ */
+
+/* ==========================================================================
+   CSS VARIABLES FOR ALL THREE THEMES
+   ========================================================================== */
+
+:root,
+[data-theme="light"] {
+  --theme-name: 'light';
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-header: rgba(255, 255, 255, 0.95);
+  --bg-sidebar: #ffffff;
+  --bg-input: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --border-app: #e2e8f0;
+  --border-card: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-soft: #475569;
+  --accent-bloom: #e11d48;
+  --bloom-glow: rgba(225, 29, 72, 0.15);
+  --modal-bg: #ffffff;
+}
+
+/* ==========================================================================
+   SAFARBLOOM MODE: The Sweet Spot between Light & Dark
+   Pleasant, soothing dusk/twilight palette with soft rose & lotus accents.
+   Not too bright, not pitch black. Designed for zero eye strain.
+   ========================================================================== */
+[data-theme="safarbloom"] {
+  --theme-name: 'safarbloom';
+  --bg-app: #181d2a;
+  --bg-surface: #202637;
+  --bg-card: #252c40;
+  --bg-card-hover: #2d354d;
+  --bg-header: rgba(32, 38, 55, 0.95);
+  --bg-sidebar: #202637;
+  --bg-input: #1a202e;
+  --bg-subtle: #293147;
+  --border-app: #333c56;
+  --border-card: rgba(251, 113, 133, 0.22);
+  --text-main: #fdf4f7;
+  --text-muted: #9ba7c0;
+  --text-soft: #cbd5e1;
+  --accent-bloom: #fb7185;
+  --bloom-glow: rgba(251, 113, 133, 0.25);
+  --modal-bg: #232a3d;
+}
+
+/* ==========================================================================
+   DARK MODE: Midnight Obsidian Slate
+   ========================================================================== */
+[data-theme="dark"] {
+  --theme-name: 'dark';
+  --bg-app: #080c14;
+  --bg-surface: #0e1422;
+  --bg-card: #131a2c;
+  --bg-card-hover: #1a233a;
+  --bg-header: rgba(14, 20, 34, 0.95);
+  --bg-sidebar: #0e1422;
+  --bg-input: #0a0f1c;
+  --bg-subtle: #182138;
+  --border-app: #1e293b;
+  --border-card: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #64748b;
+  --text-soft: #cbd5e1;
+  --accent-bloom: #f43f5e;
+  --bloom-glow: rgba(244, 63, 94, 0.2);
+  --modal-bg: #111827;
+}
+
+/* ==========================================================================
+   GLOBAL TRANSITIONS & BASE STYLES
+   ========================================================================== */
+body, header, aside, nav, div, button, input, select, textarea {
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   SAFARBLOOM SELECTORS
+   ========================================================================== */
+[data-theme="safarbloom"] body {
+  background-color: var(--bg-app) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="safarbloom"] header.h-16,
+[data-theme="safarbloom"] #mobile-bottom-nav,
+[data-theme="safarbloom"] #sidebar-nav {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-app) !important;
+  color: var(--text-main) !important;
+}
+
+/* Content panels and tabs */
+[data-theme="safarbloom"] #main-content,
+[data-theme="safarbloom"] #tab-feed-container,
+[data-theme="safarbloom"] #tab-trips-container,
+[data-theme="safarbloom"] #tab-chat-container,
+[data-theme="safarbloom"] #tab-monetization-container,
+[data-theme="safarbloom"] #tab-profile-container {
+  background-color: var(--bg-app) !important;
+  color: var(--text-main) !important;
+}
+
+/* Cards & containers */
+[data-theme="safarbloom"] .bg-white {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="safarbloom"] .bg-slate-50 {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="safarbloom"] .bg-slate-100 {
+  background-color: #2b334a !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="safarbloom"] .border-slate-100,
+[data-theme="safarbloom"] .border-slate-200,
+[data-theme="safarbloom"] .border-slate-200\/80,
+[data-theme="safarbloom"] .border-slate-300 {
+  border-color: var(--border-app) !important;
+}
+
+/* Text adjustments */
+[data-theme="safarbloom"] .text-slate-900,
+[data-theme="safarbloom"] .text-slate-800 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="safarbloom"] .text-slate-700,
+[data-theme="safarbloom"] .text-slate-600 {
+  color: var(--text-soft) !important;
+}
+
+[data-theme="safarbloom"] .text-slate-500,
+[data-theme="safarbloom"] .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+/* Inputs, textareas & selects */
+[data-theme="safarbloom"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="safarbloom"] select,
+[data-theme="safarbloom"] textarea {
+  background-color: var(--bg-input) !important;
+  border-color: var(--border-app) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="safarbloom"] input::placeholder,
+[data-theme="safarbloom"] textarea::placeholder {
+  color: #7b88a5 !important;
+}
+
+/* Modals */
+[data-theme="safarbloom"] #cab-split-modal > div > div,
+[data-theme="safarbloom"] #feedback-modal > div > div,
+[data-theme="safarbloom"] #terms-modal > div > div,
+[data-theme="safarbloom"] #upi-payment-modal > div,
+[data-theme="safarbloom"] #selfie-modal > div,
+[data-theme="safarbloom"] #direct-upi-dialog > div,
+[data-theme="safarbloom"] #chat-theme-picker-modal > div {
+  background-color: var(--modal-bg) !important;
+  border-color: var(--border-card) !important;
+  color: var(--text-main) !important;
+}
+
+/* Nav items */
+[data-theme="safarbloom"] .nav-item:hover,
+[data-theme="safarbloom"] .mobile-nav-item:hover {
+  background-color: #2b3349 !important;
+}
+
+/* SafarBloom glow badges */
+[data-theme="safarbloom"] .safarbloom-accent {
+  background: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #c084fc 100%) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   DARK MODE SELECTORS
+   ========================================================================== */
+[data-theme="dark"] body {
+  background-color: var(--bg-app) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] header.h-16,
+[data-theme="dark"] #mobile-bottom-nav,
+[data-theme="dark"] #sidebar-nav {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-app) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] #main-content,
+[data-theme="dark"] #tab-feed-container,
+[data-theme="dark"] #tab-trips-container,
+[data-theme="dark"] #tab-chat-container,
+[data-theme="dark"] #tab-monetization-container,
+[data-theme="dark"] #tab-profile-container {
+  background-color: var(--bg-app) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .bg-slate-50 {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .bg-slate-100 {
+  background-color: #172136 !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-200\/80,
+[data-theme="dark"] .border-slate-300 {
+  border-color: var(--border-app) !important;
+}
+
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .text-slate-700,
+[data-theme="dark"] .text-slate-600 {
+  color: var(--text-soft) !important;
+}
+
+[data-theme="dark"] .text-slate-500,
+[data-theme="dark"] .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--bg-input) !important;
+  border-color: var(--border-app) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #52617a !important;
+}
+
+[data-theme="dark"] #cab-split-modal > div > div,
+[data-theme="dark"] #feedback-modal > div > div,
+[data-theme="dark"] #terms-modal > div > div,
+[data-theme="dark"] #upi-payment-modal > div,
+[data-theme="dark"] #selfie-modal > div,
+[data-theme="dark"] #direct-upi-dialog > div,
+[data-theme="dark"] #chat-theme-picker-modal > div {
+  background-color: var(--modal-bg) !important;
+  border-color: var(--border-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .nav-item:hover,
+[data-theme="dark"] .mobile-nav-item:hover {
+  background-color: #172136 !important;
+}

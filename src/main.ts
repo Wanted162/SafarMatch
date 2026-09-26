@@ -30,9 +30,12 @@ try {
   (window as any).lucide.createIcons();
 } catch (e) {}
 
+import { initTheme, setTheme, cycleTheme, getSavedTheme } from './theme/themeManager';
+// Initialize theme right away to prevent any flash
+initTheme();
+
 import { isLiveFirebase, db, auth } from './config/firebase';
 import { getDocs, collection } from 'firebase/firestore';
-
 
 // Types & Config
 import { UPI_CONFIG, INDIAN_CIRCUITS_LOOKUP } from './config/constants';
@@ -218,6 +221,11 @@ globalObj.navigateToChatTab = () => {
 
 globalObj.showLandingPage = showLandingPage;
 globalObj.hideLandingPage = hideLandingPage;
+
+// Theme Management (Light, SafarBloom, Dark)
+globalObj.setTheme = setTheme;
+globalObj.cycleTheme = cycleTheme;
+globalObj.getSavedTheme = getSavedTheme;
 
 // Trigger Google OAuth Directly
 globalObj.loginWithGoogle = () => globalObj.loginWithGoogleFromLanding();
