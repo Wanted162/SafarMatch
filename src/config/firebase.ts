@@ -39,4 +39,8 @@ try {
 }
 
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
 export { app, auth, db, storage, isLiveFirebase };

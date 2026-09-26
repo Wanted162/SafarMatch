@@ -42,10 +42,7 @@ import {
   getCurrentUser, 
   loginWithGoogle, 
   signOutUser, 
-  initAuthListener,
-  authenticateWithGoogleIdentity,
-  openGoogleSignInModal,
-  closeGoogleSignInModal
+  initAuthListener
 } from './services/authService';
 
 import {
@@ -222,32 +219,8 @@ globalObj.navigateToChatTab = () => {
 globalObj.showLandingPage = showLandingPage;
 globalObj.hideLandingPage = hideLandingPage;
 
-globalObj.openGoogleSignInModal = openGoogleSignInModal;
-globalObj.closeGoogleSignInModal = closeGoogleSignInModal;
-
-globalObj.authenticateWithGoogleIdentity = (name: string, email: string, photoUrl?: string, rememberDevice: boolean = false) => {
-  const profile = getCurrentProfile();
-  const user = authenticateWithGoogleIdentity(name, email, photoUrl, rememberDevice, profile, (merged) => {
-    setCurrentProfile(merged);
-    populateProfileForm();
-    updateJourneyStatusUI();
-    updateVerificationBadgeUI(merged.verificationStatus);
-  });
-  if (user) {
-    attachProfileRealtimeListener(user.uid);
-  }
-};
-
-globalObj.handleCustomGoogleSignIn = (e: Event) => {
-  e.preventDefault();
-  const nameInput = document.getElementById('google-custom-name') as HTMLInputElement | null;
-  const emailInput = document.getElementById('google-custom-email') as HTMLInputElement | null;
-  const rememberBox = document.getElementById('google-remember-device') as HTMLInputElement | null;
-  const name = nameInput?.value.trim() || 'Google Explorer';
-  const email = emailInput?.value.trim() || 'traveler@gmail.com';
-  const remember = rememberBox?.checked ?? false;
-  globalObj.authenticateWithGoogleIdentity(name, email, undefined, remember);
-};
+// Trigger Google OAuth Directly
+globalObj.loginWithGoogle = () => globalObj.loginWithGoogleFromLanding();
 
 globalObj.loginWithGoogleFromLanding = async () => {
   const mainBtn = document.getElementById('landing-google-btn-main') as HTMLButtonElement | null;
