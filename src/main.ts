@@ -225,9 +225,9 @@ globalObj.hideLandingPage = hideLandingPage;
 globalObj.openGoogleSignInModal = openGoogleSignInModal;
 globalObj.closeGoogleSignInModal = closeGoogleSignInModal;
 
-globalObj.authenticateWithGoogleIdentity = (name: string, email: string, photoUrl?: string) => {
+globalObj.authenticateWithGoogleIdentity = (name: string, email: string, photoUrl?: string, rememberDevice: boolean = false) => {
   const profile = getCurrentProfile();
-  const user = authenticateWithGoogleIdentity(name, email, photoUrl, profile, (merged) => {
+  const user = authenticateWithGoogleIdentity(name, email, photoUrl, rememberDevice, profile, (merged) => {
     setCurrentProfile(merged);
     populateProfileForm();
     updateJourneyStatusUI();
@@ -242,9 +242,11 @@ globalObj.handleCustomGoogleSignIn = (e: Event) => {
   e.preventDefault();
   const nameInput = document.getElementById('google-custom-name') as HTMLInputElement | null;
   const emailInput = document.getElementById('google-custom-email') as HTMLInputElement | null;
-  const name = nameInput?.value.trim() || 'Google Traveler';
+  const rememberBox = document.getElementById('google-remember-device') as HTMLInputElement | null;
+  const name = nameInput?.value.trim() || 'Google Explorer';
   const email = emailInput?.value.trim() || 'traveler@gmail.com';
-  globalObj.authenticateWithGoogleIdentity(name, email);
+  const remember = rememberBox?.checked ?? false;
+  globalObj.authenticateWithGoogleIdentity(name, email, undefined, remember);
 };
 
 globalObj.loginWithGoogleFromLanding = async () => {
@@ -291,7 +293,7 @@ globalObj.handleAuthAction = () => {
     signOutUser().then(() => {
       const authBtnText = document.getElementById('btn-auth-text');
       if (authBtnText) authBtnText.textContent = "Sign In";
-      showToast("Signed out. Switched to landing page.", "info");
+      showToast("Signed out. Device cache & cookies wiped clean.", "info");
       showLandingPage();
     });
   } else {

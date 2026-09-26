@@ -1,12 +1,19 @@
 /**
  * SafarMatch — Authentication Service
- * Handles Google OAuth, persistent Auth State, and GitHub Pages / live web fallbacks.
+ * Handles Google OAuth, persistent Auth State, secure cookies, and instant zero-residual cache eviction.
  */
 
 import { signInWithPopup, signOut as fbSignOut, onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, isLiveFirebase } from '../config/firebase';
-import { STORAGE_KEYS } from '../utils/storage';
+import { STORAGE_KEYS, clearAllSessionAndCacheData } from '../utils/storage';
+import { 
+  setSessionCookie, 
+  getSessionCookie, 
+  clearAllAuthCookies, 
+  saveRememberedUserOnDevice, 
+  getRememberedUserOnDevice 
+} from '../utils/cookieUtils';
 import { showToast } from '../utils/toast';
 import type { UserProfile } from '../types';
 
@@ -37,6 +44,34 @@ export function openGoogleSignInModal(): void {
     modal.classList.add('flex');
     modal.style.display = 'flex';
   }
+
+  // Check if THIS specific device has an existing remembered account
+  const rememberedSection = document.getElementById('google-remembered-account-section');
+  const rememberedName = document.getElementById('google-remembered-name');
+  const rememberedEmail = document.getElementById('google-remembered-email');
+  const rememberedAvatar = document.getElementById('google-remembered-avatar') as HTMLImageElement | null;
+  const rememberedBtn = document.getElementById('google-remembered-account-btn') as HTMLButtonElement | null;
+
+  const deviceUser = getRememberedUserOnDevice();
+  if (deviceUser && deviceUser.email) {
+    if (rememberedSection) rememberedSection.classList.remove('hidden');
+    if (rememberedName) rememberedName.textContent = deviceUser.name;
+    if (rememberedEmail) rememberedEmail.textContent = deviceUser.email;
+    if (rememberedAvatar) {
+      rememberedAvatar.src = deviceUser.photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(deviceUser.name)}&background=e11d48&color=fff&bold=true`;
+    }
+    if (rememberedBtn) {
+      rememberedBtn.onclick = () => {
+        const globalObj = window as any;
+        if (globalObj.authenticateWithGoogleIdentity) {
+          globalObj.authenticateWithGoogleIdentity(deviceUser.name, deviceUser.email, deviceUser.photoUrl, true);
+        }
+      };
+    }
+  } else {
+    // Unknown or cleared device: hide completely so no other user's identity is ever visible
+    if (rememberedSection) rememberedSection.classList.add('hidden');
+  }
 }
 
 export function closeGoogleSignInModal(): void {
@@ -56,16 +91,19 @@ export function authenticateWithGoogleIdentity(
   name: string, 
   email: string, 
   photoUrl?: string,
+  rememberDevice: boolean = false,
   currentProfile?: UserProfile,
   onProfileMerged?: (updated: UserProfile) => void
 ): any {
-  const uid = "gid_" + btoa(email.toLowerCase()).replace(/=/g, '').slice(0, 16);
-  const avatar = photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e11d48&color=fff&bold=true`;
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanName = name.trim() || 'Explorer';
+  const uid = "gid_" + btoa(cleanEmail).replace(/=/g, '').slice(0, 16);
+  const avatar = photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=e11d48&color=fff&bold=true`;
   
   const googleUser: any = {
     uid,
-    displayName: name,
-    email,
+    displayName: cleanName,
+    email: cleanEmail,
     photoURL: avatar,
     emailVerified: true
   };
@@ -73,7 +111,7 @@ export function authenticateWithGoogleIdentity(
   const storedProfile = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
   const baseProfile: UserProfile = currentProfile || (storedProfile ? JSON.parse(storedProfile) : {
     uid,
-    name,
+    name: cleanName,
     age: 24,
     gender: 'Male',
     homeCity: 'India',
@@ -96,7 +134,7 @@ export function authenticateWithGoogleIdentity(
   const updatedProfile: UserProfile = {
     ...baseProfile,
     uid,
-    name: name || baseProfile.name,
+    name: cleanName,
     photoUrl: avatar,
     verificationStatus: 'verified'
   };
@@ -113,7 +151,22 @@ export function authenticateWithGoogleIdentity(
     }
   }
 
-  // Save session to localStorage
+  // 1. Set origin-bound secure session cookie (SameSite=Strict)
+  setSessionCookie(uid, rememberDevice);
+
+  // 2. Remember on this device ONLY if user checked the option
+  if (rememberDevice) {
+    saveRememberedUserOnDevice({
+      name: cleanName,
+      email: cleanEmail,
+      photoUrl: avatar,
+      lastLogin: Date.now()
+    });
+  } else {
+    saveRememberedUserOnDevice(null);
+  }
+
+  // 3. Save active session to localStorage
   try {
     localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify(googleUser));
     localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(updatedProfile));
@@ -132,7 +185,7 @@ export function authenticateWithGoogleIdentity(
   if (authBtnText) authBtnText.textContent = "Sign Out";
 
   const headerUserName = document.getElementById('header-user-name');
-  if (headerUserName) headerUserName.textContent = name.split(' ')[0] || name;
+  if (headerUserName) headerUserName.textContent = cleanName.split(' ')[0] || cleanName;
 
   const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
   if (headerUserAvatar) headerUserAvatar.src = avatar;
@@ -145,7 +198,7 @@ export function authenticateWithGoogleIdentity(
     landing.style.display = 'none';
   }
 
-  showToast(`Namaste, ${name}! Signed in with Google ID (${email}).`, "success");
+  showToast(`Namaste, ${cleanName}! Signed in with Google ID.`, "success");
 
   if (pendingAuthResolver) {
     pendingAuthResolver(googleUser);
@@ -161,8 +214,8 @@ export async function loginWithGoogle(
 ): Promise<User | null> {
   const isGitHubHost = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
 
-  // On GitHub Pages, popup is not authorized in Firebase Console by default.
-  // Bypass the broken popup and open the verified Google ID dialog instantly.
+  // On GitHub Pages or static host, popup is not authorized in Firebase Console by default.
+  // Bypass broken popups and open the verified Google ID dialog instantly.
   if (isGitHubHost) {
     openGoogleSignInModal();
     return new Promise((resolve) => {
@@ -200,6 +253,9 @@ export async function loginWithGoogle(
         }
       }
 
+      // Set secure session cookie
+      setSessionCookie(res.user.uid, true);
+
       try {
         localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(updatedProfile));
         localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify({
@@ -219,39 +275,63 @@ export async function loginWithGoogle(
       const authBtnText = document.getElementById('btn-auth-text');
       if (authBtnText) authBtnText.textContent = "Sign Out";
       const headerUserName = document.getElementById('header-user-name');
-      if (headerUserName) headerUserName.textContent = (res.user.displayName || 'Explorer').split(' ')[0];
+      if (headerUserName && res.user.displayName) {
+        headerUserName.textContent = res.user.displayName.split(' ')[0];
+      }
       const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
-      if (headerUserAvatar && res.user.photoURL) headerUserAvatar.src = res.user.photoURL;
+      if (headerUserAvatar && res.user.photoURL) {
+        headerUserAvatar.src = res.user.photoURL;
+      }
+
+      // Close landing page
+      const landing = document.getElementById('landing-page') || document.getElementById('landing-overlay');
+      if (landing) {
+        landing.classList.add('hidden');
+        landing.style.display = 'none';
+      }
 
       return res.user;
-    } catch (popupErr: any) {
-      console.warn("Firebase popup not supported on this domain or blocked:", popupErr?.code, popupErr?.message);
-      // Fall through to Google ID Dialog
+    } catch (e: any) {
+      console.warn("Firebase popup sign-in declined or unauthorized domain:", e.code || e.message);
+      // Seamlessly fallback to Google ID modal
+      openGoogleSignInModal();
+      return new Promise((resolve) => {
+        pendingAuthResolver = resolve;
+      });
     }
   }
 
-  // 2. Fallback Google ID Dialog for GitHub Pages & cross-origin hosts
+  // 2. Direct fallback
   openGoogleSignInModal();
-
   return new Promise((resolve) => {
     pendingAuthResolver = resolve;
   });
 }
 
+/**
+ * Signs out the current user, clears all session cookies, wipes all local & session caches.
+ */
 export async function signOutUser(): Promise<void> {
+  // 1. Firebase signout if live
   if (auth) {
     try {
       await fbSignOut(auth);
     } catch (e) {
-      console.warn("Sign out error:", e);
+      console.warn("Firebase sign out error:", e);
     }
   }
+
+  // 2. Clear all authentication & session cookies (SameSite=Strict, Max-Age=0)
+  clearAllAuthCookies();
+
+  // 3. Purge all user cache, local storage keys, session storage, and cache API
+  await clearAllSessionAndCacheData();
+
+  // 4. Wipe runtime in-memory user
   currentUser = null;
-  try {
-    localStorage.removeItem(STORAGE_KEYS.LOGGED_IN_USER);
-  } catch (e) {}
+  setCurrentUser(null);
   
-  // Reset header UI
+  // 5. Reset header UI to Guest state
   const authBtnText = document.getElementById('btn-auth-text');
   if (authBtnText) authBtnText.textContent = "Sign In";
   const headerUserName = document.getElementById('header-user-name');
@@ -261,15 +341,19 @@ export async function signOutUser(): Promise<void> {
     headerUserAvatar.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
   }
 
-  setCurrentUser(null);
+  // 6. Reset dynamic remembered account container
+  const rememberedSection = document.getElementById('google-remembered-account-section');
+  if (rememberedSection) rememberedSection.classList.add('hidden');
 }
 
 export function initAuthListener(onUserDetected: (user: User | null) => void): void {
-  // Check cached session first
+  const sessionCookie = getSessionCookie();
   let cachedUser: any = null;
+
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.LOGGED_IN_USER);
-    if (stored) {
+    // Only accept cached user if valid session cookie exists
+    if (stored && sessionCookie.token) {
       cachedUser = JSON.parse(stored);
       currentUser = cachedUser;
       onUserDetected(cachedUser);
@@ -285,6 +369,10 @@ export function initAuthListener(onUserDetected: (user: User | null) => void): v
       if (headerUserAvatar && cachedUser.photoURL) {
         headerUserAvatar.src = cachedUser.photoURL;
       }
+    } else if (stored && !sessionCookie.token) {
+      // Stale or cleared cookie: enforce logout
+      localStorage.removeItem(STORAGE_KEYS.LOGGED_IN_USER);
+      localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
     }
   } catch (e) {
     console.warn("Cached user parse error:", e);

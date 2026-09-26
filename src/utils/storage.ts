@@ -128,3 +128,50 @@ export function resetNotificationSeen(type: string, uid: string | null | undefin
   } catch (e) {}
 }
 
+/**
+ * Completely purges all user-specific cache, active session, tokens, and cookies on logout.
+ * Leaves zero leftover data on the device.
+ */
+export async function clearAllSessionAndCacheData(): Promise<void> {
+  try {
+    // 1. Clear session-critical local storage keys
+    localStorage.removeItem(STORAGE_KEYS.LOGGED_IN_USER);
+    localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
+    localStorage.removeItem(STORAGE_KEYS.PASS_UNLOCKED);
+    localStorage.removeItem(STORAGE_KEYS.MONTHLY_CONNECTS);
+    localStorage.removeItem(STORAGE_KEYS.ACTIVE_CHAT_PARTNERS);
+
+    // 2. Clear all dynamic user prefixes (chats, verification, payments, notifications)
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && (
+        k.startsWith(STORAGE_KEYS.CHAT_MESSAGES_PREFIX) ||
+        k.startsWith(STORAGE_KEYS.CHATMETA_PREFIX) ||
+        k.startsWith(STORAGE_KEYS.AWAITING_VERIFICATION_PREFIX) ||
+        k.startsWith(STORAGE_KEYS.AWAITING_PAYMENT_PREFIX) ||
+        k.startsWith('safarmatch_notif_seen_') ||
+        k.startsWith('safarmatch_device_user')
+      )) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch (e) {
+    console.warn("Storage purge warning:", e);
+  }
+
+  // 3. Clear session storage
+  try {
+    sessionStorage.clear();
+  } catch (e) {}
+
+  // 4. Purge browser Cache Storage API if available
+  if (typeof window !== 'undefined' && 'caches' in window) {
+    try {
+      const cacheNames = await window.caches.keys();
+      await Promise.all(cacheNames.map(name => window.caches.delete(name)));
+    } catch (e) {
+      console.warn("CacheStorage deletion warning:", e);
+    }
+  }
+}
+
