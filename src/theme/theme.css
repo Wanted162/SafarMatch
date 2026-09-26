@@ -285,3 +285,56 @@ body, header, aside, nav, div, button, input, select, textarea {
 [data-theme="dark"] .mobile-nav-item:hover {
   background-color: #172136 !important;
 }
+
+/* ==========================================================================
+   RESPONSIVE ALIGNMENT & SCREEN COMPATIBILITY
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* Ensure header elements never overflow or push Sign Out off-screen */
+  header.h-16 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Compact button styling on very small screens (<= 380px) */
+  #btn-auth {
+    font-size: 11px !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+/* Ensure profile signout button blends with current theme */
+[data-theme="safarbloom"] #profile-signout-btn,
+[data-theme="dark"] #profile-signout-btn {
+  background-color: rgba(244, 63, 94, 0.12) !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  color: #fb7185 !important;
+}
+
+[data-theme="safarbloom"] #sidebar-btn-auth,
+[data-theme="dark"] #sidebar-btn-auth {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-app) !important;
+  color: var(--text-main) !important;
+}
+
+/* Header Dropdown Menu Theme Styling */
+[data-theme="safarbloom"] #header-actions-dropdown,
+[data-theme="dark"] #header-actions-dropdown {
+  background-color: var(--modal-bg) !important;
+  border-color: var(--border-card) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="safarbloom"] #header-actions-dropdown .bg-slate-50,
+[data-theme="dark"] #header-actions-dropdown .bg-slate-50 {
+  background-color: var(--bg-subtle) !important;
+  border-color: var(--border-app) !important;
+}
+
+[data-theme="safarbloom"] #header-actions-dropdown button:hover,
+[data-theme="dark"] #header-actions-dropdown button:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+

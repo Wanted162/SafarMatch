@@ -241,14 +241,6 @@
           <p class="text-[11px] text-slate-400">
             ⚡ Instant 1-Click Verification • No Password Needed • 100% Free
           </p>
-
-          <button 
-            type="button"
-            onclick="handleGuestLoginFromLanding()"
-            class="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white transition flex items-center justify-center space-x-2 cursor-pointer"
-          >
-            <span>Explore Map in Preview Mode (Guest) &rarr;</span>
-          </button>
         </div>
 
         <!-- Trust footer on card -->
@@ -575,83 +567,204 @@
       </div>
     </div>
 
-    <!-- Right Header Actions (Theme, Auth, Verification Badge & Profile Completion) -->
-    <div class="flex items-center space-x-2 sm:space-x-3">
-      <!-- Tri-Mode Theme Switcher (Light | SafarBloom | Dark) -->
-      <div class="flex items-center bg-slate-100/90 p-1 rounded-2xl border border-slate-200/80 shadow-2xs flex-shrink-0" id="header-theme-switcher" role="group" aria-label="Display Theme">
-        <!-- Light Mode Button -->
+    <!-- Right Header Actions (Streamlined Top-Tier UI with Dropdown) -->
+    <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 relative">
+      <!-- Quick Theme Switcher Pill (Compact) -->
+      <div class="flex items-center bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80 shadow-2xs flex-shrink-0" id="header-theme-switcher" role="group" aria-label="Display Theme">
         <button 
           type="button" 
           data-set-theme="light" 
           data-theme-btn="light"
-          class="flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer select-none text-slate-500 hover:text-slate-800"
+          class="flex items-center space-x-1 px-1.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer select-none text-slate-500 hover:text-slate-800"
           title="Daylight: Crisp & clear view"
         >
           <span>☀️</span>
-          <span class="hidden xl:inline text-[10px]">Light</span>
         </button>
-
-        <!-- SafarBloom Mode Button (Pleasant, not too dark, not too bright) -->
         <button 
           type="button" 
           data-set-theme="safarbloom" 
           data-theme-btn="safarbloom"
-          class="flex items-center space-x-1 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer select-none text-slate-500 hover:text-slate-800"
-          title="SafarBloom: Pleasant twilight bloom, not too dark, not too bright, soothing on eyes"
+          class="flex items-center space-x-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer select-none text-slate-500 hover:text-slate-800"
+          title="SafarBloom: Pleasant twilight bloom, not too dark, not too bright"
         >
           <span>🌸</span>
-          <span class="inline text-[10px] font-bold">Bloom</span>
+          <span class="hidden sm:inline text-[10px] font-bold">Bloom</span>
         </button>
-
-        <!-- Dark Mode Button -->
         <button 
           type="button" 
           data-set-theme="dark" 
           data-theme-btn="dark"
-          class="flex items-center space-x-1 px-2 py-1 rounded-xl text-[11px] font-semibold transition cursor-pointer select-none text-slate-500 hover:text-slate-800"
+          class="flex items-center space-x-1 px-1.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer select-none text-slate-500 hover:text-slate-800"
           title="Midnight: Deep obsidian night view"
         >
           <span>🌙</span>
-          <span class="hidden xl:inline text-[10px]">Dark</span>
         </button>
       </div>
 
-      <!-- Feedback & Feature Ideas Trigger -->
-      <button onclick="openFeedbackModal()" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition cursor-pointer shadow-2xs flex-shrink-0" title="Suggest Features or Send Feedback">
-        <svg class="w-3.5 h-3.5 text-amber-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-        <span class="hidden sm:inline">Feedback & Ideas</span>
-      </button>
-      <!-- Cab & Stay Expense Splitter Tool Button -->
-      <button onclick="openCabSplitModal()" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer shadow-xs flex-shrink-0" title="Split Cab & Stay Costs">
-        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-        <span class="hidden sm:inline">Split Cab / Stay</span>
-      </button>
-      <!-- Live Verification Status Badge -->
-      <div id="header-verification-badge" class="hidden sm:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+      <!-- Live Verification Status Badge (Tablet / Desktop) -->
+      <div id="header-verification-badge" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex-shrink-0">
         <svg class="w-3.5 h-3.5 text-slate-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
         <span id="header-verification-text">Unverified</span>
       </div>
 
       <!-- Profile Completion Gauge -->
-      <div onclick="switchView('profile')" class="cursor-pointer flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-2 py-1.5 sm:px-2.5 rounded-xl transition flex-shrink-0">
+      <div id="header-profile-trigger" onclick="switchView('profile')" class="cursor-pointer flex items-center space-x-1.5 sm:space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-xl transition flex-shrink-0" title="Go to Profile">
         <div class="w-7 h-7 rounded-full bg-slate-200 overflow-hidden flex-shrink-0 border border-white shadow-xs">
           <img id="header-user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar" class="w-full h-full object-cover" />
         </div>
         <div class="text-left hidden md:block">
           <div class="flex items-center space-x-1">
-            <span id="header-user-name" class="text-xs font-bold text-slate-800 truncate max-w-[100px]">Guest</span>
+            <span id="header-user-name" class="text-xs font-bold text-slate-800 truncate max-w-[90px]">Guest</span>
             <span id="header-vip-star" class="hidden text-amber-500 text-xs">⭐</span>
           </div>
-          <div class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden mt-0.5">
+          <div class="w-14 h-1.5 bg-slate-200 rounded-full overflow-hidden mt-0.5">
             <div id="header-profile-progress" class="h-full bg-safar-600 rounded-full transition-all duration-300" style="width: 40%"></div>
           </div>
         </div>
       </div>
 
-      <!-- Google / Auth Button -->
-      <button id="btn-auth" onclick="handleAuthAction()" class="flex-shrink-0 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 sm:px-3.5 sm:py-2 rounded-xl transition flex items-center space-x-1.5 shadow-xs">
-        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
-        <span id="btn-auth-text">Sign In</span>
+      <!-- Quick Actions Dropdown Trigger Button -->
+      <div class="relative">
+        <button 
+          id="header-menu-trigger" 
+          onclick="toggleHeaderDropdown(event)" 
+          type="button" 
+          aria-expanded="false" 
+          aria-haspopup="true"
+          class="flex items-center space-x-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer shadow-2xs select-none"
+          title="More Tools & Menu"
+        >
+          <svg class="w-4 h-4 text-slate-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          <span class="hidden sm:inline text-xs">Menu</span>
+          <svg class="w-3.5 h-3.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <!-- Dropdown Menu Panel (Smart Floating Card) -->
+        <div 
+          id="header-actions-dropdown" 
+          class="hidden absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-2 z-50 transition origin-top-right text-slate-800"
+          style="max-height: calc(100vh - 80px); overflow-y: auto;"
+        >
+          <!-- User Summary Header inside Dropdown -->
+          <div class="p-3 bg-slate-50 rounded-xl mb-2 flex items-center space-x-3 border border-slate-100">
+            <div class="w-10 h-10 rounded-xl bg-slate-200 overflow-hidden flex-shrink-0 border border-white shadow-xs">
+              <img id="menu-user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="User avatar" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center space-x-1.5">
+                <span id="menu-user-name" class="font-bold text-xs text-slate-900 truncate">Explorer</span>
+              </div>
+              <p id="menu-user-email" class="text-[11px] text-slate-500 truncate">India Explorer</p>
+              <div id="menu-user-status" class="mt-1">
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Unverified</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1: Travel Utilities -->
+          <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Backpacker Utilities</div>
+          <div class="space-y-0.5 mb-2">
+            <!-- Cab & Stay Expense Splitter -->
+            <button 
+              type="button" 
+              onclick="handleDropdownCabSplit()" 
+              class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition cursor-pointer text-left"
+            >
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold text-slate-900">Cab & Stay Splitter</div>
+                <div class="text-[10px] text-slate-500 font-normal">Calculate shared taxi & hostel costs</div>
+              </div>
+            </button>
+
+            <!-- Feedback & Feature Requests -->
+            <button 
+              type="button" 
+              onclick="handleDropdownFeedback()" 
+              class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-amber-700 transition cursor-pointer text-left"
+            >
+              <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold text-slate-900">Feedback & Ideas</div>
+                <div class="text-[10px] text-slate-500 font-normal">Submit bug reports or suggest circuits</div>
+              </div>
+            </button>
+
+            <!-- Suraksha SOS & Helplines -->
+            <button 
+              type="button" 
+              onclick="handleDropdownEmergencySOS()" 
+              class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-rose-700 transition cursor-pointer text-left"
+            >
+              <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="1"/><line x1="12" x2="12" y1="14" y2="15"/></svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold text-slate-900">Suraksha Emergency SOS</div>
+                <div class="text-[10px] text-slate-500 font-normal">National Tourist & Women Helpline 1363 / 112</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Section 2: Display Theme Selector inside Menu -->
+          <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-t border-slate-100 pt-2">Display Mode</div>
+          <div class="grid grid-cols-3 gap-1.5 p-1 mb-2">
+            <button 
+              type="button" 
+              data-menu-theme="light" 
+              onclick="handleDropdownThemeSelect('light')"
+              class="py-2 px-1 rounded-xl text-center border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold transition cursor-pointer"
+            >
+              <div>☀️</div>
+              <span class="text-[10px]">Light</span>
+            </button>
+            <button 
+              type="button" 
+              data-menu-theme="safarbloom" 
+              onclick="handleDropdownThemeSelect('safarbloom')"
+              class="py-2 px-1 rounded-xl text-center border border-rose-300 bg-rose-50/50 hover:bg-rose-100/50 text-[11px] font-semibold transition cursor-pointer text-rose-700"
+            >
+              <div>🌸</div>
+              <span class="text-[10px]">Bloom</span>
+            </button>
+            <button 
+              type="button" 
+              data-menu-theme="dark" 
+              onclick="handleDropdownThemeSelect('dark')"
+              class="py-2 px-1 rounded-xl text-center border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold transition cursor-pointer"
+            >
+              <div>🌙</div>
+              <span class="text-[10px]">Dark</span>
+            </button>
+          </div>
+
+          <!-- Section 3: Account & Session Action -->
+          <div class="pt-2 border-t border-slate-100">
+            <button 
+              type="button" 
+              onclick="closeHeaderDropdown(); handleAuthAction();" 
+              class="w-full py-2.5 px-3 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition flex items-center justify-center space-x-2 cursor-pointer"
+            >
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+              <span>Sign Out Account</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Sign In / Sign Out Button (Always Accessible on Screen) -->
+      <button 
+        id="btn-auth" 
+        onclick="handleAuthAction()" 
+        class="flex-shrink-0 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-xs font-bold px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl transition flex items-center space-x-1 sm:space-x-1.5 shadow-xs cursor-pointer whitespace-nowrap"
+        title="Sign Out / Sign In"
+      >
+        <svg class="w-3.5 h-3.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+        <span id="btn-auth-text" class="font-bold">Sign In</span>
       </button>
     </div>
   </header>
@@ -758,6 +871,17 @@
           </div>
           <p class="text-[9px] text-slate-400 text-center">SafarBloom balances warm dusk & rose</p>
         </div>
+
+        <!-- Sidebar Sign Out / Account Button -->
+        <button 
+          id="sidebar-btn-auth" 
+          onclick="handleAuthAction()" 
+          class="w-full py-2.5 px-3 rounded-2xl border border-slate-200 hover:border-rose-200 hover:bg-rose-50/50 text-slate-700 hover:text-rose-600 transition flex items-center justify-center space-x-2 text-xs font-bold cursor-pointer shadow-2xs"
+          title="Sign Out / Sign In"
+        >
+          <svg class="w-3.5 h-3.5 text-slate-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+          <span id="sidebar-btn-auth-text">Sign In</span>
+        </button>
       </div>
 
       <!-- Cloud Sync & Network Status -->
@@ -1743,9 +1867,23 @@
               <textarea id="input-bio" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-safar-500 focus:bg-white" placeholder="Tell travelers what circuits you are visiting (e.g. looking to split scooters in Arambol or trek to Tosh)..."></textarea>
             </div>
 
-            <!-- Save Action Button -->
-            <div class="pt-2 flex justify-end">
-              <button type="submit" class="bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md shadow-rose-200 transition transform active:scale-95 flex items-center space-x-2">
+            <!-- Profile Form Action Buttons -->
+            <div class="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100">
+              <button 
+                type="button" 
+                id="profile-signout-btn" 
+                onclick="handleAuthAction()" 
+                class="order-2 sm:order-1 px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50/60 hover:bg-rose-100 text-rose-700 font-bold text-xs transition flex items-center justify-center space-x-2 cursor-pointer"
+                title="Sign Out of SafarMatch"
+              >
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                <span>Sign Out Account</span>
+              </button>
+
+              <button 
+                type="submit" 
+                class="order-1 sm:order-2 bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md shadow-rose-200 transition transform active:scale-95 flex items-center justify-center space-x-2 cursor-pointer"
+              >
                 <i data-lucide="save" class="w-4 h-4"></i>
                 <span>Save Traveler Profile</span>
               </button>

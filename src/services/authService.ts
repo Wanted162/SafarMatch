@@ -180,9 +180,13 @@ export async function signOutUser(): Promise<void> {
   currentUser = null;
   setCurrentUser(null);
   
-  // 5. Reset header UI to Guest state
+  // 5. Reset header & sidebar UI to Guest state
   const authBtnText = document.getElementById('btn-auth-text');
   if (authBtnText) authBtnText.textContent = "Sign In";
+  const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+  if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign In";
+  const profileSignoutBtn = document.getElementById('profile-signout-btn');
+  if (profileSignoutBtn) profileSignoutBtn.classList.add('hidden');
   const headerUserName = document.getElementById('header-user-name');
   if (headerUserName) headerUserName.textContent = "Guest";
   const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
@@ -219,9 +223,13 @@ export function initAuthListener(onUserDetected: (user: User | null) => void): v
       currentUser = cachedUser;
       onUserDetected(cachedUser);
 
-      // Restore header UI
+      // Restore header & sidebar UI
       const authBtnText = document.getElementById('btn-auth-text');
       if (authBtnText) authBtnText.textContent = "Sign Out";
+      const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+      if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
+      const profileSignoutBtn = document.getElementById('profile-signout-btn');
+      if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
       const headerUserName = document.getElementById('header-user-name');
       if (headerUserName && cachedUser.displayName) {
         headerUserName.textContent = cachedUser.displayName.split(' ')[0];

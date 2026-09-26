@@ -186,11 +186,33 @@ import {
   submitUserFeedback
 } from './ui/feedbackController';
 
+import {
+  initHeaderDropdown,
+  toggleHeaderDropdown,
+  openHeaderDropdown,
+  closeHeaderDropdown,
+  handleDropdownThemeSelect,
+  handleDropdownFeedback,
+  handleDropdownCabSplit,
+  handleDropdownEmergencySOS,
+  syncHeaderDropdownUI
+} from './ui/headerController';
+
 import { showToast } from './utils/toast';
 import { moderateMessageText } from './utils/moderation';
 
 // ==================== BIND GLOBAL WINDOW OBJECT FOR HTML ONCLICK COMPATIBILITY ====================
 const globalObj = window as any;
+
+// Header Dropdown Actions
+globalObj.toggleHeaderDropdown = toggleHeaderDropdown;
+globalObj.openHeaderDropdown = openHeaderDropdown;
+globalObj.closeHeaderDropdown = closeHeaderDropdown;
+globalObj.handleDropdownThemeSelect = handleDropdownThemeSelect;
+globalObj.handleDropdownFeedback = handleDropdownFeedback;
+globalObj.handleDropdownCabSplit = handleDropdownCabSplit;
+globalObj.handleDropdownEmergencySOS = handleDropdownEmergencySOS;
+globalObj.syncHeaderDropdownUI = syncHeaderDropdownUI;
 
 // Navigation & Auth
 globalObj.switchView = (view: string) => {
@@ -265,8 +287,7 @@ globalObj.loginWithGoogleFromLanding = async () => {
 };
 
 globalObj.handleGuestLoginFromLanding = () => {
-  hideLandingPage();
-  showToast("Exploring SafarMatch in Preview Mode. Sign in with Google anytime to save your profile.", "info");
+  globalObj.loginWithGoogleFromLanding();
 };
 
 globalObj.handleAuthAction = () => {
@@ -486,19 +507,31 @@ function bootApp(): void {
   // 2. Initialize UI views
   populateProfileForm();
   updateJourneyStatusUI();
+  initHeaderDropdown();
 
   // 3. Initialize Auth listener
   initAuthListener((user) => {
     if (user) {
       const authBtnText = document.getElementById('btn-auth-text');
       if (authBtnText) authBtnText.textContent = "Sign Out";
+      const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+      if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
+      const profileSignoutBtn = document.getElementById('profile-signout-btn');
+      if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
       if (user.uid) {
         attachProfileRealtimeListener(user.uid);
       }
+      syncHeaderDropdownUI();
       hideLandingPage();
     } else {
       const authBtnText = document.getElementById('btn-auth-text');
       if (authBtnText) authBtnText.textContent = "Sign In";
+      const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+      if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign In";
+      const profileSignoutBtn = document.getElementById('profile-signout-btn');
+      if (profileSignoutBtn) profileSignoutBtn.classList.add('hidden');
+      syncHeaderDropdownUI();
+      showLandingPage();
     }
   });
 
