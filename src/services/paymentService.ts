@@ -1,6 +1,7 @@
 /**
  * SafarMatch — UPI Payment Engine & Connect Quotas
  * Handles direct 0% fee UPI (pisalpranit1-1@oksbi), monthly free connects, UTR verification & cab split calculator.
+ * Strictly limits free users to connecting and messaging with at most 2 companion connections per calendar month.
  */
 
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -14,19 +15,56 @@ let activeUpiPlan = "explorer";
 let activeUpiAmount = 299;
 let activeUpiUri = "";
 
-export function getMonthlyConnects(): number {
+/**
+ * Returns the list of partner UIDs connected this calendar month for free users.
+ */
+export function getMonthlyConnectedPartners(): string[] {
   const thisMonth = new Date().toISOString().slice(0, 7);
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.MONTHLY_CONNECTS);
+    const raw = localStorage.getItem('safarmatch_monthly_partner_ids');
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed.month === thisMonth && typeof parsed.remaining === 'number') {
-        return parsed.remaining;
+      if (parsed.month === thisMonth && Array.isArray(parsed.partnerIds)) {
+        return parsed.partnerIds;
       }
     }
   } catch (e) {}
-  setMonthlyConnects(FREE_CONNECTS_LIMIT);
-  return FREE_CONNECTS_LIMIT;
+  return [];
+}
+
+/**
+ * Records a partner UID in the monthly connections list.
+ */
+export function recordMonthlyConnectedPartner(partnerUid: string): void {
+  if (!partnerUid) return;
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const currentPartners = getMonthlyConnectedPartners();
+  if (!currentPartners.includes(partnerUid)) {
+    currentPartners.push(partnerUid);
+    try {
+      localStorage.setItem('safarmatch_monthly_partner_ids', JSON.stringify({
+        month: thisMonth,
+        partnerIds: currentPartners
+      }));
+    } catch (e) {}
+    // Also keep remaining count in sync
+    const remaining = Math.max(0, FREE_CONNECTS_LIMIT - currentPartners.length);
+    setMonthlyConnects(remaining);
+  }
+}
+
+/**
+ * Returns whether a given partner is already among the user's active connections this month.
+ */
+export function isPartnerAlreadyConnected(partnerUid: string): boolean {
+  if (!partnerUid) return false;
+  const partners = getMonthlyConnectedPartners();
+  return partners.includes(partnerUid);
+}
+
+export function getMonthlyConnects(): number {
+  const partners = getMonthlyConnectedPartners();
+  return Math.max(0, FREE_CONNECTS_LIMIT - partners.length);
 }
 
 export function setMonthlyConnects(count: number): void {
@@ -59,28 +97,60 @@ export function isStep1Complete(profile?: UserProfile | null): boolean {
   return hasName && hasCity && hasPhoto;
 }
 
-export function consumeMonthlyConnect(profile?: UserProfile | null): boolean {
-  if (hasActiveExplorerPass(profile)) return true;
-  const current = getMonthlyConnects();
-  if (current > 0) {
-    const next = current - 1;
-    setMonthlyConnects(next);
-    showToast(`🤝 Free companion connect used! (${next} free ${next === 1 ? 'connect' : 'connects'} remaining this month)`, "info");
-    return true;
+/**
+ * Verifies if user has quota to initiate or message a new connection.
+ * If the partner was already connected this month, free chatting is permitted.
+ */
+export function canUserMessagePartner(partnerUid: string, profile: UserProfile | null): { allowed: boolean; reason?: string } {
+  if (hasActiveExplorerPass(profile)) {
+    return { allowed: true };
   }
-  return false;
+
+  if (isPartnerAlreadyConnected(partnerUid)) {
+    return { allowed: true };
+  }
+
+  const partners = getMonthlyConnectedPartners();
+  if (partners.length >= FREE_CONNECTS_LIMIT) {
+    return {
+      allowed: false,
+      reason: `You have reached your limit of ${FREE_CONNECTS_LIMIT} free companion connections this month. Activate Explorer Pass (₹299/month) for unlimited connections across India!`
+    };
+  }
+
+  return { allowed: true };
 }
 
-export function checkConnectQuotaOrPaywall(profile: UserProfile | null, onOpenProfile: () => void): boolean {
+export function consumeMonthlyConnect(partnerUid: string, profile?: UserProfile | null): boolean {
+  if (hasActiveExplorerPass(profile)) return true;
+  if (!partnerUid) return false;
+  
+  if (isPartnerAlreadyConnected(partnerUid)) {
+    return true;
+  }
+
+  const partners = getMonthlyConnectedPartners();
+  if (partners.length >= FREE_CONNECTS_LIMIT) {
+    return false;
+  }
+
+  recordMonthlyConnectedPartner(partnerUid);
+  const remaining = Math.max(0, FREE_CONNECTS_LIMIT - (partners.length + 1));
+  showToast(`🤝 Companion connection established! (${remaining} free ${remaining === 1 ? 'connection' : 'connections'} remaining this month)`, "info");
+  return true;
+}
+
+export function checkConnectQuotaOrPaywall(partnerUid: string, profile: UserProfile | null, onOpenProfile: () => void): boolean {
   if (hasActiveExplorerPass(profile)) return true;
   if (!isStep1Complete(profile)) {
     showToast("⚠️ Please complete your profile (Step 1) before connecting.", "warning");
     onOpenProfile();
     return false;
   }
-  const remaining = getMonthlyConnects();
-  if (remaining <= 0) {
-    openPaywallModal("You have used your 2 free companion connects for this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+
+  const check = canUserMessagePartner(partnerUid, profile);
+  if (!check.allowed) {
+    openPaywallModal(check.reason || `You have reached your limit of ${FREE_CONNECTS_LIMIT} free companion connections this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.`);
     return false;
   }
   return true;
@@ -108,27 +178,32 @@ export function openUpiModal(plan = "explorer", amount = 299): void {
   const modal = document.getElementById('upi-payment-modal');
   if (!modal) return;
 
-  const planName = plan === 'boost' ? 'TripBoost' : 'ExplorerPass';
-  activeUpiUri = `upi://pay?pa=${encodeURIComponent(UPI_CONFIG.PAYEE_VPA)}&pn=${encodeURIComponent(UPI_CONFIG.PAYEE_NAME)}&am=${amount}&cu=INR&tn=${planName}`;
+  const planName = plan === "boost" ? "Trip Itinerary VIP Priority Boost" : "SafarMatch Explorer Pass (1 Month)";
+  const planEl = document.getElementById('upi-plan-name');
+  const amountEl = document.getElementById('upi-plan-amount');
+  const noteEl = document.getElementById('upi-order-note');
+  const vpaEl = document.getElementById('upi-payee-vpa');
 
-  const subtitle = document.getElementById('upi-modal-subtitle');
-  if (subtitle) {
-    subtitle.textContent = plan === 'boost' ? `Trip Boost — ₹${amount} for 7 Days` : `Explorer Pass — ₹${amount} for 30 Days`;
-  }
-  const mobileBtnText = document.getElementById('upi-mobile-btn-text');
-  if (mobileBtnText) {
-    mobileBtnText.textContent = `Pay ₹${amount} via Any UPI App (GPay / PhonePe / Paytm / BHIM)`;
-  }
+  if (planEl) planEl.textContent = planName;
+  if (amountEl) amountEl.textContent = `₹${amount}`;
+  if (vpaEl) vpaEl.textContent = UPI_CONFIG.PAYEE_VPA;
+
+  const orderId = `SAFAR_${Date.now().toString().slice(-6)}`;
+  if (noteEl) noteEl.textContent = `Txn Ref: ${orderId}`;
+
+  // Direct NPCI UPI Intent Link (0% Transaction Fee)
+  const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_CONFIG.PAYEE_VPA)}&pn=${encodeURIComponent(UPI_CONFIG.PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(orderId)}`;
+  activeUpiUri = upiUrl;
 
   const qrImg = document.getElementById('upi-qr-image') as HTMLImageElement | null;
   if (qrImg) {
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(activeUpiUri)}`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUrl)}&margin=10`;
   }
-  const utrInput = document.getElementById('upi-utr-input') as HTMLInputElement | null;
-  if (utrInput) utrInput.value = "";
+
+  const utrInput = document.getElementById('input-payment-utr') as HTMLInputElement | null;
+  if (utrInput) utrInput.value = '';
 
   modal.classList.remove('hidden');
-  if ((window as any).lucide) (window as any).lucide.createIcons();
 }
 
 export function closeUpiModal(): void {
@@ -137,50 +212,42 @@ export function closeUpiModal(): void {
 }
 
 export function handleMobileUpiIntentClick(): void {
-  if (!activeUpiUri) return;
-  window.location.href = activeUpiUri;
+  if (activeUpiUri) {
+    window.location.href = activeUpiUri;
+  }
 }
 
 export function copyUpiId(): void {
-  const vpa = UPI_CONFIG.PAYEE_VPA;
-  navigator.clipboard.writeText(vpa).then(() => {
-    const btnText = document.getElementById('upi-copy-btn-text');
-    if (btnText) {
-      btnText.textContent = "Copied!";
-      setTimeout(() => { btnText.textContent = "Copy UPI ID"; }, 2500);
-    }
-    showToast(`📋 UPI ID (${vpa}) copied to clipboard!`, "success");
-  }).catch(() => {
-    showToast(`UPI ID: ${vpa}`, "info");
-  });
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(UPI_CONFIG.PAYEE_VPA).then(() => {
+      showToast("📋 UPI ID copied: " + UPI_CONFIG.PAYEE_VPA, "success");
+    });
+  }
 }
 
 export async function submitUtrVerification(profile: UserProfile | null, onUpdated: () => void): Promise<void> {
-  const input = document.getElementById('upi-utr-input') as HTMLInputElement | null;
-  if (!input) return;
-  const utr = input.value.trim();
-  if (!/^[0-9]{12}$/.test(utr)) {
-    showToast("Please enter a valid 12-digit UPI Reference / UTR Number.", "error");
+  const input = document.getElementById('input-payment-utr') as HTMLInputElement | null;
+  const utr = input ? input.value.trim() : '';
+
+  if (!utr || utr.length < 6) {
+    showToast("⚠️ Please enter a valid 12-digit UPI Reference / UTR Number from Google Pay / PhonePe / Paytm.", "error");
     return;
   }
 
   if (profile) {
-    if (profile.uid) {
-      try {
-        localStorage.setItem(STORAGE_KEYS.AWAITING_PAYMENT_PREFIX + profile.uid, 'true');
-      } catch (e) {}
-    }
-    (profile as any).subscription = {
+    const paymentRecord = {
+      utr,
+      plan: activeUpiPlan,
+      amount: activeUpiAmount,
+      submittedAt: new Date().toISOString(),
       status: "pending_review",
-      utr: utr,
-      plan: "explorer_monthly",
-      activatedAt: new Date().toISOString()
+      uid: profile.uid || 'guest',
+      userName: profile.name || 'Traveler',
+      userEmail: (profile as any).email || 'None'
     };
-    profile.subscriptionStatus = 'pending_verification';
-    profile.subscriptionUtr = utr;
 
     try {
-      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+      localStorage.setItem(STORAGE_KEYS.AWAITING_PAYMENT_PREFIX + (profile.uid || 'guest'), JSON.stringify(paymentRecord));
     } catch (e) {}
 
     if (isLiveFirebase && db && profile.uid) {
@@ -248,14 +315,9 @@ export function copySplitSummary(): void {
   const perPerson = Math.ceil(grandTotal / people);
   const text = `🚕 *SafarMatch Cab/Stay Split*\n💰 Total Bill: ₹${grandTotal.toLocaleString('en-IN')}\n👥 Explorers: ${people}\n👉 *Each Person Pays: ₹${perPerson.toLocaleString('en-IN')}*\nPay via UPI: ${UPI_CONFIG.PAYEE_VPA}`;
 
-  navigator.clipboard.writeText(text).then(() => {
-    const btnText = document.getElementById('split-copy-btn-text');
-    if (btnText) {
-      btnText.textContent = "Copied to Clipboard!";
-      setTimeout(() => { btnText.textContent = "Copy Split Breakdown for WhatsApp"; }, 2500);
-    }
-    showToast("📋 Split summary copied for WhatsApp!", "success");
-  }).catch(() => {
-    showToast(`Each person pays: ₹${perPerson}`, "info");
-  });
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast("📋 Split summary copied for WhatsApp!", "success");
+    });
+  }
 }

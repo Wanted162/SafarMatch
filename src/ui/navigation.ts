@@ -82,6 +82,11 @@ export function showLandingPage(): void {
   if (landing) {
     landing.classList.remove('hidden');
     landing.style.display = 'flex';
+    setTimeout(() => {
+      if ((window as any).initLandingMap) {
+        (window as any).initLandingMap();
+      }
+    }, 150);
   }
 }
 

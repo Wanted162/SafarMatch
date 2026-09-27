@@ -23,7 +23,7 @@ import {
 } from '../services/chatService';
 import { getAllTravelers } from '../services/travelerService';
 import { getCurrentProfile, DEFAULT_AVATAR } from '../services/profileService';
-import { hasActiveExplorerPass, getMonthlyConnects, consumeMonthlyConnect, openPaywallModal } from '../services/paymentService';
+import { hasActiveExplorerPass, getMonthlyConnects, consumeMonthlyConnect, openPaywallModal, canUserMessagePartner, getMonthlyConnectedPartners } from '../services/paymentService';
 import { SEED_INDIAN_TRAVELERS } from '../data/seedTravelers';
 import type { Traveler, ChatMessage } from '../types';
 
@@ -64,11 +64,45 @@ export function applyChatThemeToUI(): void {
   }
 }
 
+export function renderThemeDropdownOptions(): void {
+  const list = document.getElementById('chat-theme-options-list');
+  if (!list) return;
+
+  const themes = [
+    { id: 'peace', name: 'Peace Zen', icon: '🌸', desc: 'Calming twilight lotus with soft rose accent' },
+    { id: 'emerald', name: 'Valley Emerald', icon: '🌿', desc: 'Lush mountain trail green & pine glow' },
+    { id: 'sunset', name: 'Gokarna Sunset', icon: '🌅', desc: 'Warm amber dusk & coastal sunset tone' }
+  ];
+
+  list.innerHTML = themes.map(t => {
+    const isActive = currentChatTheme === t.id;
+    return `
+      <button 
+        type="button" 
+        onclick="window.setChatTheme('${t.id}')" 
+        class="w-full text-left p-2 rounded-xl transition flex items-center space-x-2.5 cursor-pointer ${
+          isActive ? 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30' : 'hover:bg-slate-800/60 text-slate-300'
+        }"
+      >
+        <span class="text-base">${t.icon}</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-semibold flex items-center justify-between">
+            <span>${t.name}</span>
+            ${isActive ? '<span class="text-[10px] text-rose-400 font-bold">Active ✓</span>' : ''}
+          </div>
+          <div class="text-[10px] text-slate-400 truncate">${t.desc}</div>
+        </div>
+      </button>
+    `;
+  }).join('');
+}
+
 export function toggleChatThemeDropdown(e?: Event): void {
   if (e) e.stopPropagation();
   const dropdown = document.getElementById('chat-theme-dropdown');
   if (!dropdown) return;
   if (dropdown.classList.contains('hidden')) {
+    renderThemeDropdownOptions();
     dropdown.classList.remove('hidden');
     setTimeout(() => {
       document.addEventListener('click', closeChatThemeDropdownOnClickOutside);
@@ -115,10 +149,23 @@ export function renderConversationList(): void {
   const myUid = currentProfile ? currentProfile.uid : 'guest';
   const activeChatPartner = getActiveChatPartner();
 
-  const allList = getAllTravelers().length > 0 ? getAllTravelers() : (SEED_INDIAN_TRAVELERS as unknown as Traveler[]);
-  const otherTravelers = allList.filter(t => t.uid !== myUid);
+  // ONLY connected users (or those with whom the user has actively exchanged messages/connected) are visible in the chat system
+  const connectedIds = Array.from(new Set([
+    ...getExistingChatPartnerIds(),
+    ...getMonthlyConnectedPartners()
+  ])).filter(Boolean);
 
-  let travelers = otherTravelers;
+  const allList = getAllTravelers().length > 0 ? getAllTravelers() : (SEED_INDIAN_TRAVELERS as unknown as Traveler[]);
+  
+  // Filter exclusively to travelers that the user has actually connected with or opened a chat with
+  let connectedTravelers = allList.filter(t => t.uid !== myUid && connectedIds.includes(t.uid));
+
+  // If currently talking to someone who was just clicked on the map/trip board, ensure they show
+  if (activeChatPartner && activeChatPartner.uid !== myUid && !connectedTravelers.some(t => t.uid === activeChatPartner.uid)) {
+    connectedTravelers.unshift(activeChatPartner);
+  }
+
+  let travelers = connectedTravelers;
   if (activeChatFilter === 'unread') {
     travelers = travelers.filter(trv => {
       const chatId = [myUid, trv.uid].sort().join('_');
@@ -131,10 +178,20 @@ export function renderConversationList(): void {
 
   if (travelers.length === 0) {
     container.innerHTML = `
-      <div class="text-center py-10 px-4 text-slate-400 text-xs">
-        <p class="font-medium">No conversations found</p>
+      <div class="text-center py-12 px-4 text-slate-400 text-xs space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-slate-400 flex items-center justify-center mx-auto">
+          <i data-lucide="message-square-dashed" class="w-6 h-6 text-slate-500"></i>
+        </div>
+        <p class="font-bold text-slate-300 text-xs">No active connections yet</p>
+        <p class="text-[11px] text-slate-400 leading-relaxed max-w-xs mx-auto">
+          Explore the Live Bharat Map or Trip Board to connect with travelers. When you make a connection, they will appear here!
+        </p>
+        <button onclick="window.switchView('map')" class="mt-2 px-3.5 py-1.5 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition">
+          Find Travelers on Map
+        </button>
       </div>
     `;
+    if ((window as any).lucide) (window as any).lucide.createIcons();
     return;
   }
 
@@ -193,6 +250,23 @@ export function renderConversationList(): void {
       </div>
     `;
   }).join('');
+
+  // Update unread indicator dots across dropdown and mobile nav
+  const hasAnyUnread = connectedTravelers.some(trv => {
+    const chatId = [myUid, trv.uid].sort().join('_');
+    const meta = getChatMeta(chatId);
+    return meta && Array.isArray(meta.unreadBy) && meta.unreadBy.includes(myUid);
+  });
+  const unreadDot1 = document.getElementById('sidebar-chat-unread-dot');
+  const unreadDot2 = document.getElementById('mobile-chat-unread-dot');
+  if (unreadDot1) {
+    if (hasAnyUnread) unreadDot1.classList.remove('hidden');
+    else unreadDot1.classList.add('hidden');
+  }
+  if (unreadDot2) {
+    if (hasAnyUnread) unreadDot2.classList.remove('hidden');
+    else unreadDot2.classList.add('hidden');
+  }
 
   if ((window as any).lucide) (window as any).lucide.createIcons();
 }
@@ -381,10 +455,6 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
   if (headerName) headerName.textContent = travelerName;
   if (headerCircuit) headerCircuit.textContent = circuitText;
 
-  // Also update prompt banner name
-  const promptName = document.getElementById('chat-whatsapp-prompt-name');
-  if (promptName) promptName.textContent = travelerName;
-
   if (headerBadge) {
     if (traveler.verificationStatus === 'verified' || traveler.verified) {
       headerBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1";
@@ -395,28 +465,87 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
     }
   }
 
-  // Restore or reset chat prompt status
-  const promptBanner = document.getElementById('chat-whatsapp-prompt-banner');
-  const declinedBanner = document.getElementById('chat-declined-banner');
+  // 1. Check existing Firestore chats/{chatId} FIRST before creating metadata
+  let chatStatus = 'accepted';
+  let initiatorUid = myUid;
+  let existingMeta = getChatMeta(chatId);
+
+  if (isLiveFirebase && db) {
+    try {
+      const chatDocRef = doc(db, 'chats', chatId);
+      const chatSnap = await getDoc(chatDocRef);
+      if (chatSnap.exists()) {
+        const data = chatSnap.data();
+        chatStatus = data.status || 'accepted';
+        initiatorUid = data.initiatorUid || myUid;
+        existingMeta = { ...existingMeta, ...data };
+        saveChatMeta(chatId, existingMeta);
+      } else {
+        // Doc doesn't exist yet: establish pending handshake without overwriting
+        chatStatus = 'pending';
+        initiatorUid = myUid;
+        const newMeta = {
+          initiatorUid: myUid,
+          recipientUid: partnerUid,
+          status: 'pending',
+          lastMessage: `${travelerName} connected on SafarMatch`,
+          lastMessageTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          unreadBy: [partnerUid]
+        };
+        await setDoc(chatDocRef, {
+          ...newMeta,
+          createdAt: serverTimestamp()
+        }, { merge: true });
+        saveChatMeta(chatId, newMeta);
+      }
+    } catch (e) {
+      console.warn("Firestore chat handshake fetch error, using local fallback:", e);
+      if (existingMeta && existingMeta.status) {
+        chatStatus = existingMeta.status;
+        initiatorUid = existingMeta.initiatorUid || myUid;
+      }
+    }
+  } else {
+    if (existingMeta && existingMeta.status) {
+      chatStatus = existingMeta.status;
+      initiatorUid = existingMeta.initiatorUid || myUid;
+    } else {
+      chatStatus = 'accepted';
+    }
+  }
+
+  // Handle Pending Handshake Banners
+  const senderBanner = document.getElementById('chat-sender-pending-banner');
+  const recipientBanner = document.getElementById('chat-recipient-action-banner');
+  const recipientNameEl = document.getElementById('chat-recipient-name');
   const chatInput = document.getElementById('chat-message-input') as HTMLInputElement | null;
   const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
-  
-  let consentStatus: string | null = null;
-  try {
-    consentStatus = localStorage.getItem('safarmatch_chat_consent_' + partnerUid);
-  } catch (e) {}
 
-  if (consentStatus === 'declined') {
-    if (promptBanner) promptBanner.classList.add('hidden');
-    if (declinedBanner) declinedBanner.classList.remove('hidden');
-    if (chatInput) {
-      chatInput.disabled = true;
-      chatInput.placeholder = "Conversation paused. Click 'Resume Chat' above to continue.";
+  if (chatStatus === 'pending') {
+    if (initiatorUid === myUid) {
+      // Current user sent the request
+      if (senderBanner) senderBanner.classList.remove('hidden');
+      if (recipientBanner) recipientBanner.classList.add('hidden');
+      if (chatInput) {
+        chatInput.disabled = true;
+        chatInput.placeholder = "Connection request sent. Waiting for traveler to accept...";
+      }
+      if (sendBtn) sendBtn.disabled = true;
+    } else {
+      // Current user is recipient
+      if (senderBanner) senderBanner.classList.add('hidden');
+      if (recipientBanner) recipientBanner.classList.remove('hidden');
+      if (recipientNameEl) recipientNameEl.textContent = travelerName;
+      if (chatInput) {
+        chatInput.disabled = true;
+        chatInput.placeholder = "Accept connection request above to start messaging.";
+      }
+      if (sendBtn) sendBtn.disabled = true;
     }
-    if (sendBtn) sendBtn.disabled = true;
   } else {
-    if (promptBanner) promptBanner.classList.add('hidden');
-    if (declinedBanner) declinedBanner.classList.add('hidden');
+    // Accepted
+    if (senderBanner) senderBanner.classList.add('hidden');
+    if (recipientBanner) recipientBanner.classList.add('hidden');
     if (chatInput) {
       chatInput.disabled = false;
       chatInput.placeholder = "Type a message... (Anti-scam filter active)";
@@ -441,6 +570,86 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
   }
 
   if ((window as any).lucide) (window as any).lucide.createIcons();
+}
+
+export async function acceptChatRequest(): Promise<void> {
+  const activePartner = getActiveChatPartner();
+  if (!activePartner) return;
+  const currentProfile = getCurrentProfile();
+  const myUid = currentProfile ? currentProfile.uid : 'guest';
+  const partnerUid = activePartner.uid;
+  const chatId = [myUid, partnerUid].sort().join('_');
+
+  const senderBanner = document.getElementById('chat-sender-pending-banner');
+  const recipientBanner = document.getElementById('chat-recipient-action-banner');
+  const chatInput = document.getElementById('chat-message-input') as HTMLInputElement | null;
+  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+
+  if (senderBanner) senderBanner.classList.add('hidden');
+  if (recipientBanner) recipientBanner.classList.add('hidden');
+  if (chatInput) {
+    chatInput.disabled = false;
+    chatInput.placeholder = "Type a message... (Anti-scam filter active)";
+    chatInput.focus();
+  }
+  if (sendBtn) sendBtn.disabled = false;
+
+  const meta = getChatMeta(chatId) || {};
+  meta.status = 'accepted';
+  saveChatMeta(chatId, meta);
+
+  if (isLiveFirebase && db) {
+    try {
+      const chatDocRef = doc(db, 'chats', chatId);
+      await setDoc(chatDocRef, {
+        status: 'accepted',
+        acceptedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      console.warn("Firestore accept chat error:", e);
+    }
+  }
+
+  showToast(`Connected with ${activePartner.name}! Real-time chat unlocked.`, "success");
+}
+
+export async function declineChatRequest(): Promise<void> {
+  const activePartner = getActiveChatPartner();
+  if (!activePartner) return;
+  const currentProfile = getCurrentProfile();
+  const myUid = currentProfile ? currentProfile.uid : 'guest';
+  const partnerUid = activePartner.uid;
+  const chatId = [myUid, partnerUid].sort().join('_');
+
+  const senderBanner = document.getElementById('chat-sender-pending-banner');
+  const recipientBanner = document.getElementById('chat-recipient-action-banner');
+  const chatInput = document.getElementById('chat-message-input') as HTMLInputElement | null;
+  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+
+  if (senderBanner) senderBanner.classList.add('hidden');
+  if (recipientBanner) recipientBanner.classList.add('hidden');
+  if (chatInput) {
+    chatInput.disabled = true;
+    chatInput.placeholder = "Connection request declined.";
+  }
+  if (sendBtn) sendBtn.disabled = true;
+
+  const meta = getChatMeta(chatId) || {};
+  meta.status = 'declined';
+  saveChatMeta(chatId, meta);
+
+  if (isLiveFirebase && db) {
+    try {
+      const chatDocRef = doc(db, 'chats', chatId);
+      await setDoc(chatDocRef, {
+        status: 'declined'
+      }, { merge: true });
+    } catch (e) {
+      console.warn("Firestore decline chat error:", e);
+    }
+  }
+
+  showToast(`Connection request declined.`, "info");
 }
 
 export function continueWhatsAppChat(accept: boolean): void {
@@ -509,13 +718,15 @@ export async function handleSendMessage(e: Event): Promise<void> {
   const msgs = getMessagesForPartner(partnerUid);
   const isFirstMessage = msgs.length === 0;
 
-  if (isFirstMessage && !hasActiveExplorerPass(currentProfile)) {
-    const remaining = getMonthlyConnects();
-    if (remaining <= 0) {
-      openPaywallModal("You've used your 2 free companion connects for this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
+  if (!hasActiveExplorerPass(currentProfile)) {
+    const quotaCheck = canUserMessagePartner(partnerUid, currentProfile);
+    if (!quotaCheck.allowed) {
+      openPaywallModal(quotaCheck.reason || "Free users can connect and message with at most 2 companion connections per month. Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.");
       return;
     }
-    consumeMonthlyConnect(currentProfile);
+    if (isFirstMessage) {
+      consumeMonthlyConnect(partnerUid, currentProfile);
+    }
     recordChatPartner(partnerUid);
   } else {
     recordChatPartner(partnerUid);
@@ -551,7 +762,7 @@ export async function handleSendMessage(e: Event): Promise<void> {
   saveChatMeta(chatId, meta);
   renderConversationList();
 
-  // Tick progression: Pending -> Sent at 400ms
+  // Message delivery progression: Pending -> Sent at 300ms
   setTimeout(() => {
     const liveMsgs = getMessagesForPartner(partnerUid);
     const target = liveMsgs.find(m => m.id === newMsg.id);
@@ -562,9 +773,9 @@ export async function handleSendMessage(e: Event): Promise<void> {
         renderMessagesList(liveMsgs);
       }
     }
-  }, 400);
+  }, 300);
 
-  // Delivered at 1000ms
+  // Delivered tick at 800ms (real companion status, NO dummy auto-replies)
   setTimeout(() => {
     const liveMsgs = getMessagesForPartner(partnerUid);
     const target = liveMsgs.find(m => m.id === newMsg.id);
@@ -575,37 +786,5 @@ export async function handleSendMessage(e: Event): Promise<void> {
         renderMessagesList(liveMsgs);
       }
     }
-  }, 1000);
-
-  // Read at 1800ms
-  setTimeout(() => {
-    const liveMsgs = getMessagesForPartner(partnerUid);
-    liveMsgs.forEach(m => {
-      if (m.sender === 'me') m.status = 'read';
-    });
-    saveMessagesForPartner(partnerUid, liveMsgs);
-    if (getActiveChatPartner()?.uid === partnerUid) {
-      renderMessagesList(liveMsgs);
-    }
-  }, 1800);
-
-  // Contextual simulated reply
-  setTimeout(() => {
-    const liveMsgs = getMessagesForPartner(partnerUid);
-    const replyText = `Hey! Thanks for reaching out about traveling together. Let's coordinate our itinerary!`;
-    const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    liveMsgs.push({
-      id: "reply_" + Date.now(),
-      sender: "partner",
-      senderUid: partnerUid,
-      text: replyText,
-      timestamp: replyTime,
-      status: "read"
-    });
-    saveMessagesForPartner(partnerUid, liveMsgs);
-    if (getActiveChatPartner()?.uid === partnerUid) {
-      renderMessagesList(liveMsgs);
-    }
-    renderConversationList();
-  }, 2800);
+  }, 800);
 }

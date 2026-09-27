@@ -79,6 +79,7 @@ import {
   initTravelersCache,
   inspectTravelerFromMap,
   closeTravelerDetailModal,
+  getInspectedTraveler,
   reportInspectedTraveler,
   openReportModalFromChat,
   closeReportBlockModal,
@@ -140,8 +141,10 @@ import {
 
 import {
   initMap,
+  initLandingMap,
   renderTravelerPins,
   filterMapCircuit,
+  filterLandingMapCircuit,
   resetMapCenter,
   flyToDestination,
   locateUserPosition,
@@ -157,9 +160,12 @@ import {
   backToConversationList,
   setChatTheme,
   toggleChatThemeDropdown,
+  renderThemeDropdownOptions,
   setChatFilter,
   handleSendMessage,
-  continueWhatsAppChat
+  continueWhatsAppChat,
+  acceptChatRequest,
+  declineChatRequest
 } from './ui/chatController';
 
 import {
@@ -189,6 +195,7 @@ import {
 import {
   initHeaderDropdown,
   toggleHeaderDropdown,
+  toggleNavMenu,
   openHeaderDropdown,
   closeHeaderDropdown,
   handleDropdownThemeSelect,
@@ -206,6 +213,7 @@ const globalObj = window as any;
 
 // Header Dropdown Actions
 globalObj.toggleHeaderDropdown = toggleHeaderDropdown;
+globalObj.toggleNavMenu = toggleNavMenu;
 globalObj.openHeaderDropdown = openHeaderDropdown;
 globalObj.closeHeaderDropdown = closeHeaderDropdown;
 globalObj.handleDropdownThemeSelect = handleDropdownThemeSelect;
@@ -244,6 +252,42 @@ globalObj.navigateToChatTab = () => {
 
 globalObj.showLandingPage = showLandingPage;
 globalObj.hideLandingPage = hideLandingPage;
+
+globalObj.toggleLandingDropdown = (event?: Event) => {
+  if (event) event.stopPropagation();
+  const dropdown = document.getElementById('landing-nav-dropdown');
+  if (dropdown) {
+    dropdown.classList.toggle('hidden');
+    if ((window as any).lucide?.createIcons) {
+      (window as any).lucide.createIcons();
+    }
+  }
+};
+
+globalObj.closeLandingDropdown = () => {
+  const dropdown = document.getElementById('landing-nav-dropdown');
+  if (dropdown) dropdown.classList.add('hidden');
+};
+
+globalObj.openViewFromLanding = (view: string) => {
+  globalObj.closeLandingDropdown();
+  hideLandingPage();
+  if (view === 'chat') {
+    globalObj.navigateToChatTab();
+  } else {
+    globalObj.switchView(view);
+  }
+};
+
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement | null;
+  if (!target) return;
+  const dropdown = document.getElementById('landing-nav-dropdown');
+  const trigger = document.getElementById('landing-menu-trigger');
+  if (dropdown && !dropdown.contains(target) && trigger && !trigger.contains(target)) {
+    dropdown.classList.add('hidden');
+  }
+});
 
 // Theme Management (Light, SafarBloom, Dark)
 globalObj.setTheme = setTheme;
@@ -306,6 +350,8 @@ globalObj.handleAuthAction = () => {
 
 // Map
 globalObj.initMap = initMap;
+globalObj.initLandingMap = initLandingMap;
+globalObj.filterLandingMapCircuit = filterLandingMapCircuit;
 globalObj.renderTravelerPins = renderTravelerPins;
 globalObj.filterMapCircuit = filterMapCircuit;
 globalObj.resetMapCenter = resetMapCenter;
@@ -365,18 +411,26 @@ globalObj.backToConversationList = backToConversationList;
 globalObj.closeActiveChat = backToConversationList;
 globalObj.setChatTheme = setChatTheme;
 globalObj.toggleChatThemeDropdown = toggleChatThemeDropdown;
+globalObj.renderThemeDropdownOptions = renderThemeDropdownOptions;
 globalObj.setChatFilter = setChatFilter;
 globalObj.handleSendMessage = handleSendMessage;
 globalObj.continueWhatsAppChat = continueWhatsAppChat;
+globalObj.acceptChatRequest = acceptChatRequest;
+globalObj.declineChatRequest = declineChatRequest;
 globalObj.getExistingChatPartnerIds = getExistingChatPartnerIds;
-globalObj.recordChatPartner = recordChatPartner;
 globalObj.startChatWithInspectedTraveler = () => {
-  const inspected = globalObj.inspectedTraveler || getActiveChatPartner();
-  closeTravelerDetailModal();
-  if (inspected) {
-    globalObj.switchView('chat');
-    openChatWithTraveler(inspected);
+  const inspected = getInspectedTraveler() || globalObj.inspectedTraveler || getActiveChatPartner();
+  if (!inspected) {
+    closeTravelerDetailModal();
+    return;
   }
+  const currentProfile = getCurrentProfile();
+  if (!checkConnectQuotaOrPaywall(inspected.uid, currentProfile, () => globalObj.switchView('profile'))) {
+    return;
+  }
+  closeTravelerDetailModal();
+  globalObj.switchView('chat');
+  openChatWithTraveler(inspected);
 };
 globalObj.sendQuickChatMessage = (text: string) => {
   const input = document.getElementById('chat-message-input') as HTMLInputElement | null;
@@ -474,12 +528,12 @@ globalObj.copyMyLocationSummary = () => {
 // Payment & Connects
 globalObj.getMonthlyConnects = getMonthlyConnects;
 globalObj.setMonthlyConnects = setMonthlyConnects;
-globalObj.consumeMonthlyConnect = () => consumeMonthlyConnect(getCurrentProfile());
+globalObj.consumeMonthlyConnect = (partnerUid?: string) => consumeMonthlyConnect(partnerUid || '', getCurrentProfile());
 globalObj.getDailyConnects = getMonthlyConnects;
 globalObj.setDailyConnects = setMonthlyConnects;
-globalObj.consumeDailyConnect = () => consumeMonthlyConnect(getCurrentProfile());
-globalObj.checkConnectQuotaOrPaywall = (actionDesc?: string) => {
-  return checkConnectQuotaOrPaywall(getCurrentProfile(), () => globalObj.switchView('profile'));
+globalObj.consumeDailyConnect = (partnerUid?: string) => consumeMonthlyConnect(partnerUid || '', getCurrentProfile());
+globalObj.checkConnectQuotaOrPaywall = (targetUid?: string) => {
+  return checkConnectQuotaOrPaywall(targetUid || '', getCurrentProfile(), () => globalObj.switchView('profile'));
 };
 globalObj.hasActiveExplorerPass = () => hasActiveExplorerPass(getCurrentProfile());
 globalObj.isStep1Complete = () => isStep1Complete(getCurrentProfile());
@@ -557,6 +611,7 @@ function bootApp(): void {
 
   // 4. Initialize Map
   initMap();
+  initLandingMap();
 
   // 5. Fetch live Firestore feeds in background if connected
   if (isLiveFirebase && db) {

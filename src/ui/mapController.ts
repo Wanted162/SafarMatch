@@ -18,10 +18,18 @@ let mapMarkersLayer: any = null;
 let currentCircuitFilter = "all";
 let homeCityMiniMap: any = null;
 let homeCityMiniMarker: any = null;
+let landingMapInstance: any = null;
+let landingMapMarkersLayer: any = null;
 
 export function initMap(): void {
   const mapEl = document.getElementById('map');
-  if (!mapEl || mapInstance) return;
+  if (!mapEl) return;
+  if (mapInstance) {
+    try {
+      mapInstance.invalidateSize();
+    } catch (e) {}
+    return;
+  }
 
   if (typeof L === 'undefined') {
     console.warn("Leaflet library not loaded yet.");
@@ -44,6 +52,135 @@ export function initMap(): void {
   mapMarkersLayer = L.layerGroup().addTo(mapInstance);
 
   renderTravelerPins(currentCircuitFilter);
+}
+
+export function initLandingMap(): void {
+  const landingMapEl = document.getElementById('landing-interactive-map');
+  if (!landingMapEl) return;
+  if (landingMapInstance) {
+    try {
+      landingMapInstance.invalidateSize();
+    } catch (e) {}
+    return;
+  }
+
+  if (typeof L === 'undefined') {
+    setTimeout(initLandingMap, 300);
+    return;
+  }
+
+  landingMapInstance = L.map('landing-interactive-map', {
+    center: [21.5, 78.9629],
+    zoom: 5,
+    zoomControl: false,
+    attributionControl: true
+  });
+
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 19
+  }).addTo(landingMapInstance);
+
+  L.control.zoom({ position: 'topright' }).addTo(landingMapInstance);
+  landingMapMarkersLayer = L.layerGroup().addTo(landingMapInstance);
+
+  renderLandingTravelerPins();
+
+  setTimeout(() => {
+    if (landingMapInstance) {
+      landingMapInstance.invalidateSize();
+    }
+  }, 400);
+}
+
+export function renderLandingTravelerPins(filterCircuit = "all"): void {
+  if (!landingMapMarkersLayer || typeof L === 'undefined') return;
+  landingMapMarkersLayer.clearLayers();
+
+  const travelersList = [...getAllTravelers()];
+  const filtered = filterCircuit === 'all' 
+    ? travelersList 
+    : travelersList.filter(t => {
+        const matchCircuit = ((t as any).upcomingCircuit || t.currentCircuit || '').toLowerCase().includes(filterCircuit.toLowerCase());
+        const matchHome = ((t as any).homeCity || t.city || '').toLowerCase().includes(filterCircuit.toLowerCase());
+        return matchCircuit || matchHome;
+      });
+
+  const countBadge = document.getElementById('landing-map-explorers-count');
+  if (countBadge) countBadge.textContent = `${filtered.length} Live Explorers`;
+
+  filtered.forEach(traveler => {
+    const isVerified = traveler.verificationStatus === "verified";
+    const shieldBadgeHtml = isVerified
+      ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">✓</span>`
+      : `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center text-[9px] shadow-xs">⏳</span>`;
+
+    const photo = (traveler as any).photoUrl || traveler.photo || DEFAULT_AVATAR;
+    const ringBorder = isVerified ? 'border-emerald-500' : 'border-rose-500';
+
+    const iconHtml = `
+      <div class="relative cursor-pointer group custom-avatar-pin" style="width: 44px; height: 44px;">
+        <div class="absolute inset-0 rounded-full bg-rose-500/20 pin-pulse"></div>
+        <div class="w-10 h-10 rounded-full border-2 ${ringBorder} bg-white overflow-hidden shadow-lg transform transition group-hover:scale-110 flex items-center justify-center">
+          <img src="${photo}" alt="${traveler.name}" class="w-full h-full object-cover" />
+        </div>
+        ${shieldBadgeHtml}
+      </div>
+    `;
+
+    const customIcon = L.divIcon({
+      html: iconHtml,
+      className: 'custom-avatar-pin',
+      iconSize: [44, 44],
+      iconAnchor: [22, 22]
+    });
+
+    const tLat = Number(traveler.lat);
+    const tLng = Number(traveler.lng);
+    if (isNaN(tLat) || isNaN(tLng) || !isFinite(tLat) || !isFinite(tLng)) return;
+
+    const marker = L.marker([tLat, tLng], { icon: customIcon });
+    const bioSnippet = traveler.bio ? (traveler.bio.length > 90 ? traveler.bio.substring(0, 90) + '...' : traveler.bio) : 'Traveler exploring India.';
+
+    const popupContent = `
+      <div class="p-3 max-w-[230px] text-xs font-sans text-slate-800">
+        <div class="flex items-center space-x-2 pb-2 border-b border-slate-100">
+          <img src="${photo}" class="w-9 h-9 rounded-xl object-cover border border-slate-200" />
+          <div class="min-w-0">
+            <h4 class="font-bold text-slate-900 text-xs truncate">${traveler.name}</h4>
+            <p class="text-[10px] text-slate-500">${(traveler as any).upcomingCircuit || traveler.currentCircuit || 'India'}</p>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-600 py-1.5 leading-snug">${bioSnippet}</p>
+        <button onclick="loginWithGoogleFromLanding()" class="w-full py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-xs cursor-pointer flex items-center justify-center gap-1">
+          <span>Connect via Google</span>
+        </button>
+      </div>
+    `;
+
+    marker.bindPopup(popupContent);
+    landingMapMarkersLayer.addLayer(marker);
+  });
+}
+
+export function filterLandingMapCircuit(circuit: string): void {
+  const pills = document.querySelectorAll('.landing-circuit-pill');
+  pills.forEach(p => {
+    if (p.getAttribute('data-circuit') === circuit) {
+      p.className = "landing-circuit-pill px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-xs transition flex-shrink-0 cursor-pointer";
+    } else {
+      p.className = "landing-circuit-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-800/80 text-slate-300 border border-white/10 hover:border-white/30 transition flex-shrink-0 cursor-pointer";
+    }
+  });
+
+  renderLandingTravelerPins(circuit);
+
+  if (circuit !== 'all' && INDIAN_CIRCUITS_LOOKUP[circuit] && landingMapInstance) {
+    const coords = INDIAN_CIRCUITS_LOOKUP[circuit];
+    landingMapInstance.flyTo([coords.lat, coords.lng], 8, { duration: 1.2 });
+  } else if (circuit === 'all' && landingMapInstance) {
+    landingMapInstance.flyTo([21.5, 78.9629], 5, { duration: 1.2 });
+  }
 }
 
 export function renderTravelerPins(filterCircuit = "all"): void {

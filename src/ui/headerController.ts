@@ -8,7 +8,7 @@ import { openFeedbackModal } from './feedbackController';
 import { openCabSplitModal } from '../services/paymentService';
 import { openSurakshaEmergencyModal } from '../services/surakshaService';
 import { getCurrentProfile } from '../services/profileService';
-import { setTheme, getSavedTheme, ThemeMode } from '../theme/themeManager';
+import { setTheme } from '../theme/themeManager';
 
 let isHeaderDropdownOpen = false;
 
@@ -17,8 +17,8 @@ export function initHeaderDropdown(): void {
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement | null;
     if (!target) return;
-    const dropdown = document.getElementById('header-actions-dropdown');
-    const triggerBtn = document.getElementById('header-menu-trigger');
+    const dropdown = document.getElementById('nav-dropdown-menu') || document.getElementById('header-actions-dropdown');
+    const triggerBtn = document.getElementById('btn-nav-menu') || document.getElementById('header-menu-trigger');
     const profileTrigger = document.getElementById('header-profile-trigger');
 
     if (
@@ -54,9 +54,11 @@ export function toggleHeaderDropdown(event?: Event): void {
   }
 }
 
+export const toggleNavMenu = toggleHeaderDropdown;
+
 export function openHeaderDropdown(): void {
-  const dropdown = document.getElementById('header-actions-dropdown');
-  const triggerBtn = document.getElementById('header-menu-trigger');
+  const dropdown = document.getElementById('nav-dropdown-menu') || document.getElementById('header-actions-dropdown');
+  const triggerBtn = document.getElementById('btn-nav-menu') || document.getElementById('header-menu-trigger');
   if (!dropdown) return;
 
   dropdown.classList.remove('hidden');
@@ -65,7 +67,7 @@ export function openHeaderDropdown(): void {
 
   if (triggerBtn) {
     triggerBtn.setAttribute('aria-expanded', 'true');
-    triggerBtn.classList.add('bg-slate-100', 'text-slate-900');
+    triggerBtn.classList.add('bg-slate-200', 'text-slate-900');
   }
 
   syncHeaderDropdownUI();
@@ -75,8 +77,8 @@ export function openHeaderDropdown(): void {
 }
 
 export function closeHeaderDropdown(): void {
-  const dropdown = document.getElementById('header-actions-dropdown');
-  const triggerBtn = document.getElementById('header-menu-trigger');
+  const dropdown = document.getElementById('nav-dropdown-menu') || document.getElementById('header-actions-dropdown');
+  const triggerBtn = document.getElementById('btn-nav-menu') || document.getElementById('header-menu-trigger');
   if (!dropdown) return;
 
   dropdown.classList.add('hidden');
@@ -84,13 +86,12 @@ export function closeHeaderDropdown(): void {
 
   if (triggerBtn) {
     triggerBtn.setAttribute('aria-expanded', 'false');
-    triggerBtn.classList.remove('bg-slate-100', 'text-slate-900');
+    triggerBtn.classList.remove('bg-slate-200', 'text-slate-900');
   }
 }
 
 export function syncHeaderDropdownUI(): void {
   const prof = getCurrentProfile();
-  const currentTheme = getSavedTheme();
 
   // 1. Update dropdown user info
   const dropAvatar = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
@@ -112,25 +113,11 @@ export function syncHeaderDropdownUI(): void {
     }
   }
 
-  // 2. Sync theme active state inside menu
-  const themeBtns = document.querySelectorAll('[data-menu-theme]');
-  themeBtns.forEach(btn => {
-    const el = btn as HTMLElement;
-    const mode = el.getAttribute('data-menu-theme');
-    if (mode === currentTheme) {
-      el.classList.add('border-rose-400', 'bg-rose-50/70', 'text-rose-700', 'font-bold', 'ring-2', 'ring-rose-400/20');
-      el.classList.remove('border-slate-200', 'text-slate-600', 'hover:bg-slate-50');
-    } else {
-      el.classList.remove('border-rose-400', 'bg-rose-50/70', 'text-rose-700', 'font-bold', 'ring-2', 'ring-rose-400/20');
-      el.classList.add('border-slate-200', 'text-slate-600', 'hover:bg-slate-50');
-    }
-  });
 }
 
 // Global actions fired from dropdown items
-export function handleDropdownThemeSelect(theme: ThemeMode): void {
-  setTheme(theme, true);
-  syncHeaderDropdownUI();
+export function handleDropdownThemeSelect(): void {
+  setTheme('safarbloom');
 }
 
 export function handleDropdownFeedback(): void {

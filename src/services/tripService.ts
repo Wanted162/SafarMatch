@@ -115,15 +115,18 @@ export function handleJoinTripClick(
     onOpenProfile();
     return;
   }
-  if (!hasActiveExplorerPass(profile)) {
-    if (!checkConnectQuotaOrPaywall(profile, onOpenProfile)) return;
-    consumeMonthlyConnect(profile);
-  }
   const trip = (allTripsCache || []).find(t => t.id === tripId);
+  const hostUid = trip?.creatorUid || ("trv_host_" + tripId);
+
+  if (!hasActiveExplorerPass(profile)) {
+    if (!checkConnectQuotaOrPaywall(hostUid, profile, onOpenProfile)) return;
+    consumeMonthlyConnect(hostUid, profile);
+  }
+
   if (trip) {
     showToast(`🤝 Connecting with ${trip.creatorName}! Opening conversation...`, "success");
     onOpenChat({
-      uid: trip.creatorUid || "trv_host_" + trip.id,
+      uid: hostUid,
       name: trip.creatorName,
       photo: trip.creatorPhoto || DEFAULT_AVATAR,
       currentCircuit: trip.circuit,

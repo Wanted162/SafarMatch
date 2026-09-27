@@ -1,45 +1,21 @@
 /**
- * SafarMatch — Tri-Mode Theme System
- * Supports 'light', 'safarbloom' (pleasantly balanced twilight bloom), and 'dark'.
+ * SafarMatch — Permanent Bloom Visual Theme
+ * Operates exclusively on the soothing Bloom twilight palette:
+ * Warm obsidian slate backgrounds, luminous soft rose and lotus highlights,
+ * and high-contrast, crystal-clear text colors that never go invisible.
  */
 
-/* ==========================================================================
-   CSS VARIABLES FOR ALL THREE THEMES
-   ========================================================================== */
-
 :root,
-[data-theme="light"] {
-  --theme-name: 'light';
-  --bg-app: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
-  --bg-header: rgba(255, 255, 255, 0.95);
-  --bg-sidebar: #ffffff;
-  --bg-input: #ffffff;
-  --bg-subtle: #f1f5f9;
-  --border-app: #e2e8f0;
-  --border-card: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-soft: #475569;
-  --accent-bloom: #e11d48;
-  --bloom-glow: rgba(225, 29, 72, 0.15);
-  --modal-bg: #ffffff;
-}
-
-/* ==========================================================================
-   SAFARBLOOM MODE: The Sweet Spot between Light & Dark
-   Pleasant, soothing dusk/twilight palette with soft rose & lotus accents.
-   Not too bright, not pitch black. Designed for zero eye strain.
-   ========================================================================== */
-[data-theme="safarbloom"] {
-  --theme-name: 'safarbloom';
+html,
+body,
+[data-theme="safarbloom"],
+[data-theme="light"],
+[data-theme="dark"] {
   --bg-app: #181d2a;
   --bg-surface: #202637;
   --bg-card: #252c40;
   --bg-card-hover: #2d354d;
-  --bg-header: rgba(32, 38, 55, 0.95);
+  --bg-header: rgba(32, 38, 55, 0.96);
   --bg-sidebar: #202637;
   --bg-input: #1a202e;
   --bg-subtle: #293147;
@@ -53,288 +29,219 @@
   --modal-bg: #232a3d;
 }
 
-/* ==========================================================================
-   DARK MODE: Midnight Obsidian Slate
-   ========================================================================== */
-[data-theme="dark"] {
-  --theme-name: 'dark';
-  --bg-app: #080c14;
-  --bg-surface: #0e1422;
-  --bg-card: #131a2c;
-  --bg-card-hover: #1a233a;
-  --bg-header: rgba(14, 20, 34, 0.95);
-  --bg-sidebar: #0e1422;
-  --bg-input: #0a0f1c;
-  --bg-subtle: #182138;
-  --border-app: #1e293b;
-  --border-card: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #64748b;
-  --text-soft: #cbd5e1;
-  --accent-bloom: #f43f5e;
-  --bloom-glow: rgba(244, 63, 94, 0.2);
-  --modal-bg: #111827;
-}
-
-/* ==========================================================================
-   GLOBAL TRANSITIONS & BASE STYLES
-   ========================================================================== */
-body, header, aside, nav, div, button, input, select, textarea {
-  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ==========================================================================
-   SAFARBLOOM SELECTORS
-   ========================================================================== */
-[data-theme="safarbloom"] body {
+/* Base Body & Surfaces */
+body {
   background-color: var(--bg-app) !important;
   color: var(--text-main) !important;
+  -webkit-font-smoothing: antialiased;
 }
 
-[data-theme="safarbloom"] header.h-16,
-[data-theme="safarbloom"] #mobile-bottom-nav,
-[data-theme="safarbloom"] #sidebar-nav {
+header,
+header.h-16,
+#mobile-bottom-nav,
+#sidebar-nav {
   background-color: var(--bg-surface) !important;
   border-color: var(--border-app) !important;
   color: var(--text-main) !important;
 }
 
-/* Content panels and tabs */
-[data-theme="safarbloom"] #main-content,
-[data-theme="safarbloom"] #tab-feed-container,
-[data-theme="safarbloom"] #tab-trips-container,
-[data-theme="safarbloom"] #tab-chat-container,
-[data-theme="safarbloom"] #tab-monetization-container,
-[data-theme="safarbloom"] #tab-profile-container {
+/* Content Panels */
+#main-content,
+#tab-feed-container,
+#tab-trips-container,
+#tab-chat-container,
+#tab-monetization-container,
+#tab-profile-container {
   background-color: var(--bg-app) !important;
   color: var(--text-main) !important;
 }
 
-/* Cards & containers */
-[data-theme="safarbloom"] .bg-white {
+/* Cards & Containers */
+.bg-white {
   background-color: var(--bg-card) !important;
   border-color: var(--border-card) !important;
   color: var(--text-main) !important;
 }
 
-[data-theme="safarbloom"] .bg-slate-50 {
+.bg-slate-50 {
   background-color: var(--bg-subtle) !important;
   color: var(--text-main) !important;
 }
 
-[data-theme="safarbloom"] .bg-slate-100 {
+.bg-slate-100 {
   background-color: #2b334a !important;
   color: var(--text-main) !important;
 }
 
-[data-theme="safarbloom"] .border-slate-100,
-[data-theme="safarbloom"] .border-slate-200,
-[data-theme="safarbloom"] .border-slate-200\/80,
-[data-theme="safarbloom"] .border-slate-300 {
+.border-slate-100,
+.border-slate-200,
+.border-slate-200\/80,
+.border-slate-200\/90,
+.border-slate-300 {
   border-color: var(--border-app) !important;
 }
 
-/* Text adjustments */
-[data-theme="safarbloom"] .text-slate-900,
-[data-theme="safarbloom"] .text-slate-800 {
-  color: var(--text-main) !important;
+/* High-Contrast Word & Text Legibility Overrides */
+.text-slate-900,
+.text-slate-800 {
+  color: #fdf4f7 !important;
 }
 
-[data-theme="safarbloom"] .text-slate-700,
-[data-theme="safarbloom"] .text-slate-600 {
-  color: var(--text-soft) !important;
+.text-slate-700,
+.text-slate-600 {
+  color: #cbd5e1 !important;
 }
 
-[data-theme="safarbloom"] .text-slate-500,
-[data-theme="safarbloom"] .text-slate-400 {
-  color: var(--text-muted) !important;
+.text-slate-500,
+.text-slate-400 {
+  color: #9ba7c0 !important;
 }
 
-/* Inputs, textareas & selects */
-[data-theme="safarbloom"] input:not([type="checkbox"]):not([type="radio"]),
-[data-theme="safarbloom"] select,
-[data-theme="safarbloom"] textarea {
+/* Alert boxes, badges & pills legibility */
+.bg-rose-50,
+.bg-rose-100 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+}
+.text-rose-700,
+.text-rose-800,
+.text-rose-900 {
+  color: #fda4af !important;
+}
+
+.bg-emerald-50,
+.bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+.text-emerald-700,
+.text-emerald-800,
+.text-emerald-900 {
+  color: #a7f3d0 !important;
+}
+
+.bg-amber-50,
+.bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+.text-amber-700,
+.text-amber-800,
+.text-amber-900 {
+  color: #fde68a !important;
+}
+
+/* Form Inputs, Selects & Textareas */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
   background-color: var(--bg-input) !important;
   border-color: var(--border-app) !important;
-  color: var(--text-main) !important;
+  color: #fdf4f7 !important;
 }
 
-[data-theme="safarbloom"] input::placeholder,
-[data-theme="safarbloom"] textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: #7b88a5 !important;
 }
 
-/* Modals */
-[data-theme="safarbloom"] #cab-split-modal > div > div,
-[data-theme="safarbloom"] #feedback-modal > div > div,
-[data-theme="safarbloom"] #terms-modal > div > div,
-[data-theme="safarbloom"] #upi-payment-modal > div,
-[data-theme="safarbloom"] #selfie-modal > div,
-[data-theme="safarbloom"] #direct-upi-dialog > div,
-[data-theme="safarbloom"] #chat-theme-picker-modal > div {
+/* Modals & Dialogs */
+#cab-split-modal > div > div,
+#feedback-modal > div > div,
+#terms-modal > div > div,
+#upi-payment-modal > div,
+#selfie-modal > div,
+#direct-upi-dialog > div,
+#chat-theme-picker-modal > div,
+#traveler-detail-modal > div,
+#report-block-modal > div,
+#paywall-modal > div,
+#verification-approved-modal > div,
+#verification-rejected-modal > div,
+#payment-approved-modal > div,
+#payment-rejected-modal > div,
+#header-actions-dropdown {
   background-color: var(--modal-bg) !important;
   border-color: var(--border-card) !important;
   color: var(--text-main) !important;
 }
 
-/* Nav items */
-[data-theme="safarbloom"] .nav-item:hover,
-[data-theme="safarbloom"] .mobile-nav-item:hover {
+#header-actions-dropdown .bg-slate-50 {
+  background-color: var(--bg-subtle) !important;
+  border-color: var(--border-app) !important;
+}
+
+#header-actions-dropdown button:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+
+/* Navigation items hover */
+.nav-item:hover,
+.mobile-nav-item:hover {
   background-color: #2b3349 !important;
 }
 
-/* SafarBloom glow badges */
-[data-theme="safarbloom"] .safarbloom-accent {
-  background: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #c084fc 100%) !important;
-  color: #ffffff !important;
+/* Brand Title & Badge */
+.brand-title {
+  display: inline-block;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #fda4af 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: #fb7185;
 }
 
-/* ==========================================================================
-   DARK MODE SELECTORS
-   ========================================================================== */
-[data-theme="dark"] body {
-  background-color: var(--bg-app) !important;
-  color: var(--text-main) !important;
+.brand-edition-badge {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background-color: rgba(251, 113, 133, 0.18) !important;
+  color: #fecdd3 !important;
+  border: 1px solid rgba(251, 113, 133, 0.35) !important;
 }
 
-[data-theme="dark"] header.h-16,
-[data-theme="dark"] #mobile-bottom-nav,
-[data-theme="dark"] #sidebar-nav {
-  background-color: var(--bg-surface) !important;
-  border-color: var(--border-app) !important;
-  color: var(--text-main) !important;
-}
-
-[data-theme="dark"] #main-content,
-[data-theme="dark"] #tab-feed-container,
-[data-theme="dark"] #tab-trips-container,
-[data-theme="dark"] #tab-chat-container,
-[data-theme="dark"] #tab-monetization-container,
-[data-theme="dark"] #tab-profile-container {
-  background-color: var(--bg-app) !important;
-  color: var(--text-main) !important;
-}
-
-[data-theme="dark"] .bg-white {
+/* Sign-Out and Auth Buttons */
+#sidebar-btn-auth {
   background-color: var(--bg-card) !important;
-  border-color: var(--border-card) !important;
-  color: var(--text-main) !important;
-}
-
-[data-theme="dark"] .bg-slate-50 {
-  background-color: var(--bg-subtle) !important;
-  color: var(--text-main) !important;
-}
-
-[data-theme="dark"] .bg-slate-100 {
-  background-color: #172136 !important;
-  color: var(--text-main) !important;
-}
-
-[data-theme="dark"] .border-slate-100,
-[data-theme="dark"] .border-slate-200,
-[data-theme="dark"] .border-slate-200\/80,
-[data-theme="dark"] .border-slate-300 {
-  border-color: var(--border-app) !important;
-}
-
-[data-theme="dark"] .text-slate-900,
-[data-theme="dark"] .text-slate-800 {
-  color: var(--text-main) !important;
-}
-
-[data-theme="dark"] .text-slate-700,
-[data-theme="dark"] .text-slate-600 {
-  color: var(--text-soft) !important;
-}
-
-[data-theme="dark"] .text-slate-500,
-[data-theme="dark"] .text-slate-400 {
-  color: var(--text-muted) !important;
-}
-
-[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
-[data-theme="dark"] select,
-[data-theme="dark"] textarea {
-  background-color: var(--bg-input) !important;
   border-color: var(--border-app) !important;
   color: var(--text-main) !important;
 }
 
-[data-theme="dark"] input::placeholder,
-[data-theme="dark"] textarea::placeholder {
-  color: #52617a !important;
-}
-
-[data-theme="dark"] #cab-split-modal > div > div,
-[data-theme="dark"] #feedback-modal > div > div,
-[data-theme="dark"] #terms-modal > div > div,
-[data-theme="dark"] #upi-payment-modal > div,
-[data-theme="dark"] #selfie-modal > div,
-[data-theme="dark"] #direct-upi-dialog > div,
-[data-theme="dark"] #chat-theme-picker-modal > div {
-  background-color: var(--modal-bg) !important;
-  border-color: var(--border-card) !important;
-  color: var(--text-main) !important;
-}
-
-[data-theme="dark"] .nav-item:hover,
-[data-theme="dark"] .mobile-nav-item:hover {
-  background-color: #172136 !important;
-}
-
-/* ==========================================================================
-   RESPONSIVE ALIGNMENT & SCREEN COMPATIBILITY
-   ========================================================================== */
-@media (max-width: 640px) {
-  /* Ensure header elements never overflow or push Sign Out off-screen */
-  header.h-16 {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
-
-  /* Compact button styling on very small screens (<= 380px) */
-  #btn-auth {
-    font-size: 11px !important;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
-}
-
-/* Ensure profile signout button blends with current theme */
-[data-theme="safarbloom"] #profile-signout-btn,
-[data-theme="dark"] #profile-signout-btn {
+#profile-signout-btn {
   background-color: rgba(244, 63, 94, 0.12) !important;
   border-color: rgba(244, 63, 94, 0.35) !important;
   color: #fb7185 !important;
 }
 
-[data-theme="safarbloom"] #sidebar-btn-auth,
-[data-theme="dark"] #sidebar-btn-auth {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-app) !important;
-  color: var(--text-main) !important;
-}
-
-/* Header Dropdown Menu Theme Styling */
-[data-theme="safarbloom"] #header-actions-dropdown,
-[data-theme="dark"] #header-actions-dropdown {
-  background-color: var(--modal-bg) !important;
-  border-color: var(--border-card) !important;
-  color: var(--text-main) !important;
-}
-
-[data-theme="safarbloom"] #header-actions-dropdown .bg-slate-50,
-[data-theme="dark"] #header-actions-dropdown .bg-slate-50 {
-  background-color: var(--bg-subtle) !important;
+/* Leaflet Mini-Map Container Fix */
+#home-city-mini-map,
+#profile-home-minimap {
   border-color: var(--border-app) !important;
 }
 
-[data-theme="safarbloom"] #header-actions-dropdown button:hover,
-[data-theme="dark"] #header-actions-dropdown button:hover {
-  background-color: var(--bg-card-hover) !important;
+/* Chat Wallpaper Themes */
+.chat-theme-peace {
+  background-color: #1a2233 !important;
+  background-image: radial-gradient(rgba(244, 63, 94, 0.08) 1px, transparent 1px), radial-gradient(rgba(255, 255, 255, 0.03) 1px, #1a2233 1px) !important;
+  background-size: 24px 24px !important;
+  background-position: 0 0, 12px 12px !important;
 }
 
+.chat-theme-emerald {
+  background-color: #132422 !important;
+  background-image: radial-gradient(rgba(16, 185, 129, 0.12) 1px, transparent 1px), radial-gradient(rgba(52, 211, 153, 0.04) 1px, #132422 1px) !important;
+  background-size: 26px 26px !important;
+  background-position: 0 0, 13px 13px !important;
+}
+
+.chat-theme-sunset {
+  background-color: #281926 !important;
+  background-image: radial-gradient(rgba(245, 158, 11, 0.12) 1px, transparent 1px), radial-gradient(rgba(251, 113, 133, 0.06) 1px, #281926 1px) !important;
+  background-size: 24px 24px !important;
+  background-position: 0 0, 12px 12px !important;
+}
