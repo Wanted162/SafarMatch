@@ -146,6 +146,7 @@ import {
   filterMapCircuit,
   filterLandingMapCircuit,
   resetMapCenter,
+  invalidateMapSize,
   flyToDestination,
   locateUserPosition,
   initHomeCityMiniMap
@@ -355,6 +356,7 @@ globalObj.filterLandingMapCircuit = filterLandingMapCircuit;
 globalObj.renderTravelerPins = renderTravelerPins;
 globalObj.filterMapCircuit = filterMapCircuit;
 globalObj.resetMapCenter = resetMapCenter;
+globalObj.invalidateMapSize = invalidateMapSize;
 globalObj.flyToDestination = flyToDestination;
 globalObj.locateUserPosition = locateUserPosition;
 globalObj.handleMapSearchSubmit = () => {

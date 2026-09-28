@@ -358,6 +358,14 @@ export function filterMapCircuit(circuit: string): void {
   }
 }
 
+export function invalidateMapSize(): void {
+  if (mapInstance) {
+    try {
+      mapInstance.invalidateSize();
+    } catch (e) {}
+  }
+}
+
 export function resetMapCenter(): void {
   if (mapInstance) {
     mapInstance.flyTo([20.5937, 78.9629], 5);
