@@ -102,6 +102,13 @@ export function isMessageFromMe(msg: any, myUid: string, partnerUid: string): bo
   return false;
 }
 
+export function setActiveChatUnsubscribe(fn: (() => void) | null): void {
+  if (activeChatUnsubscribe) {
+    try { activeChatUnsubscribe(); } catch (e) {}
+  }
+  activeChatUnsubscribe = fn;
+}
+
 export function cleanupChatListeners(): void {
   if (activeChatUnsubscribe) {
     try { activeChatUnsubscribe(); } catch (e) {}
@@ -112,3 +119,4 @@ export function cleanupChatListeners(): void {
     activeChatDocUnsubscribe = null;
   }
 }
+

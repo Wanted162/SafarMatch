@@ -245,3 +245,45 @@ textarea::placeholder {
   background-size: 24px 24px !important;
   background-position: 0 0, 12px 12px !important;
 }
+
+/* ==================== SURAKSHA SHIELD HIGH-CONTRAST BLACK FONT ==================== */
+/* Ensures Suraksha Shield information in profile is 100% crystal-clear black, never white on white */
+#suraksha-profile-card,
+.suraksha-shield-card,
+#suraksha-profile-card h3,
+#suraksha-profile-card p,
+#suraksha-profile-card span,
+#suraksha-profile-card .suraksha-info-text,
+#suraksha-profile-card .pillar-title,
+#suraksha-profile-card .pillar-desc {
+  color: #000000 !important;
+}
+
+#suraksha-profile-card {
+  background: #ffffff !important;
+  border-color: #fda4af !important;
+}
+
+#suraksha-profile-card .suraksha-pillar-box {
+  background: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+#suraksha-profile-card #suraksha-status-badge {
+  color: #000000 !important;
+  font-weight: 800 !important;
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+}
+
+#suraksha-profile-card #suraksha-status-badge.active-badge {
+  color: #881337 !important;
+  background-color: #fecdd3 !important;
+  border-color: #fb7185 !important;
+}
+
+#suraksha-profile-card .suraksha-link-btn {
+  color: #be123c !important;
+  font-weight: 800 !important;
+}
+

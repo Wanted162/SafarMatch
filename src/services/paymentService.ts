@@ -200,7 +200,7 @@ export function openUpiModal(plan = "explorer", amount = 299): void {
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUrl)}&margin=10`;
   }
 
-  const utrInput = document.getElementById('input-payment-utr') as HTMLInputElement | null;
+  const utrInput = (document.getElementById('upi-utr-input') || document.getElementById('input-payment-utr')) as HTMLInputElement | null;
   if (utrInput) utrInput.value = '';
 
   modal.classList.remove('hidden');
@@ -226,15 +226,23 @@ export function copyUpiId(): void {
 }
 
 export async function submitUtrVerification(profile: UserProfile | null, onUpdated: () => void): Promise<void> {
-  const input = document.getElementById('input-payment-utr') as HTMLInputElement | null;
-  const utr = input ? input.value.trim() : '';
-
-  if (!utr || utr.length < 6) {
-    showToast("⚠️ Please enter a valid 12-digit UPI Reference / UTR Number from Google Pay / PhonePe / Paytm.", "error");
+  const input = (document.getElementById('upi-utr-input') || document.getElementById('input-payment-utr')) as HTMLInputElement | null;
+  const utr = input ? input.value.trim().replace(/\s+/g, '') : '';
+  if (!utr || !/^\d{12}$/.test(utr)) {
+    showToast("⚠️ Invalid UTR: Please enter the exact 12-digit numeric reference number from Google Pay / PhonePe / Paytm / BHIM.", "error");
     return;
   }
 
-  if (profile) {
+  // Prevent trivial fake UTR exploitation (e.g. 000000000000, 111111111111, 123456789012)
+  if (/^(.)\1{11}$/.test(utr) || utr === "123456789012" || utr === "012345678901" || utr === "987654321098") {
+    showToast("⚠️ Invalid Reference: Test sequences are rejected. Enter the genuine 12-digit UTR from your UPI app receipt or bank SMS.", "error");
+    return;
+  }
+
+  if (!profile) {
+    showToast("Please complete your traveler profile before submitting payment.", "warning");
+    return;
+  }
     const paymentRecord = {
       utr,
       plan: activeUpiPlan,
@@ -255,19 +263,20 @@ export async function submitUtrVerification(profile: UserProfile | null, onUpdat
         await setDoc(doc(db, "profiles", profile.uid), {
           subscription: {
             status: "pending_review",
-            utr: utr,
-            plan: "explorer_monthly",
-            activatedAt: serverTimestamp()
+            utrNumber: utr,
+            upiReference: utr,
+            plan: activeUpiPlan || "explorer_monthly",
+            amount: activeUpiAmount || 299,
+            submittedAt: serverTimestamp()
           }
         }, { merge: true });
       } catch (err) {
         console.warn("Firestore subscription write error:", err);
       }
     }
-  }
 
   closeUpiModal();
-  showToast("Payment received! Our team is verifying the UTR. Pass will activate shortly.", "info");
+  showToast("UTR submitted successfully! Our team is verifying with SBI. Your Pass will unlock upon approval.", "success");
   onUpdated();
 }
 

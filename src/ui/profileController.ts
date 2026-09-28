@@ -9,6 +9,8 @@ import { getCurrentProfile, updateJourneyStatusUI, DEFAULT_AVATAR } from '../ser
 import { getAllTravelers, setAllTravelers } from '../services/travelerService';
 import { STORAGE_KEYS, saveStoredTravelers } from '../utils/storage';
 import { showToast } from '../utils/toast';
+import { moderateMessageText } from '../utils/moderation';
+import { sanitizePlainText } from '../utils/security';
 import { renderTravelerPins } from './mapController';
 import { INDIAN_CIRCUITS_LOOKUP } from '../config/constants';
 import type { Traveler } from '../types';
@@ -169,20 +171,27 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
   const currentProfile = getCurrentProfile();
   if (!currentProfile) return;
 
-  const name = (document.getElementById('input-full-name') as HTMLInputElement)?.value.trim() || '';
-  const age = parseInt((document.getElementById('input-age') as HTMLInputElement)?.value) || 23;
-  const gender = (document.getElementById('input-gender') as HTMLSelectElement)?.value as any || 'Male';
-  const homeCity = (document.getElementById('input-home-city') as HTMLInputElement)?.value.trim() || '';
-  const upcomingCircuit = (document.getElementById('input-upcoming-circuit') as HTMLSelectElement)?.value || 'Goa';
-  const bio = (document.getElementById('input-bio') as HTMLTextAreaElement)?.value.trim() || '';
-  const travelIntent = (document.getElementById('input-travel-intent') as HTMLInputElement)?.value as any || 'companion';
+  const rawName = (document.getElementById('input-full-name') as HTMLInputElement)?.value || '';
+  const rawAge = parseInt((document.getElementById('input-age') as HTMLInputElement)?.value, 10);
+  const rawGender = (document.getElementById('input-gender') as HTMLSelectElement)?.value as any || 'Male';
+  const rawHomeCity = (document.getElementById('input-home-city') as HTMLInputElement)?.value || '';
+  const rawUpcomingCircuit = (document.getElementById('input-upcoming-circuit') as HTMLSelectElement)?.value || 'Goa';
+  const rawBio = (document.getElementById('input-bio') as HTMLTextAreaElement)?.value || '';
+  const rawTravelIntent = (document.getElementById('input-travel-intent') as HTMLInputElement)?.value as any || 'companion';
+
+  const name = sanitizePlainText(rawName, 60);
+  const homeCity = sanitizePlainText(rawHomeCity, 60);
+  const bio = sanitizePlainText(rawBio, 500);
+  const upcomingCircuit = sanitizePlainText(rawUpcomingCircuit, 50);
+  const travelIntent = sanitizePlainText(rawTravelIntent, 30);
+  const gender = (rawGender === 'Female' || rawGender === 'Non-binary') ? rawGender : 'Male';
 
   if (!name || name.length < 2) {
     showToast("Please enter your full name (minimum 2 letters).", "error");
     return;
   }
-  if (!age || age < 18) {
-    showToast("Please enter a valid age (18 or older).", "error");
+  if (isNaN(rawAge) || rawAge < 18 || rawAge > 99) {
+    showToast("Please enter a valid age between 18 and 99.", "error");
     return;
   }
   if (!homeCity || homeCity.length < 2) {
@@ -190,14 +199,21 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
     return;
   }
 
+  // Anti-scam moderation on bio and name
+  const modCheck = moderateMessageText(`${name} ${bio}`);
+  if (!modCheck.allowed) {
+    showToast("⚠️ Moderation Alert: Contact numbers, off-platform links, or abusive words are not allowed in profile fields.", "error");
+    return;
+  }
+
   currentProfile.name = name;
-  currentProfile.age = age;
+  currentProfile.age = rawAge;
   currentProfile.gender = gender;
   currentProfile.homeCity = homeCity;
   currentProfile.currentCircuit = upcomingCircuit;
   currentProfile.upcomingDestination = upcomingCircuit;
   currentProfile.bio = bio;
-  currentProfile.intent = travelIntent;
+  currentProfile.intent = travelIntent as any;
 
   if (INDIAN_CIRCUITS_LOOKUP[upcomingCircuit]) {
     currentProfile.homeLat = INDIAN_CIRCUITS_LOOKUP[upcomingCircuit].lat;

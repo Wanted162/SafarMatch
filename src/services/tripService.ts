@@ -8,6 +8,7 @@ import { db, isLiveFirebase } from '../config/firebase';
 import { SEED_INDIAN_TRIPS } from '../data/seedTrips';
 import { getStoredTrips, saveStoredTrips } from '../utils/storage';
 import { showToast } from '../utils/toast';
+import { moderateMessageText } from '../utils/moderation';
 import { isStep1Complete, hasActiveExplorerPass, consumeMonthlyConnect, checkConnectQuotaOrPaywall } from './paymentService';
 import { DEFAULT_AVATAR } from './profileService';
 import type { Trip, UserProfile, Traveler } from '../types';
@@ -59,14 +60,44 @@ export async function handleCreateTripSubmit(
   onTripCreated: () => void
 ): Promise<void> {
   e.preventDefault();
-  const title = (document.getElementById('trip-input-title') as HTMLInputElement)?.value.trim();
-  const destination = (document.getElementById('trip-input-destination') as HTMLInputElement)?.value.trim();
-  const circuit = (document.getElementById('trip-input-circuit') as HTMLSelectElement)?.value;
-  const startDate = (document.getElementById('trip-input-start-date') as HTMLInputElement)?.value;
-  const duration = (document.getElementById('trip-input-duration') as HTMLInputElement)?.value.trim();
-  const budget = (document.getElementById('trip-input-budget') as HTMLInputElement)?.value;
-  const style = (document.getElementById('trip-input-style') as HTMLSelectElement)?.value;
-  const itinerary = (document.getElementById('trip-input-itinerary') as HTMLTextAreaElement)?.value.trim();
+
+  if (!isStep1Complete(profile)) {
+    showToast("⚠️ Step 1 Incomplete: Please complete your traveler profile before publishing trips.", "error");
+    return;
+  }
+  if (!hasActiveExplorerPass(profile)) {
+    showToast("🔒 Explorer Pass Required: Activate the Explorer Pass to publish live trip plans.", "error");
+    return;
+  }
+
+  const title = (document.getElementById('trip-input-title') as HTMLInputElement)?.value.trim() || '';
+  const destination = (document.getElementById('trip-input-destination') as HTMLInputElement)?.value.trim() || '';
+  const circuit = (document.getElementById('trip-input-circuit') as HTMLSelectElement)?.value || 'Goa';
+  const startDate = (document.getElementById('trip-input-start-date') as HTMLInputElement)?.value || '';
+  const duration = (document.getElementById('trip-input-duration') as HTMLInputElement)?.value.trim() || 'Flexible';
+  const budget = (document.getElementById('trip-input-budget') as HTMLInputElement)?.value || 'Split 50/50';
+  const style = (document.getElementById('trip-input-style') as HTMLSelectElement)?.value || 'Backpacking';
+  const itinerary = (document.getElementById('trip-input-itinerary') as HTMLTextAreaElement)?.value.trim() || '';
+
+  if (title.length < 3) {
+    showToast("Please enter a descriptive trip title (at least 3 characters).", "error");
+    return;
+  }
+  if (destination.length < 2) {
+    showToast("Please enter a valid trip destination.", "error");
+    return;
+  }
+  if (itinerary.length < 10) {
+    showToast("Please describe your itinerary plan in more detail (at least 10 characters).", "error");
+    return;
+  }
+
+  // Anti-scam moderation check for trip post
+  const modCheck = moderateMessageText(`${title} ${destination} ${itinerary}`);
+  if (!modCheck.allowed) {
+    showToast("⚠️ Trip blocked: Contact numbers, social handles, or inappropriate words are not permitted in trip cards.", "error");
+    return;
+  }
 
   const newTrip = {
     id: "trip_" + Date.now(),

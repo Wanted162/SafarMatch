@@ -74,10 +74,12 @@ export function toggleSurakshaMode(
   if (surakshaBadge) {
     if (enabled) {
       surakshaBadge.textContent = "Safe Mode Active 🛡️";
-      surakshaBadge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200";
+      surakshaBadge.className = "active-badge text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-200 text-black border border-rose-400";
+      surakshaBadge.style.color = "#000000";
     } else {
       surakshaBadge.textContent = "Standard Mode";
-      surakshaBadge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200";
+      surakshaBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full bg-slate-200 text-black border border-slate-400";
+      surakshaBadge.style.color = "#000000";
     }
   }
 

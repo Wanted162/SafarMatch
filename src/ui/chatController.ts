@@ -8,6 +8,7 @@ import { collection, doc, setDoc, addDoc, getDoc, onSnapshot, serverTimestamp } 
 import { db, isLiveFirebase } from '../config/firebase';
 import { STORAGE_KEYS } from '../utils/storage';
 import { moderateMessageText } from '../utils/moderation';
+import { escapeHtml } from '../utils/security';
 import { showToast } from '../utils/toast';
 import {
   getActiveChatPartner,
@@ -19,11 +20,12 @@ import {
   getMessagesForPartner,
   saveMessagesForPartner,
   isMessageFromMe,
+  setActiveChatUnsubscribe,
   cleanupChatListeners
 } from '../services/chatService';
 import { getAllTravelers } from '../services/travelerService';
 import { getCurrentProfile, DEFAULT_AVATAR } from '../services/profileService';
-import { hasActiveExplorerPass, getMonthlyConnects, consumeMonthlyConnect, openPaywallModal, canUserMessagePartner, getMonthlyConnectedPartners } from '../services/paymentService';
+import { hasActiveExplorerPass, getMonthlyConnects, consumeMonthlyConnect, openPaywallModal, canUserMessagePartner, getMonthlyConnectedPartners, isStep1Complete } from '../services/paymentService';
 import { SEED_INDIAN_TRAVELERS } from '../data/seedTravelers';
 import type { Traveler, ChatMessage } from '../types';
 
@@ -319,9 +321,9 @@ export function renderMessagesList(msgs: ChatMessage[]): void {
       return `
         <div class="w-full flex justify-end items-end gap-1.5 my-1.5">
           <div class="relative max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl rounded-tr-xs bg-emerald-600 text-white shadow-xs">
-            <p class="text-xs leading-relaxed break-words whitespace-pre-wrap">${m.text}</p>
+            <p class="text-xs leading-relaxed break-words whitespace-pre-wrap">${escapeHtml(m.text)}</p>
             <div class="flex items-center justify-end space-x-1 mt-0.5">
-              <span class="text-[9px] text-emerald-100 opacity-80">${m.timestamp || ''}</span>
+              <span class="text-[9px] text-emerald-100 opacity-80">${escapeHtml(m.timestamp || '')}</span>
               ${statusIcon}
             </div>
           </div>
@@ -335,9 +337,9 @@ export function renderMessagesList(msgs: ChatMessage[]): void {
             <img src="${partnerPhoto}" class="w-full h-full object-cover" />
           </div>
           <div class="relative max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl rounded-tl-xs bg-white text-slate-800 shadow-xs border border-slate-200">
-            <p class="text-xs leading-relaxed break-words whitespace-pre-wrap">${m.text}</p>
+            <p class="text-xs leading-relaxed break-words whitespace-pre-wrap">${escapeHtml(m.text)}</p>
             <div class="flex items-center justify-end space-x-1 mt-0.5">
-              <span class="text-[9px] text-slate-400">${m.timestamp || ''}</span>
+              <span class="text-[9px] text-slate-400">${escapeHtml(m.timestamp || '')}</span>
             </div>
           </div>
         </div>
@@ -564,6 +566,41 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
   renderMessagesList(msgs);
   renderConversationList();
 
+  // Real-time Firestore messages listener for live sync across devices
+  if (isLiveFirebase && db) {
+    try {
+      const messagesQuery = collection(db, 'chats', chatId, 'messages');
+      const unsub = onSnapshot(messagesQuery, (snap) => {
+        if (!snap.empty && getActiveChatPartner()?.uid === partnerUid) {
+          const remoteMsgs: ChatMessage[] = [];
+          snap.forEach(d => {
+            const dData = d.data();
+            remoteMsgs.push({
+              id: d.id,
+              sender: dData.senderUid === myUid ? 'me' : 'partner',
+              senderUid: dData.senderUid,
+              text: dData.text || '',
+              timestamp: dData.timestamp || '',
+              status: dData.status || 'delivered'
+            });
+          });
+          if (remoteMsgs.length > 0) {
+            const localMsgs = getMessagesForPartner(partnerUid);
+            const combinedMap = new Map<string, ChatMessage>();
+            localMsgs.forEach(m => combinedMap.set(m.id, m));
+            remoteMsgs.forEach(m => combinedMap.set(m.id, m));
+            const merged = Array.from(combinedMap.values());
+            saveMessagesForPartner(partnerUid, merged);
+            renderMessagesList(merged);
+          }
+        }
+      }, (err) => console.warn("Firestore chat messages snapshot error:", err));
+      setActiveChatUnsubscribe(unsub);
+    } catch (e) {
+      console.warn("Could not attach messages snapshot:", e);
+    }
+  }
+
   // Show thread on mobile
   if (window.innerWidth < 768) {
     showActiveChatOnMobile();
@@ -700,9 +737,31 @@ export async function handleSendMessage(e: Event): Promise<void> {
   }
 
   const currentProfile = getCurrentProfile();
+  if (!isStep1Complete(currentProfile)) {
+    showToast("⚠️ Step 1 Incomplete: Please complete your traveler profile before messaging.", "warning");
+    if ((window as any).switchView) (window as any).switchView('profile');
+    return;
+  }
+
   const myUid = currentProfile ? currentProfile.uid : 'guest';
   const partnerUid = activeChatPartner.uid;
   const chatId = [myUid, partnerUid].sort().join('_');
+
+  // Verify handshake is not pending or declined
+  const chatMeta = getChatMeta(chatId);
+  if (chatMeta && chatMeta.status === 'declined') {
+    showToast("⚠️ This connection request was declined.", "warning");
+    return;
+  }
+  if (chatMeta && chatMeta.status === 'pending') {
+    if (chatMeta.initiatorUid === myUid) {
+      showToast("⏳ Connection pending: Waiting for traveler to accept your request before messaging unlocks.", "info");
+      return;
+    } else {
+      showToast("⚠️ Connection request received: Please tap 'Accept Request ✓' above to unlock messaging.", "info");
+      return;
+    }
+  }
 
   const input = document.getElementById('chat-message-input') as HTMLInputElement | null;
   const text = input ? input.value.trim() : '';
@@ -749,8 +808,9 @@ export async function handleSendMessage(e: Event): Promise<void> {
   renderMessagesList(msgs);
   if (input) input.value = "";
 
+  const originalInitiator = (chatMeta && chatMeta.initiatorUid) ? chatMeta.initiatorUid : myUid;
   const meta = {
-    initiatorUid: myUid,
+    initiatorUid: originalInitiator,
     recipientUid: partnerUid,
     status: "accepted",
     lastMessage: text,
@@ -761,6 +821,33 @@ export async function handleSendMessage(e: Event): Promise<void> {
   };
   saveChatMeta(chatId, meta);
   renderConversationList();
+
+  // Firestore sync if connected
+  if (isLiveFirebase && db) {
+    try {
+      const chatDocRef = doc(db, 'chats', chatId);
+      addDoc(collection(chatDocRef, 'messages'), {
+        senderUid: myUid,
+        text,
+        timestamp: timeStr,
+        createdAt: serverTimestamp(),
+        status: 'sent'
+      }).catch(err => console.warn("Firestore message write error:", err));
+
+      setDoc(chatDocRef, {
+        initiatorUid: originalInitiator,
+        recipientUid: partnerUid,
+        status: 'accepted',
+        lastMessage: text,
+        lastMessageTime: timeStr,
+        lastSenderUid: myUid,
+        unreadBy: [partnerUid],
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(err => console.warn("Firestore chat doc update error:", err));
+    } catch (e) {
+      console.warn("Firestore chat push exception:", e);
+    }
+  }
 
   // Message delivery progression: Pending -> Sent at 300ms
   setTimeout(() => {

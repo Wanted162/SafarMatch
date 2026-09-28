@@ -9,6 +9,7 @@ import { getBlockedUsers } from '../utils/storage';
 import { INDIAN_CIRCUITS_LOOKUP } from '../config/constants';
 import { DEFAULT_AVATAR } from '../services/profileService';
 import { showToast } from '../utils/toast';
+import { escapeHtml } from '../utils/security';
 import type { Traveler } from '../types';
 
 declare const L: any;
@@ -27,6 +28,12 @@ export function initMap(): void {
   if (mapInstance) {
     try {
       mapInstance.invalidateSize();
+      setTimeout(() => {
+        try { mapInstance?.invalidateSize(); } catch (e) {}
+      }, 100);
+      setTimeout(() => {
+        try { mapInstance?.invalidateSize(); } catch (e) {}
+      }, 300);
     } catch (e) {}
     return;
   }
@@ -306,20 +313,20 @@ export function renderTravelerPins(filterCircuit = "all"): void {
             <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200" />
             <div>
               <div class="flex items-center gap-1">
-                <h4 class="font-bold text-slate-900">${traveler.name} ${traveler.isCurrentUser ? '(You)' : ''}</h4>
+                <h4 class="font-bold text-slate-900">${escapeHtml(traveler.name)} ${traveler.isCurrentUser ? '(You)' : ''}</h4>
                 ${isVerified ? '<span class="text-emerald-600 font-bold">✓</span>' : ''}
               </div>
-              <p class="text-[11px] text-slate-500">${(traveler as any).upcomingCircuit || traveler.currentCircuit || 'India'} • ${traveler.gender || 'Traveler'}</p>
+              <p class="text-[11px] text-slate-500">${escapeHtml((traveler as any).upcomingCircuit || traveler.currentCircuit || 'India')} • ${escapeHtml(traveler.gender || 'Traveler')}</p>
             </div>
           </div>
-          <p class="text-[11px] text-slate-600 py-2 leading-relaxed">${bioSnippet}</p>
+          <p class="text-[11px] text-slate-600 py-2 leading-relaxed">${escapeHtml(bioSnippet)}</p>
           <div class="pt-1 flex gap-1.5">
             ${traveler.isCurrentUser ? `
               <button onclick="window.switchView('profile')" class="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs cursor-pointer">
                 Edit Profile
               </button>
             ` : `
-              <button onclick="window.inspectTravelerFromMap('${traveler.uid}')" class="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-xs cursor-pointer">
+              <button onclick="window.inspectTravelerFromMap('${escapeHtml(traveler.uid)}')" class="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-xs cursor-pointer">
                 View Profile
               </button>
             `}

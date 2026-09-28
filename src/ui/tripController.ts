@@ -5,6 +5,7 @@
 
 import { getAllTrips } from '../services/tripService';
 import { getCurrentProfile, DEFAULT_AVATAR } from '../services/profileService';
+import { escapeHtml } from '../utils/security';
 
 let currentTripCircuitFilter = "all";
 
@@ -46,7 +47,7 @@ export function renderTripsFeed(filterCircuit = "all", searchKeyword = ""): void
         <div class="w-14 h-14 rounded-2xl bg-rose-50 text-safar-600 flex items-center justify-center mb-3 shadow-xs">
           <i data-lucide="compass" class="w-7 h-7"></i>
         </div>
-        <h4 class="text-base font-bold text-slate-900">No Trips for "${kw || (filterCircuit === 'all' ? 'Any Circuit' : filterCircuit)}"</h4>
+        <h4 class="text-base font-bold text-slate-900">No Trips for "${escapeHtml(kw || (filterCircuit === 'all' ? 'Any Circuit' : filterCircuit))}"</h4>
         <p class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">Be the first to post an upcoming roadtrip, trek, or journey to this destination to find verified travel companions!</p>
         <button onclick="window.handlePostTripClick()" class="mt-5 px-5 py-2.5 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center space-x-1.5 cursor-pointer">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -71,39 +72,39 @@ export function renderTripsFeed(filterCircuit = "all", searchKeyword = ""): void
               <img src="${photo}" class="w-9 h-9 rounded-full object-cover border border-slate-200" />
               <div>
                 <div class="flex items-center space-x-1">
-                  <span class="text-xs font-bold text-slate-900">${trip.creatorName}</span>
+                  <span class="text-xs font-bold text-slate-900">${escapeHtml(trip.creatorName)}</span>
                   ${isVerified ? '<span class="text-[10px] text-emerald-600 font-bold">✓</span>' : ''}
                 </div>
-                <span class="text-[10px] text-slate-400 font-medium">${trip.circuit}</span>
+                <span class="text-[10px] text-slate-400 font-medium">${escapeHtml(trip.circuit)}</span>
               </div>
             </div>
             <span class="text-[10px] font-extrabold uppercase tracking-wide bg-rose-50 text-safar-700 px-2.5 py-0.5 rounded-full border border-rose-100">
-              ${trip.style}
+              ${escapeHtml(trip.style)}
             </span>
           </div>
 
           <!-- Title & Details -->
           <div>
-            <h3 class="text-sm font-bold text-slate-900 leading-snug">${trip.title}</h3>
-            <p class="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">${trip.itinerary}</p>
+            <h3 class="text-sm font-bold text-slate-900 leading-snug">${escapeHtml(trip.title)}</h3>
+            <p class="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">${escapeHtml(trip.itinerary)}</p>
           </div>
 
           <!-- Meta pills -->
           <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-600 pt-1">
             <div class="flex items-center space-x-1.5 bg-slate-50 p-2 rounded-xl">
               <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
-              <span class="truncate">${trip.destination}</span>
+              <span class="truncate">${escapeHtml(trip.destination)}</span>
             </div>
             <div class="flex items-center space-x-1.5 bg-slate-50 p-2 rounded-xl">
               <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
-              <span>${trip.startDate || 'Upcoming'} (${trip.duration || 'Flexible'})</span>
+              <span>${escapeHtml(trip.startDate || 'Upcoming')} (${escapeHtml(trip.duration || 'Flexible')})</span>
             </div>
           </div>
         </div>
 
         <!-- Bottom action row: Join / Connect -->
         <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-          <span class="text-xs font-extrabold text-slate-800">${trip.budget || 'Split 50/50'}</span>
+          <span class="text-xs font-extrabold text-slate-800">${escapeHtml(trip.budget || 'Split 50/50')}</span>
           <button onclick="window.handleJoinTripClick('${trip.id}')" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center space-x-1 cursor-pointer">
             <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
             <span>Join Plan</span>
