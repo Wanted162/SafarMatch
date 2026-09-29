@@ -178,7 +178,9 @@ export function openUpiModal(plan = "explorer", amount = 299): void {
   const modal = document.getElementById('upi-payment-modal');
   if (!modal) return;
 
-  const planName = plan === "boost" ? "Trip Itinerary VIP Priority Boost" : "SafarMatch Explorer Pass (1 Month)";
+  let planName = "SafarMatch Explorer Pass (1 Month)";
+  if (plan === "boost") planName = "Trip Itinerary VIP Priority Boost";
+  else if (plan === "cab_split") planName = "Cab / Stay Share Settlement (Direct UPI)";
   const planEl = document.getElementById('upi-plan-name');
   const amountEl = document.getElementById('upi-plan-amount');
   const noteEl = document.getElementById('upi-order-note');
@@ -330,3 +332,14 @@ export function copySplitSummary(): void {
     });
   }
 }
+
+export function payPerPersonViaUpi(): void {
+  const total = parseFloat((document.getElementById('split-total-amount') as HTMLInputElement)?.value) || 0;
+  const people = Math.max(1, parseInt((document.getElementById('split-people-count') as HTMLInputElement)?.value) || 1);
+  const misc = parseFloat((document.getElementById('split-misc-amount') as HTMLInputElement)?.value) || 0;
+  const grandTotal = total + misc;
+  const perPerson = Math.ceil(grandTotal / people);
+  closeCabSplitModal();
+  openUpiModal('cab_split', perPerson);
+}
+

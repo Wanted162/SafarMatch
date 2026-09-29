@@ -121,7 +121,8 @@ import {
   closeCabSplitModal,
   applySplitPreset,
   calculateSplit,
-  copySplitSummary
+  copySplitSummary,
+  payPerPersonViaUpi
 } from './services/paymentService';
 
 import {
@@ -559,6 +560,7 @@ globalObj.closeCabSplitModal = closeCabSplitModal;
 globalObj.applySplitPreset = applySplitPreset;
 globalObj.calculateSplit = calculateSplit;
 globalObj.copySplitSummary = copySplitSummary;
+globalObj.payPerPersonViaUpi = payPerPersonViaUpi;
 
 // Feedback Hub
 globalObj.openFeedbackModal = openFeedbackModal;
