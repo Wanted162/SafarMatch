@@ -14,7 +14,7 @@ export interface Traveler {
   uid: string;
   name: string;
   age: number;
-  gender: 'Female' | 'Male' | 'Non-Binary';
+  gender: 'Female' | 'Male' | 'Non-Binary' | '';
   city: string;
   lat: number;
   lng: number;
@@ -36,7 +36,7 @@ export interface Trip {
   destination: string;
   title: string;
   authorName: string;
-  authorGender: 'Female' | 'Male' | 'Non-Binary';
+  authorGender: 'Female' | 'Male' | 'Non-Binary' | '';
   authorPhoto: string;
   authorUid?: string;
   circuit: string;
@@ -76,7 +76,7 @@ export interface UserProfile {
   uid: string;
   name: string;
   age: number;
-  gender: 'Female' | 'Male' | 'Non-Binary';
+  gender: 'Female' | 'Male' | 'Non-Binary' | '';
   homeCity: string;
   homeLat: number;
   homeLng: number;

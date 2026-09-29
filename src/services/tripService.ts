@@ -27,10 +27,11 @@ export function setAllTrips(trips: any[]): void {
 export function initTripsCache(): any[] {
   const stored = getStoredTrips();
   if (stored && stored.length > 0) {
-    allTripsCache = stored;
+    allTripsCache = stored.filter((t: any) => !t.id?.startsWith('trip_seed_') && !t.creatorUid?.startsWith('seed_'));
   } else {
-    allTripsCache = [...SEED_INDIAN_TRIPS];
+    allTripsCache = [];
   }
+  saveStoredTrips(allTripsCache);
   return allTripsCache;
 }
 

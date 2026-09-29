@@ -124,7 +124,7 @@
     <!-- LANDING HEADER -->
     <header class="w-full border-b border-white/10 bg-[#070b14]/90 backdrop-blur-xl sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-safar-600 via-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-safar-600 via-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20 flex-shrink-0">
           <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
         </div>
         <div>
@@ -136,123 +136,21 @@
         </div>
       </div>
 
-      <!-- Quick Nav Links -->
+      <!-- Quick Website Info Links -->
       <nav class="hidden lg:flex items-center space-x-6 text-xs font-semibold text-slate-300">
         <a href="#landing-benefits" class="hover:text-white transition">Benefits</a>
         <a href="#landing-how-it-works" class="hover:text-white transition">How It Works</a>
         <a href="#landing-who-is-it-for" class="hover:text-white transition">Who It's For</a>
-        
+        <a href="#landing-safety" class="hover:text-white transition">Suraksha & Safety</a>
+        <a href="#landing-faq" class="hover:text-white transition">FAQ & Info</a>
       </nav>
 
-      <!-- Navigation & Dropdown -->
+      <!-- Primary Sign In Option Only -->
       <div class="flex items-center space-x-2 sm:space-x-3">
-        <!-- Landing Feature Navigation Dropdown Menu -->
-        <div class="relative">
-          <button 
-            id="landing-menu-trigger" 
-            type="button" 
-            onclick="toggleLandingDropdown(event)" 
-            class="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white text-xs font-bold transition border border-white/15 cursor-pointer backdrop-blur-md shadow-xs select-none"
-            title="Explore App Features"
-          >
-            <i data-lucide="compass" class="w-4 h-4 text-rose-400"></i>
-            <span class="text-xs">Explore</span>
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-300"></i>
-          </button>
-
-          <!-- Landing Dropdown Floating Card -->
-          <div 
-            id="landing-nav-dropdown" 
-            class="hidden absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#1e2538] rounded-2xl shadow-2xl border border-white/15 p-2 z-50 text-slate-200 backdrop-blur-xl animate-in fade-in-50 zoom-in-95 origin-top-right"
-          >
-            <div class="px-2.5 py-1.5 border-b border-white/10 flex items-center justify-between mb-1.5">
-              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Quick App Navigation</span>
-              <span class="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">All Screens</span>
-            </div>
-
-            <div class="space-y-1">
-              <!-- 1. Explore Map -->
-              <button 
-                type="button" 
-                onclick="openViewFromLanding('map')" 
-                class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition cursor-pointer text-left group"
-              >
-                <div class="w-8 h-8 rounded-lg bg-rose-500/15 text-rose-400 border border-rose-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
-                  <i data-lucide="map-pin" class="w-4 h-4"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-bold text-white flex items-center justify-between">
-                    <span>Explore Map</span>
-                    <span class="text-[10px] font-bold text-rose-400">Live</span>
-                  </div>
-                  <div class="text-[11px] text-slate-400 font-normal truncate">Interactive Bharat map with verified explorers</div>
-                </div>
-              </button>
-
-              <!-- 2. Trip Board -->
-              <button 
-                type="button" 
-                onclick="openViewFromLanding('trips')" 
-                class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition cursor-pointer text-left group"
-              >
-                <div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
-                  <i data-lucide="calendar" class="w-4 h-4"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-bold text-white flex items-center justify-between">
-                    <span>Trip Board</span>
-                    <span class="text-[10px] font-bold text-emerald-400">Feed</span>
-                  </div>
-                  <div class="text-[11px] text-slate-400 font-normal truncate">Community itineraries, cab splits & trek plans</div>
-                </div>
-              </button>
-
-              <!-- 3. Real-Time Chat -->
-              <button 
-                type="button" 
-                onclick="openViewFromLanding('chat')" 
-                class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition cursor-pointer text-left group"
-              >
-                <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
-                  <i data-lucide="message-circle" class="w-4 h-4"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-bold text-white flex items-center justify-between">
-                    <span>Real-Time Chat</span>
-                    <span class="text-[10px] font-bold text-amber-400">Direct</span>
-                  </div>
-                  <div class="text-[11px] text-slate-400 font-normal truncate">Encrypted messaging with verified companions</div>
-                </div>
-              </button>
-
-              <!-- 4. Explorer Pass -->
-              <button 
-                type="button" 
-                onclick="openViewFromLanding('monetization')" 
-                class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition cursor-pointer text-left group"
-              >
-                <div class="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-400 border border-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
-                  <i data-lucide="crown" class="w-4 h-4"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-bold text-white flex items-center justify-between">
-                    <span>Explorer Pass</span>
-                    <span class="text-[10px] font-extrabold text-amber-300">₹299</span>
-                  </div>
-                  <div class="text-[11px] text-slate-400 font-normal truncate">VIP badge, unlimited connects & itinerary host</div>
-                </div>
-              </button>
-            </div>
-
-            <div class="mt-2 pt-2 border-t border-white/10 text-center">
-              <span class="text-[10px] text-slate-400">✨ Seamless view on desktop, tablet & mobile</span>
-            </div>
-          </div>
-        </div>
-
         <button 
           onclick="loginWithGoogleFromLanding()" 
-          class="group relative inline-flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold transition shadow-md hover:shadow-lg cursor-pointer border border-slate-200"
+          class="group relative inline-flex items-center space-x-2 px-3.5 sm:px-4 py-2 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] text-slate-900 text-xs font-bold transition shadow-md hover:shadow-lg cursor-pointer border border-slate-200"
+          title="Sign in with your Google Account"
         >
           <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -266,49 +164,96 @@
       </div>
     </header>
 
-    <!-- HERO SECTION -->
+    <!-- HERO SECTION: WEBSITE INFO & GOOGLE SIGN-IN -->
     <section class="relative pt-8 sm:pt-16 pb-16 px-4 sm:px-6 max-w-7xl mx-auto w-full">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
-        <!-- Left Column: Full Interactive Live Bharat Radar Map -->
-        <div class="lg:col-span-7 flex flex-col space-y-3">
-          <!-- Live Map Header Bar -->
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-xs font-semibold text-rose-300 backdrop-blur-md">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse"></span>
-              <span class="font-bold">Live Bharat Radar</span>
-              <span class="text-white/40">•</span>
-              <span id="landing-map-explorers-count" class="text-white font-extrabold">Active Travelers</span>
+        <!-- Left Column: Rich Website Information & Value Pillars -->
+        <div class="lg:col-span-7 flex flex-col space-y-6">
+          <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-xs font-semibold text-rose-300 backdrop-blur-md w-fit">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+            <span class="font-bold">Bharat's Verified Solo Travel Platform</span>
+            <span class="text-white/40">•</span>
+            <span class="text-white font-medium">Safe & Commission-Free</span>
+          </div>
+
+          <div class="space-y-3">
+            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+              Travel Solo Across India, <br class="hidden sm:inline" />
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-400">Never Feel Alone.</span>
+            </h1>
+            <p class="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+              SafarMatch connects verified Indian solo explorers. Split airport taxis, share scenic homestays, coordinate trek companions, and journey safely with peace of mind.
+            </p>
+          </div>
+
+          <!-- 4 Website Info Core Highlights -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+            <!-- 1. Cab Splitter -->
+            <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition space-y-1.5">
+              <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
+                <span class="w-7 h-7 rounded-xl bg-emerald-500/20 flex items-center justify-center text-sm">🚕</span>
+                <span>Cut Airport Cabs by 50%+</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-snug">
+                Arriving at MOPA Goa, Dehradun, or Bagdogra? Share the cab ride and split fares directly via UPI with zero commissions.
+              </p>
             </div>
 
-            <!-- Quick Hotspot Circuit Pills -->
-            <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
-              <button onclick="filterLandingMapCircuit('all')" class="landing-circuit-pill px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-xs transition flex-shrink-0 cursor-pointer" data-circuit="all">All</button>
-              <button onclick="filterLandingMapCircuit('Goa')" class="landing-circuit-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-800/80 text-slate-300 border border-white/10 hover:border-white/30 transition flex-shrink-0 cursor-pointer" data-circuit="Goa">🏖️ Goa</button>
-              <button onclick="filterLandingMapCircuit('Himachal')" class="landing-circuit-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-800/80 text-slate-300 border border-white/10 hover:border-white/30 transition flex-shrink-0 cursor-pointer" data-circuit="Himachal">🏔️ Himachal</button>
-              <button onclick="filterLandingMapCircuit('Uttarakhand')" class="landing-circuit-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-800/80 text-slate-300 border border-white/10 hover:border-white/30 transition flex-shrink-0 cursor-pointer" data-circuit="Uttarakhand">🌊 Rishikesh</button>
-              <button onclick="filterLandingMapCircuit('Rajasthan')" class="landing-circuit-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-800/80 text-slate-300 border border-white/10 hover:border-white/30 transition flex-shrink-0 cursor-pointer" data-circuit="Rajasthan">🏰 Rajasthan</button>
-              <button onclick="filterLandingMapCircuit('Kerala')" class="landing-circuit-pill px-3 py-1 rounded-full text-xs font-medium bg-slate-800/80 text-slate-300 border border-white/10 hover:border-white/30 transition flex-shrink-0 cursor-pointer" data-circuit="Kerala">🌴 Kerala</button>
+            <!-- 2. Suraksha Shield -->
+            <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-rose-500/30 transition space-y-1.5">
+              <div class="flex items-center space-x-2 text-rose-400 font-bold text-xs">
+                <span class="w-7 h-7 rounded-xl bg-rose-500/20 flex items-center justify-center text-sm">🛡️</span>
+                <span>Suraksha Shield (सुरक्षा)</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-snug">
+                Women-First safe matching with Govt ID badges, live selfie verification, and emergency hotlines (112, 1091).
+              </p>
+            </div>
+
+            <!-- 3. Encrypted In-App Chat -->
+            <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-500/30 transition space-y-1.5">
+              <div class="flex items-center space-x-2 text-sky-400 font-bold text-xs">
+                <span class="w-7 h-7 rounded-xl bg-sky-500/20 flex items-center justify-center text-sm">💬</span>
+                <span>Zero Phone Number Leaks</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-snug">
+                Encrypted in-app messaging with lotus tranquility themes. No need to share personal numbers before meeting.
+              </p>
+            </div>
+
+            <!-- 4. 50+ Top Circuits -->
+            <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-amber-500/30 transition space-y-1.5">
+              <div class="flex items-center space-x-2 text-amber-400 font-bold text-xs">
+                <span class="w-7 h-7 rounded-xl bg-amber-500/20 flex items-center justify-center text-sm">🏔️</span>
+                <span>50+ Bharat Travel Circuits</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-snug">
+                Find companions across Goa beaches, Parvati Valley trails, Pushkar sands, Rishikesh rapids, and Gokarna shacks.
+              </p>
             </div>
           </div>
 
-          <!-- Whole Map Card Viewport -->
-          <div class="relative w-full h-[400px] sm:h-[480px] lg:h-[540px] rounded-3xl overflow-hidden border border-white/20 shadow-2xl bg-slate-900/80 backdrop-blur-md">
-            <!-- Leaflet Map Container -->
-            <div id="landing-interactive-map" class="w-full h-full z-0"></div>
-
-            <!-- Floating Map Badge Overlay: Click to inspect hints -->
-            <div class="absolute bottom-3 left-3 right-3 sm:right-auto z-[15] bg-slate-950/85 backdrop-blur-md border border-white/15 px-3.5 py-2 rounded-2xl flex items-center justify-between gap-3 text-xs text-slate-200 shadow-xl pointer-events-none">
-              <div class="flex items-center space-x-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                <span class="text-[11px] font-semibold">Tap any explorer pin to preview profile & connect</span>
-              </div>
-              <span class="hidden sm:inline text-[10px] text-amber-300 font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">50+ Circuits</span>
-            </div>
+          <!-- Trust Badges Summary Row -->
+          <div class="flex flex-wrap items-center gap-4 pt-1 text-[11px] text-slate-400">
+            <span class="flex items-center space-x-1.5">
+              <span class="text-emerald-400">✓</span>
+              <span>Govt ID Badges</span>
+            </span>
+            <span class="text-white/20">•</span>
+            <span class="flex items-center space-x-1.5">
+              <span class="text-emerald-400">✓</span>
+              <span>100% Direct UPI Settlement</span>
+            </span>
+            <span class="text-white/20">•</span>
+            <span class="flex items-center space-x-1.5">
+              <span class="text-emerald-400">✓</span>
+              <span>Safe 256-Bit Cloud Vault</span>
+            </span>
           </div>
         </div>
 
-        <!-- Right Column: Clean, Polished Google Sign In Action Card -->
+        <!-- Right Column: Dedicated Google Sign-In Card -->
         <div class="lg:col-span-5 flex justify-center">
           <div class="w-full max-w-md bg-gradient-to-b from-white/10 to-white/5 border border-white/20 p-6 sm:p-8 rounded-3xl backdrop-blur-xl shadow-2xl relative overflow-hidden">
             <div class="text-center space-y-4">
@@ -319,7 +264,7 @@
 
               <div>
                 <h3 class="text-lg sm:text-xl font-bold text-white">Join Verified Explorers</h3>
-                <p class="text-xs text-slate-300 mt-1">Authenticate securely with Google to browse live maps, view companion itineraries, and connect.</p>
+                <p class="text-xs text-slate-300 mt-1">Authenticate securely with Google to browse the live companion radar, view verified itineraries, and connect.</p>
               </div>
 
               <!-- PRIMARY GOOGLE LOGIN BUTTON -->
@@ -369,7 +314,7 @@
       <div class="text-center max-w-2xl mx-auto mb-12">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-rose-400 mb-2">Why Solo Travelers Choose SafarMatch</h2>
         <h3 class="text-2xl sm:text-4xl font-extrabold text-white">Core Benefits of Our Platform</h3>
-        <p class="text-xs sm:text-sm text-slate-400 mt-2">Solving the real-world problems solo explorers face across Bharat: high private cab costs, safety concerns, and solitude.</p>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">Solving real problems solo explorers face across Bharat: high private cab costs, safety concerns, and solitude.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -522,7 +467,7 @@
       </div>
     </section>
 
-    <!-- HOW IT WORKS -->
+    <!-- ==================== SECTION: HOW IT WORKS ==================== -->
     <section id="landing-how-it-works" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full border-t border-white/10">
       <div class="text-center max-w-xl mx-auto mb-12">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-1">Simple 3-Step Process</h2>
@@ -559,14 +504,93 @@
       </div>
     </section>
 
-    
+    <!-- ==================== SECTION: SURAKSHA SAFETY ARCHITECTURE ==================== -->
+    <section id="landing-safety" class="py-16 px-4 sm:px-6 max-w-6xl mx-auto w-full border-t border-white/10">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-rose-400 mb-2">Trust & Safety First</h2>
+        <h3 class="text-2xl sm:text-4xl font-extrabold text-white">Suraksha Protocol (सुरक्षा)</h3>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">Built from the ground up to protect solo travelers and women with multi-layered identity safeguards.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">🪪</div>
+          <h4 class="text-sm font-bold text-white">Govt ID Verification</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Explorers verify with official Govt ID (Aadhaar, Passport, DL) to earn the green Verified Explorer Shield.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2.5">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-lg">📸</div>
+          <h4 class="text-sm font-bold text-white">Live Biometric Selfie</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Anti-catfishing live camera capture ensures travelers are genuinely who they claim to be.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">🚨</div>
+          <h4 class="text-sm font-bold text-white">Emergency SOS Hotlines</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Instant 1-tap connection to 112 National Emergency, 1091 Women Helpline, and GPS location sharing.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-2.5">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg">🔒</div>
+          <h4 class="text-sm font-bold text-white">Contact Shield</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Automated screening restricts phone number leakage and spam to keep your private credentials safe.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION: FAQ & PLATFORM INFO ==================== -->
+    <section id="landing-faq" class="py-16 px-4 sm:px-6 max-w-4xl mx-auto w-full border-t border-white/10">
+      <div class="text-center max-w-xl mx-auto mb-10">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1">Frequently Asked Questions</h2>
+        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Platform Information</h3>
+      </div>
+
+      <div class="space-y-4">
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <h4 class="text-sm font-bold text-white">Is SafarMatch free to join?</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Yes, signing in and setting up your explorer profile is 100% free. You can view the live map, search circuits, and chat with travel companions. An optional ₹299 Explorer Pass is available for unlimited connects and verified trip hosting.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <h4 class="text-sm font-bold text-white">How does airport cab fare splitting work?</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Use the in-app Cab Splitter calculator to enter total fare and passenger count. The app generates an instant breakdown and direct UPI payment link so you settle immediately with co-passengers with zero service charges.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <h4 class="text-sm font-bold text-white">How does Suraksha Safe Mode protect solo female travelers?</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            When female explorers activate Suraksha Mode, their profile and communications are restricted to female verified explorers. Male profiles cannot view or initiate contact, and 1-tap SOS buttons link directly to women safety helplines.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+          <h4 class="text-sm font-bold text-white">Will my phone number or private data be exposed?</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Never. SafarMatch handles all communications through in-app encrypted chat. Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.
+          </p>
+        </div>
+      </div>
+    </section>
 
     <!-- FINAL CTA BANNER -->
     <section class="py-16 px-4 sm:px-6 max-w-4xl mx-auto w-full text-center">
       <div class="p-8 sm:p-12 rounded-3xl bg-gradient-to-tr from-rose-950 via-slate-900 to-emerald-950 border border-white/20 relative overflow-hidden shadow-2xl">
         <h3 class="text-2xl sm:text-4xl font-black text-white">Ready For Your Next Journey?</h3>
         <p class="text-xs sm:text-sm text-slate-300 mt-3 max-w-md mx-auto">
-          Login using your Google ID to enter the live map, explore active trip itineraries, and match with verified companions across Bharat.
+          Login using your Google ID to enter the live companion map, explore real trip itineraries, and connect with verified explorers across Bharat.
         </p>
 
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -582,8 +606,6 @@
             </svg>
             <span>Sign in with Google ID</span>
           </button>
-
-          
         </div>
 
         <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-[10px] text-slate-400">

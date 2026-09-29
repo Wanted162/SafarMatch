@@ -37,9 +37,9 @@ export function initTravelersCache(currentProfile?: UserProfile | null): Travele
 
   let combined: Traveler[] = [];
   if (stored && stored.length > 0) {
-    combined = stored.filter(t => !blocked.includes(t.uid));
+    combined = stored.filter(t => !blocked.includes(t.uid) && !t.uid.startsWith('seed_'));
   } else {
-    combined = (SEED_INDIAN_TRAVELERS as unknown as Traveler[]).filter(t => !blocked.includes(t.uid));
+    combined = [];
   }
 
   if (currentProfile && currentProfile.name && currentProfile.name.trim().length >= 2) {

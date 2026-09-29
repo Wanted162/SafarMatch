@@ -27,13 +27,13 @@ export function populateProfileForm(): void {
   const bioInput = document.getElementById('input-bio') as HTMLTextAreaElement | null;
   const intentInput = document.getElementById('input-travel-intent') as HTMLInputElement | null;
 
-  if (nameInput && profile.name) nameInput.value = profile.name;
-  if (ageInput && profile.age) ageInput.value = String(profile.age);
-  if (genderInput && profile.gender) genderInput.value = profile.gender;
-  if (homeCityInput && profile.homeCity) homeCityInput.value = profile.homeCity;
-  if (circuitInput && profile.currentCircuit) circuitInput.value = profile.currentCircuit;
-  if (bioInput && profile.bio) bioInput.value = profile.bio;
-  if (intentInput && profile.intent) intentInput.value = profile.intent;
+  if (nameInput) nameInput.value = profile.name || '';
+  if (ageInput) ageInput.value = profile.age ? String(profile.age) : '';
+  if (genderInput) genderInput.value = profile.gender || '';
+  if (homeCityInput) homeCityInput.value = profile.homeCity || '';
+  if (circuitInput) circuitInput.value = profile.currentCircuit || '';
+  if (bioInput) bioInput.value = profile.bio || '';
+  if (intentInput) intentInput.value = profile.intent || '';
 
   // Sync Intent Pills
   document.querySelectorAll('.intent-pill').forEach(pill => {
