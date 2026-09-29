@@ -157,7 +157,7 @@ export function renderConversationList(): void {
     ...getMonthlyConnectedPartners()
   ])).filter(Boolean);
 
-  const allList = getAllTravelers().length > 0 ? getAllTravelers() : (SEED_INDIAN_TRAVELERS as unknown as Traveler[]);
+  const allList = getAllTravelers();
   
   // Filter exclusively to travelers that the user has actually connected with or opened a chat with
   let connectedTravelers = allList.filter(t => t.uid !== myUid && connectedIds.includes(t.uid));

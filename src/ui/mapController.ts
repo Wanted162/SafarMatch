@@ -308,25 +308,25 @@ export function renderTravelerPins(filterCircuit = "all"): void {
       const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
 
       const popupContent = `
-        <div class="p-3.5 max-w-[240px] text-xs font-sans">
-          <div class="flex items-center space-x-2.5 pb-2 border-b border-slate-100">
-            <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200" />
-            <div>
+        <div class="p-4 max-w-[250px] text-xs font-sans text-slate-100 bg-[#1e2538] rounded-2xl select-none">
+          <div class="flex items-center space-x-2.5 pb-2.5 border-b border-white/10">
+            <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-white/20 flex-shrink-0" />
+            <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1">
-                <h4 class="font-bold text-slate-900">${escapeHtml(traveler.name)} ${traveler.isCurrentUser ? '(You)' : ''}</h4>
-                ${isVerified ? '<span class="text-emerald-600 font-bold">✓</span>' : ''}
+                <h4 class="font-extrabold text-white text-xs truncate popup-name">${escapeHtml(traveler.name)} ${traveler.isCurrentUser ? '(You)' : ''}</h4>
+                ${isVerified ? '<span class="text-emerald-400 font-bold text-xs flex-shrink-0">✓</span>' : ''}
               </div>
-              <p class="text-[11px] text-slate-500">${escapeHtml((traveler as any).upcomingCircuit || traveler.currentCircuit || 'India')} • ${escapeHtml(traveler.gender || 'Traveler')}</p>
+              <p class="text-[11px] text-slate-300 font-semibold truncate popup-meta">${escapeHtml((traveler as any).upcomingCircuit || traveler.currentCircuit || 'India')} • ${escapeHtml(traveler.gender || 'Traveler')}</p>
             </div>
           </div>
-          <p class="text-[11px] text-slate-600 py-2 leading-relaxed">${escapeHtml(bioSnippet)}</p>
+          <p class="text-[11px] text-slate-200 py-2.5 leading-relaxed font-normal popup-bio">${escapeHtml(bioSnippet)}</p>
           <div class="pt-1 flex gap-1.5">
             ${traveler.isCurrentUser ? `
-              <button onclick="window.switchView('profile')" class="flex-1 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] shadow-xs cursor-pointer">
+              <button onclick="window.switchView('profile')" class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-slate-950 font-black text-xs shadow-md cursor-pointer transition">
                 Edit Profile
               </button>
             ` : `
-              <button onclick="window.inspectTravelerFromMap('${escapeHtml(traveler.uid)}')" class="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-xs cursor-pointer">
+              <button onclick="window.inspectTravelerFromMap('${escapeHtml(traveler.uid)}')" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-600 active:scale-[0.98] text-white font-black text-xs shadow-md cursor-pointer transition">
                 View Profile
               </button>
             `}

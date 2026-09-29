@@ -1,6 +1,6 @@
 {
   "name": "SafarMatch",
-  "description": "Travel dating and companion finder platform built exclusively for Indian travelers.",
+  "description": "हर सफ़र में हमसफ़र (Har Safar Mein Humsafar) — India's verified travel dating and companion finder platform for solo travelers, women explorers, and backpackers.",
   "requestFramePermissions": ["camera", "geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

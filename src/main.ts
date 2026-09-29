@@ -39,6 +39,7 @@ import { getDocs, collection } from 'firebase/firestore';
 
 // Types & Config
 import { UPI_CONFIG, INDIAN_CIRCUITS_LOOKUP } from './config/constants';
+import { purgeAllUserDataFromClient } from './utils/storage';
 
 // Services
 import { 
@@ -577,6 +578,11 @@ globalObj.moderateMessageText = moderateMessageText;
 
 // ==================== APP BOOTSTRAP INITIALIZATION ====================
 function bootApp(): void {
+  // If no user is logged in, ensure zero leftover data on the client device
+  if (!getCurrentUser()) {
+    purgeAllUserDataFromClient();
+  }
+
   // 1. Initialize local cache and session state
   const profile = initProfileState();
   initTravelersCache(profile);
@@ -602,6 +608,7 @@ function bootApp(): void {
       syncHeaderDropdownUI();
       hideLandingPage();
     } else {
+      purgeAllUserDataFromClient();
       const authBtnText = document.getElementById('btn-auth-text');
       if (authBtnText) authBtnText.textContent = "Sign In";
       const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
