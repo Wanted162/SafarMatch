@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==================== 1. PUBLIC EXPLORER PROFILES ====================
+    // Contains ONLY public attributes (name, age, city, circuit, bio, verified badge).
+    // SENSITIVE FIELDS (phone, email, govt ID, live selfie, UPI UTR) ARE STRICTLY FORBIDDEN HERE.
+    match /profiles/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId
+        && !('phoneNumber' in request.resource.data)
+        && !('phone' in request.resource.data)
+        && !('email' in request.resource.data)
+        && !('govtIdData' in request.resource.data)
+        && !('selfieData' in request.resource.data)
+        && !('utrNumber' in request.resource.data);
+    }
+
+    // ==================== 2. 256-BIT ENCRYPTED PRIVATE CLOUD VAULT ====================
+    // Stores personal KYC documents, Aadhaar/DL photos, live selfies, phone numbers, and emails.
+    // ISOLATED IN ZERO-KNOWLEDGE PRIVATE VAULT: Access is strictly granted ONLY to the authenticated owner.
+    match /vault/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /profiles/{userId}/private_vault/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ==================== 3. IN-APP ENCRYPTED CHATS ====================
+    // Chat messages and metadata are strictly private to the 2 verified participants.
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null && request.auth.uid in chatId.split('_');
+
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null && request.auth.uid in chatId.split('_');
+      }
+    }
+
+    // ==================== 4. PUBLIC TRIP ITINERARIES ====================
+    match /trips/{tripId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.creatorUid;
+    }
+
+    // ==================== 5. FEEDBACK SUBMISSIONS ====================
+    match /feedback/{feedbackId} {
+      allow create: if true;
+      allow read: if false;
+    }
+  }
+}

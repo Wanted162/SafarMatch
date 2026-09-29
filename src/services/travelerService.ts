@@ -9,6 +9,7 @@ import { SEED_INDIAN_TRAVELERS } from '../data/seedTravelers';
 import { getStoredTravelers, saveStoredTravelers, getBlockedUsers, addBlockedUser } from '../utils/storage';
 import { showToast } from '../utils/toast';
 import { DEFAULT_AVATAR } from './profileService';
+import { sanitizePublicProfile } from '../utils/vaultCrypto';
 import type { Traveler, UserProfile } from '../types';
 
 let allTravelersCache: Traveler[] = [];
@@ -20,7 +21,7 @@ export function getAllTravelers(): Traveler[] {
 }
 
 export function setAllTravelers(travelers: Traveler[]): void {
-  allTravelersCache = travelers;
+  allTravelersCache = (travelers || []).map(t => sanitizePublicProfile(t));
 }
 
 export function getInspectedTraveler(): Traveler | null {

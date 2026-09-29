@@ -168,7 +168,9 @@ import {
   handleSendMessage,
   continueWhatsAppChat,
   acceptChatRequest,
-  declineChatRequest
+  declineChatRequest,
+  openVaultSecurityModal,
+  closeVaultSecurityModal
 } from './ui/chatController';
 
 import {
@@ -528,6 +530,10 @@ globalObj.closeSurakshaEmergencyModal = closeSurakshaEmergencyModal;
 globalObj.copyMyLocationSummary = () => {
   copyMyLocationSummary(getCurrentProfile());
 };
+
+// 256-Bit Encrypted Cloud Vault Security Modal
+globalObj.openVaultSecurityModal = openVaultSecurityModal;
+globalObj.closeVaultSecurityModal = closeVaultSecurityModal;
 
 // Payment & Connects
 globalObj.getMonthlyConnects = getMonthlyConnects;

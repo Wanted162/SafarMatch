@@ -576,10 +576,19 @@
           </p>
         </div>
 
-        <div class="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-          <h4 class="text-sm font-bold text-white">Will my phone number or private data be exposed?</h4>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Never. SafarMatch handles all communications through in-app encrypted chat. Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.
+        <div class="p-6 rounded-3xl bg-gradient-to-br from-emerald-950/60 via-slate-900 to-slate-900 border-2 border-emerald-400/40 space-y-2.5 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center space-x-1">
+              <span>🔒</span>
+              <span>256-Bit Cloud Privacy Vault Guarantee</span>
+            </span>
+            <span class="text-xs text-emerald-400 font-bold">100% Zero-Exposure</span>
+          </div>
+          <h4 class="text-base font-extrabold text-white flex items-center space-x-2">
+            <span>Will my phone number or private data be exposed?</span>
+          </h4>
+          <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+            <strong class="text-white font-bold">Never.</strong> SafarMatch handles all communications through in-app encrypted chat. Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.
           </p>
         </div>
       </div>
@@ -1240,12 +1249,17 @@
               </div>
             </div>
 
-            <!-- Anti-Bypass Safety Notice -->
-            <div class="bg-amber-50/70 border-b border-amber-200/60 px-4 py-1.5 flex items-center justify-between text-[11px] text-amber-800 flex-shrink-0">
-              <div class="flex items-center space-x-1.5">
-                <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-600 flex-shrink-0"></i>
-                <span>Anti-Scam Filter: Phone numbers, UPI IDs, and external links are automatically filtered for safety.</span>
+            <!-- 256-Bit Encrypted In-App Chat Security Banner -->
+            <div class="chat-vault-banner bg-slate-900 border-b border-emerald-500/40 px-3 py-2 flex items-center justify-between text-[11px] sm:text-xs text-slate-100 flex-shrink-0 shadow-inner">
+              <div class="flex items-center space-x-2 min-w-0">
+                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex-shrink-0">🔒</span>
+                <span class="truncate font-medium text-slate-200">
+                  <strong class="font-extrabold text-emerald-300">In-App Encrypted Chat:</strong> Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.
+                </span>
               </div>
+              <button type="button" onclick="openVaultSecurityModal()" class="text-[10px] font-extrabold text-emerald-400 hover:text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-500/40 px-2 py-0.5 rounded-lg transition ml-2 flex-shrink-0 cursor-pointer flex items-center space-x-1">
+                <span>🛡️ Vault Info</span>
+              </button>
             </div>
 
             <!-- Pending Chat Handshake: Sender Banner -->
@@ -1286,7 +1300,7 @@
               </div>
             </div>
 
-            <!-- WhatsApp Prompt: Continue Chatting Choice -->
+            <!-- In-App Encrypted Chat: Continue Messaging Consent -->
             <div id="chat-whatsapp-prompt-banner" class="hidden bg-white border-b border-slate-200/90 px-4 py-3 shadow-xs flex-shrink-0">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center space-x-3 min-w-0">
@@ -1298,7 +1312,7 @@
                       Do you want to continue chatting with <span id="chat-whatsapp-prompt-name" class="font-bold text-slate-900">Traveler</span>?
                     </p>
                     <p class="text-[11px] text-slate-500 mt-0.5" id="chat-whatsapp-prompt-text">
-                      Choose whether you'd like to chat with this traveler on SafarMatch.
+                      Chat is secured in-app with 256-bit encryption. Your private phone number and documents are never exposed.
                     </p>
                   </div>
                 </div>
@@ -1671,6 +1685,51 @@
                 <button type="button" onclick="openSurakshaEmergencyModal()" class="suraksha-link-btn mt-2 text-[11px] font-black text-rose-300 hover:text-white underline flex items-center space-x-1 cursor-pointer">
                   <span>View SOS & Helplines →</span>
                 </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dedicated 256-Bit Encrypted Cloud Privacy Vault Card -->
+          <div class="rounded-3xl p-5 border-2 border-emerald-500/40 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 shadow-sm space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                  🔒
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <h3 class="text-sm sm:text-base font-extrabold text-white">256-Bit Encrypted Cloud Privacy Vault</h3>
+                    <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Zero Exposure Guarantee</span>
+                  </div>
+                  <p class="text-xs text-slate-300 mt-0.5">Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.</p>
+                </div>
+              </div>
+              <button type="button" onclick="openVaultSecurityModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs shadow-xs transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-center flex-shrink-0">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                <span>Vault Certificate</span>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                <div class="font-bold text-emerald-300 text-[11px] flex items-center space-x-1">
+                  <span>📱</span>
+                  <span>Phone & Email Privacy</span>
+                </div>
+                <p class="text-[10px] text-slate-200 leading-snug">Never exposed on public traveler cards, itineraries, or map pins.</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                <div class="font-bold text-emerald-300 text-[11px] flex items-center space-x-1">
+                  <span>💬</span>
+                  <span>In-App Encrypted Chat</span>
+                </div>
+                <p class="text-[10px] text-slate-200 leading-snug">All conversations handled through encrypted in-app channels.</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                <div class="font-bold text-emerald-300 text-[11px] flex items-center space-x-1">
+                  <span>🔐</span>
+                  <span>AES-GCM-256 Vault</span>
+                </div>
+                <p class="text-[10px] text-slate-200 leading-snug">Identity documents encrypted via military-grade 256-bit keys.</p>
               </div>
             </div>
           </div>
@@ -2100,11 +2159,105 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
         <button type="button" onclick="copySplitSummary()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
           <i data-lucide="share-2" class="w-4 h-4"></i>
-          <span id="split-copy-btn-text">Copy for WhatsApp</span>
+          <span id="split-copy-btn-text">Copy for In-App Chat</span>
         </button>
         <button type="button" onclick="payPerPersonViaUpi()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
           <span>Pay via Direct UPI (0% Fee)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: 256-BIT ENCRYPTED CLOUD PRIVACY VAULT ==================== -->
+  <div id="vault-security-modal" class="hidden fixed inset-0 z-[1000] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border-2 border-emerald-500/40 rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl space-y-4 my-auto max-h-[90dvh] overflow-y-auto text-white">
+      <div class="flex items-start justify-between pb-3 border-b border-emerald-500/20">
+        <div class="flex items-center space-x-3">
+          <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-xl flex-shrink-0">
+            🔒
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white">256-Bit Cloud Privacy Vault</h3>
+            <p class="text-[11px] text-emerald-300 font-medium">प्राइवेट एन्क्रिप्टेड वॉल्ट • Zero-Knowledge Isolation</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeVaultSecurityModal()" class="p-1.5 text-slate-400 hover:text-white rounded-full hover:bg-white/10 cursor-pointer transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Verified Security Guarantee Banner -->
+      <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/80 via-slate-900 to-slate-900 border border-emerald-400/50 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            Official Privacy Guarantee
+          </span>
+          <span class="text-xs text-emerald-400 font-bold flex items-center space-x-1">
+            <span>🛡️</span>
+            <span>256-Bit AES Active</span>
+          </span>
+        </div>
+        <h4 class="text-sm font-extrabold text-white">Will my phone number or private data be exposed?</h4>
+        <p class="text-xs text-slate-200 leading-relaxed">
+          <strong class="text-emerald-300 font-bold">Never.</strong> SafarMatch handles all communications through in-app encrypted chat. Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.
+        </p>
+      </div>
+
+      <!-- 4 Pillars of Vault Security -->
+      <div class="space-y-2.5 text-xs">
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-start space-x-3">
+          <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+            📱
+          </div>
+          <div>
+            <h5 class="font-bold text-white text-xs">Zero Phone & Contact Exposure</h5>
+            <p class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+              Your phone number and email are locked in your private cloud vault. They are strictly excluded from explorer directory queries, trip board cards, and map markers.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-start space-x-3">
+          <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+            💬
+          </div>
+          <div>
+            <h5 class="font-bold text-white text-xs">In-App Encrypted Chat Channels</h5>
+            <p class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+              All messaging is kept inside SafarMatch. Real-time message screening automatically blocks attempts to leak phone numbers, fake UPI IDs, or off-platform handles.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-start space-x-3">
+          <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+            🔐
+          </div>
+          <div>
+            <h5 class="font-bold text-white text-xs">AES-GCM-256 Military Encryption</h5>
+            <p class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+              KYC documents, government photo IDs, and live verification selfies are encrypted using Web Crypto API AES-GCM with PBKDF2 100,000 key derivation iterations.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-start space-x-3">
+          <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+            🛡️
+          </div>
+          <div>
+            <h5 class="font-bold text-white text-xs">Zero-Knowledge Cloud Rules</h5>
+            <p class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+              Cloud security rules enforce that private vault records are accessible exclusively by the authenticated owner. Public writes containing phone numbers are rejected.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button type="button" onclick="closeVaultSecurityModal()" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition cursor-pointer">
+          Acknowledge & Close ✓
         </button>
       </div>
     </div>

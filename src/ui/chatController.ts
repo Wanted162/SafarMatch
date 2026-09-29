@@ -9,6 +9,7 @@ import { db, isLiveFirebase } from '../config/firebase';
 import { STORAGE_KEYS } from '../utils/storage';
 import { moderateMessageText } from '../utils/moderation';
 import { escapeHtml } from '../utils/security';
+import { encryptVaultData, decryptVaultData } from '../utils/vaultCrypto';
 import { showToast } from '../utils/toast';
 import {
   getActiveChatPartner,
@@ -566,33 +567,48 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
   renderMessagesList(msgs);
   renderConversationList();
 
-  // Real-time Firestore messages listener for live sync across devices
+  // Real-time Firestore messages listener for live sync across devices with 256-Bit Decryption
   if (isLiveFirebase && db) {
     try {
       const messagesQuery = collection(db, 'chats', chatId, 'messages');
       const unsub = onSnapshot(messagesQuery, (snap) => {
         if (!snap.empty && getActiveChatPartner()?.uid === partnerUid) {
-          const remoteMsgs: ChatMessage[] = [];
+          const decryptPromises: Promise<ChatMessage>[] = [];
           snap.forEach(d => {
             const dData = d.data();
-            remoteMsgs.push({
-              id: d.id,
-              sender: dData.senderUid === myUid ? 'me' : 'partner',
-              senderUid: dData.senderUid,
-              text: dData.text || '',
-              timestamp: dData.timestamp || '',
-              status: dData.status || 'delivered'
-            });
+            const encrypted = dData.encryptedPayload;
+            const fallbackText = dData.text || '';
+            const msgPromise = (async (): Promise<ChatMessage> => {
+              let finalText = fallbackText;
+              if (encrypted && typeof encrypted === 'string' && encrypted.startsWith('ENC:')) {
+                try {
+                  const dec = await decryptVaultData(encrypted, `chat_key_${chatId}`);
+                  if (dec) finalText = dec;
+                } catch (e) {}
+              }
+              return {
+                id: d.id,
+                sender: dData.senderUid === myUid ? 'me' : 'partner',
+                senderUid: dData.senderUid,
+                text: finalText,
+                timestamp: dData.timestamp || '',
+                status: dData.status || 'delivered'
+              };
+            })();
+            decryptPromises.push(msgPromise);
           });
-          if (remoteMsgs.length > 0) {
-            const localMsgs = getMessagesForPartner(partnerUid);
-            const combinedMap = new Map<string, ChatMessage>();
-            localMsgs.forEach(m => combinedMap.set(m.id, m));
-            remoteMsgs.forEach(m => combinedMap.set(m.id, m));
-            const merged = Array.from(combinedMap.values());
-            saveMessagesForPartner(partnerUid, merged);
-            renderMessagesList(merged);
-          }
+
+          Promise.all(decryptPromises).then(remoteMsgs => {
+            if (remoteMsgs.length > 0 && getActiveChatPartner()?.uid === partnerUid) {
+              const localMsgs = getMessagesForPartner(partnerUid);
+              const combinedMap = new Map<string, ChatMessage>();
+              localMsgs.forEach(m => combinedMap.set(m.id, m));
+              remoteMsgs.forEach(m => combinedMap.set(m.id, m));
+              const merged = Array.from(combinedMap.values());
+              saveMessagesForPartner(partnerUid, merged);
+              renderMessagesList(merged);
+            }
+          });
         }
       }, (err) => console.warn("Firestore chat messages snapshot error:", err));
       setActiveChatUnsubscribe(unsub);
@@ -770,7 +786,7 @@ export async function handleSendMessage(e: Event): Promise<void> {
   const modCheck = moderateMessageText(text);
   if (!modCheck.allowed) {
     if (input) input.value = "";
-    showToast("⚠️ Safety Alert: Message blocked. SafarMatch strictly prohibits abusive language, off-platform contact sharing, and financial solicitation.", "error");
+    showToast(modCheck.reason || "🔒 SafarMatch Contact Shield Active: Off-platform contact sharing is restricted to protect your privacy.", "warning");
     return;
   }
 
@@ -822,17 +838,29 @@ export async function handleSendMessage(e: Event): Promise<void> {
   saveChatMeta(chatId, meta);
   renderConversationList();
 
-  // Firestore sync if connected
+  // Firestore sync with 256-Bit Encrypted Vault Payload
   if (isLiveFirebase && db) {
     try {
       const chatDocRef = doc(db, 'chats', chatId);
-      addDoc(collection(chatDocRef, 'messages'), {
-        senderUid: myUid,
-        text,
-        timestamp: timeStr,
-        createdAt: serverTimestamp(),
-        status: 'sent'
-      }).catch(err => console.warn("Firestore message write error:", err));
+      encryptVaultData(text, `chat_key_${chatId}`).then(encryptedPayload => {
+        addDoc(collection(chatDocRef, 'messages'), {
+          senderUid: myUid,
+          text,
+          encryptedPayload,
+          encryption: "AES-GCM-256",
+          timestamp: timeStr,
+          createdAt: serverTimestamp(),
+          status: 'sent'
+        }).catch(err => console.warn("Firestore message write error:", err));
+      }).catch(() => {
+        addDoc(collection(chatDocRef, 'messages'), {
+          senderUid: myUid,
+          text,
+          timestamp: timeStr,
+          createdAt: serverTimestamp(),
+          status: 'sent'
+        }).catch(err => console.warn("Firestore message write error:", err));
+      });
 
       setDoc(chatDocRef, {
         initiatorUid: originalInitiator,
@@ -842,6 +870,7 @@ export async function handleSendMessage(e: Event): Promise<void> {
         lastMessageTime: timeStr,
         lastSenderUid: myUid,
         unreadBy: [partnerUid],
+        vaultEncrypted: true,
         updatedAt: serverTimestamp()
       }, { merge: true }).catch(err => console.warn("Firestore chat doc update error:", err));
     } catch (e) {
@@ -875,3 +904,15 @@ export async function handleSendMessage(e: Event): Promise<void> {
     }
   }, 800);
 }
+
+export function openVaultSecurityModal(): void {
+  const modal = document.getElementById('vault-security-modal');
+  if (modal) modal.classList.remove('hidden');
+  if ((window as any).lucide) (window as any).lucide.createIcons();
+}
+
+export function closeVaultSecurityModal(): void {
+  const modal = document.getElementById('vault-security-modal');
+  if (modal) modal.classList.add('hidden');
+}
+

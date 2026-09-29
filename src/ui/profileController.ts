@@ -11,6 +11,7 @@ import { STORAGE_KEYS, saveStoredTravelers } from '../utils/storage';
 import { showToast } from '../utils/toast';
 import { moderateMessageText } from '../utils/moderation';
 import { sanitizePlainText } from '../utils/security';
+import { sanitizePublicProfile } from '../utils/vaultCrypto';
 import { renderTravelerPins } from './mapController';
 import { INDIAN_CIRCUITS_LOOKUP } from '../config/constants';
 import type { Traveler } from '../types';
@@ -256,10 +257,11 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
 
   if (isLiveFirebase && db && currentProfile.uid) {
     try {
-      await setDoc(doc(db, "profiles", currentProfile.uid), {
+      const publicClean = sanitizePublicProfile({
         ...currentProfile,
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      });
+      await setDoc(doc(db, "profiles", currentProfile.uid), publicClean, { merge: true });
     } catch (err) {
       console.warn("Firestore profile save error:", err);
     }

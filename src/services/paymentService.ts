@@ -328,7 +328,7 @@ export function copySplitSummary(): void {
 
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => {
-      showToast("📋 Split summary copied for WhatsApp!", "success");
+      showToast("📋 Split summary copied for in-app chat!", "success");
     });
   }
 }

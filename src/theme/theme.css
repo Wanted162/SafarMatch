@@ -179,6 +179,7 @@ select option {
 #payment-approved-modal > div,
 #payment-rejected-modal > div,
 #suraksha-emergency-modal > div,
+#vault-security-modal > div,
 #header-actions-dropdown {
   background-color: var(--modal-bg) !important;
   border-color: var(--border-card) !important;
@@ -199,7 +200,8 @@ select option {
 #verification-rejected-modal h3,
 #payment-approved-modal h3,
 #payment-rejected-modal h3,
-#suraksha-emergency-modal h3 {
+#suraksha-emergency-modal h3,
+#vault-security-modal h3 {
   color: #ffffff !important;
 }
 
@@ -213,7 +215,8 @@ select option {
 #traveler-detail-modal p,
 #report-block-modal p,
 #paywall-modal p,
-#suraksha-emergency-modal p {
+#suraksha-emergency-modal p,
+#vault-security-modal p {
   color: #cbd5e1 !important;
 }
 
