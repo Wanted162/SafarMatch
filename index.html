@@ -55,14 +55,21 @@
     .pt-safe { padding-top: max(0.75rem, env(safe-area-inset-top)); }
 
     .leaflet-popup-content-wrapper {
-      padding: 0;
-      border-radius: 1.25rem;
+      padding: 0 !important;
+      border-radius: 1rem !important;
       overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      background: transparent !important;
+      box-shadow: none !important;
     }
     .leaflet-popup-content {
-      margin: 0;
-      line-height: 1.4;
+      margin: 0 !important;
+      line-height: normal !important;
+    }
+    .leaflet-popup-tip {
+      background: #ffffff !important;
+    }
+    .dark .leaflet-popup-tip {
+      background: #0f172a !important;
     }
     .custom-avatar-pin {
       background: transparent;
@@ -647,7 +654,7 @@
   </div>
 
   <!-- ==================== TOP NAVIGATION HEADER ==================== -->
-  <header class="h-14 sm:h-16 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between z-30 flex-shrink-0 shadow-xs">
+  <header class="h-14 sm:h-16 border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between z-30 flex-shrink-0 shadow-xs">
     <!-- Brand -->
     <div class="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0" onclick="switchView('map')">
       <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-safar-600 via-rose-500 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-200/50 flex-shrink-0">
@@ -655,50 +662,63 @@
       </div>
       <div class="min-w-0">
         <div class="flex items-center space-x-1.5 sm:space-x-2">
-          <span class="brand-title text-base sm:text-xl font-black truncate">SafarMatch</span>
+          <span class="brand-title text-base sm:text-xl font-black truncate text-slate-900 dark:text-white">SafarMatch</span>
           <span class="brand-edition-badge text-[9px] sm:text-[10px] px-1.5 py-0.5">Bharat</span>
         </div>
-        <p class="text-[11px] text-slate-300 hidden sm:block truncate font-medium">Never Just A Destination. Find Someone Who Remembers You Along The Way.</p>
+        <p class="text-[11px] text-slate-600 dark:text-slate-300 hidden sm:block truncate font-medium">Never Just A Destination. Find Someone Who Remembers You Along The Way.</p>
       </div>
     </div>
 
     <!-- Center: 2-Step Journey Status Pill (Tablet / Desktop) -->
-    <div class="hidden lg:flex items-center space-x-3 bg-slate-50 border border-slate-200/90 px-3.5 py-1.5 rounded-full text-xs font-medium shadow-2xs">
+    <div class="hidden lg:flex items-center space-x-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 px-3.5 py-1.5 rounded-full text-xs font-medium shadow-2xs">
       <!-- Step 1 Indicator -->
-      <div id="header-step1-status" class="flex items-center space-x-1.5 text-slate-700">
-        <span id="step1-badge-icon" class="w-4 h-4 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">1</span>
-        <span class="text-[11px] text-slate-600">Traveler Profile:</span>
-        <span id="step1-badge-label" class="font-bold text-amber-600">Pending</span>
+      <div id="header-step1-status" class="flex items-center space-x-1.5 text-slate-700 dark:text-slate-300">
+        <span id="step1-badge-icon" class="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-[10px] font-bold">1</span>
+        <span class="text-[11px] text-slate-600 dark:text-slate-400">Traveler Profile:</span>
+        <span id="step1-badge-label" class="font-bold text-amber-600 dark:text-amber-400">Pending</span>
       </div>
-      <span class="text-slate-300">|</span>
+      <span class="text-slate-300 dark:text-slate-600">|</span>
       <!-- Step 2 Indicator -->
-      <div id="header-step2-status" class="flex items-center space-x-1.5 text-slate-700">
-        <span id="step2-badge-icon" class="w-4 h-4 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">2</span>
-        <span class="text-[11px] text-slate-600">Explorer Pass:</span>
-        <span id="step2-badge-label" class="font-bold text-slate-500">Locked (₹299)</span>
+      <div id="header-step2-status" class="flex items-center space-x-1.5 text-slate-700 dark:text-slate-300">
+        <span id="step2-badge-icon" class="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-[10px] font-bold">2</span>
+        <span class="text-[11px] text-slate-600 dark:text-slate-400">Explorer Pass:</span>
+        <span id="step2-badge-label" class="font-bold text-slate-500 dark:text-slate-400">Locked (₹299)</span>
       </div>
     </div>
 
     <!-- Right Header Actions (Streamlined Top-Tier UI with Dropdown) -->
     <div class="flex items-center space-x-1.5 sm:space-x-3 flex-shrink-0 relative">
 
+      <!-- Day / Night Theme Switcher Button -->
+      <button 
+        id="header-theme-toggle-btn" 
+        onclick="cycleTheme()" 
+        type="button" 
+        class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 transition cursor-pointer shadow-2xs border border-slate-200/80 dark:border-slate-700" 
+        title="Toggle Day / Night Mode"
+      >
+        <span class="theme-toggle-icon">
+          <svg class="w-4 h-4 text-slate-700 dark:text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </span>
+      </button>
+
       <!-- 1. Live Verification Status Badge -->
-      <div id="header-verification-badge" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex-shrink-0">
-        <svg class="w-3.5 h-3.5 text-slate-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+      <div id="header-verification-badge" class="hidden md:flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex-shrink-0">
+        <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
         <span id="header-verification-text">Unverified</span>
       </div>
 
       <!-- 2. Profile Completion Gauge & Avatar -->
-      <div id="header-profile-trigger" onclick="switchView('profile')" class="cursor-pointer flex items-center space-x-1 sm:space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 p-1 sm:px-2.5 sm:py-1.5 rounded-xl transition flex-shrink-0" title="Go to Profile">
-        <div class="w-7 h-7 rounded-full bg-slate-200 overflow-hidden flex-shrink-0 border border-white shadow-xs">
+      <div id="header-profile-trigger" onclick="switchView('profile')" class="cursor-pointer flex items-center space-x-1 sm:space-x-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-200/80 dark:border-slate-700 p-1 sm:px-2.5 sm:py-1.5 rounded-xl transition flex-shrink-0" title="Go to Profile">
+        <div class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex-shrink-0 border border-white dark:border-slate-600 shadow-xs">
           <img id="header-user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar" class="w-full h-full object-cover" />
         </div>
         <div class="text-left hidden md:block">
           <div class="flex items-center space-x-1">
-            <span id="header-user-name" class="text-xs font-bold text-slate-800 truncate max-w-[90px]">Guest</span>
+            <span id="header-user-name" class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[90px]">Guest</span>
             <span id="header-vip-star" class="hidden text-amber-500 text-xs">⭐</span>
           </div>
-          <div class="w-14 h-1.5 bg-slate-200 rounded-full overflow-hidden mt-0.5">
+          <div class="w-14 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mt-0.5">
             <div id="header-profile-progress" class="h-full bg-safar-600 rounded-full transition-all duration-300" style="width: 40%"></div>
           </div>
         </div>
@@ -712,12 +732,12 @@
           type="button" 
           aria-expanded="false" 
           aria-haspopup="true"
-          class="flex items-center space-x-1 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition cursor-pointer shadow-2xs select-none"
+          class="flex items-center space-x-1 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition cursor-pointer shadow-2xs select-none border border-slate-200/80 dark:border-slate-700"
           title="Navigation & Backpacker Tools"
         >
           <i data-lucide="menu" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Menu</span>
-          <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500"></i>
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400"></i>
         </button>
 
         <!-- Dropdown Menu Panel (Smart Floating Dark Card with Full Navigation & Tools) -->
@@ -917,7 +937,7 @@
   </header>
 
   <!-- ==================== FULL-WIDTH MAIN VIEW CANVAS ==================== -->
-  <main class="flex-1 w-full h-full relative overflow-hidden bg-slate-50 flex flex-col">
+  <main class="flex-1 w-full h-full relative overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col">
 
       <!-- ==================== VIEW 1: EXPLORE MAP ==================== -->
       <section id="view-map" class="view-panel relative w-full h-full flex flex-col overflow-hidden">
@@ -1015,17 +1035,17 @@
       </section>
 
       <!-- ==================== VIEW 2: LIVE INDIA TRIP BOARD ==================== -->
-      <section id="view-trips" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto pb-24 md:pb-0">
+      <section id="view-trips" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-y-auto pb-24 md:pb-0">
         <!-- Sticky Header with Circuit Filters & Action Button -->
-        <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div class="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div>
             <div class="flex items-center space-x-2">
-              <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">Live India Trip Board</h2>
-              <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">Live India Trip Board</h2>
+              <span class="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200 dark:border-emerald-800">
                 <i data-lucide="eye" class="w-3 h-3"></i> Free Read Access
               </span>
             </div>
-            <p class="text-xs text-slate-500">Discover upcoming companion trips, scooter roadtrips & hostel splits across India.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Discover upcoming companion trips, scooter roadtrips & hostel splits across India.</p>
           </div>
 
           <div class="flex items-center space-x-2">
@@ -1098,18 +1118,18 @@
       </section>
 
       <!-- ==================== VIEW 3: IN-APP REAL-TIME CHAT ==================== -->
-      <section id="view-chat" class="view-panel hidden w-full h-full flex flex-col bg-white overflow-hidden relative">
+      <section id="view-chat" class="view-panel hidden w-full h-full flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden relative">
 
         <!-- LOCKED PAYWALL CONTAINER (Visible when user has no Explorer Pass) -->
-        <div id="chat-paywall-locked" class="hidden absolute inset-0 z-20 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl border border-slate-100 space-y-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-rose-200">
+        <div id="chat-paywall-locked" class="hidden absolute inset-0 z-20 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-rose-200/50">
               <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
             <div>
-              <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-900 px-3 py-1 rounded-full">Explorer Pass Required</span>
-              <h3 class="text-xl font-extrabold text-slate-900 mt-2">Real-Time Chat is Protected</h3>
-              <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">Explorer Pass Required</span>
+              <h3 class="text-xl font-extrabold text-slate-900 dark:text-white mt-2">Real-Time Chat is Protected</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
                 Connect 1-on-1 with verified backpackers, plan scooter splits in Goa, or coordinate high-altitude treks in Manali with private end-to-end messaging.
               </p>
             </div>
@@ -1393,7 +1413,7 @@
       </section>
 
       <!-- ==================== VIEW 4: EXPLORER PASS & MONETIZATION ==================== -->
-      <section id="view-monetization" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto pb-24 md:pb-0">
+      <section id="view-monetization" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-y-auto pb-24 md:pb-0">
         <div class="max-w-6xl mx-auto w-full p-4 sm:p-8 space-y-6 pb-28 md:pb-8">
           <!-- Mobile Quick-Actions Banner (Cab Splitter & Feedback) -->
           <div class="flex md:hidden items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -1614,7 +1634,7 @@
       </section>
 
       <!-- ==================== VIEW 5: MY TRAVEL PROFILE & TRUST SUITE ==================== -->
-      <section id="view-profile" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 overflow-y-auto">
+      <section id="view-profile" class="view-panel hidden w-full h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-4 sm:p-8 space-y-6 pb-28 md:pb-8">
           <!-- Mobile Quick-Actions Banner (Cab Splitter, Suraksha Shield & Feedback) -->
           <div class="flex md:hidden items-center justify-between gap-2 bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -1633,7 +1653,7 @@
           </div>
 
           <!-- Dedicated Suraksha Shield (भारत सुरक्षा शील्ड) & Safety Controls Card -->
-          <div id="suraksha-profile-card" class="suraksha-shield-card rounded-3xl p-6 border-2 border-rose-400/40 shadow-sm space-y-4">
+          <div id="suraksha-profile-card" class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-rose-200 dark:border-rose-900/60 shadow-sm space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="flex items-center space-x-3">
                 <div class="w-11 h-11 rounded-2xl bg-rose-600 text-white flex items-center justify-center shadow-md shadow-rose-500/20 flex-shrink-0">
@@ -1641,48 +1661,48 @@
                 </div>
                 <div>
                   <div class="flex items-center space-x-2">
-                    <h3 class="text-base sm:text-lg font-black text-white">Suraksha Shield (सुरक्षा शील्ड)</h3>
-                    <span id="suraksha-status-badge" class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/40">Standard Mode</span>
+                    <h3 class="text-rose-950 dark:text-rose-200 font-extrabold text-sm sm:text-base">Suraksha Shield (सुरक्षा शील्ड)</h3>
+                    <span id="suraksha-status-badge" class="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800">Standard Mode</span>
                   </div>
-                  <p class="text-xs text-slate-300 font-medium mt-0.5">Designed for solo female backpackers and verified travelers across Bharat.</p>
+                  <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed mt-0.5">Designed for solo female backpackers and verified travelers across Bharat.</p>
                 </div>
               </div>
 
               <!-- Safe Mode Toggle Control -->
-              <div class="flex items-center space-x-3 bg-slate-800/80 px-3.5 py-2 rounded-2xl border border-slate-700 shadow-xs flex-shrink-0">
-                <span class="text-xs font-bold text-white">Safe Mode Filter</span>
+              <div class="flex items-center space-x-3 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex-shrink-0">
+                <span class="text-xs font-bold text-slate-800 dark:text-white">Safe Mode Filter</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="profile-suraksha-toggle" onchange="toggleSurakshaMode(this.checked)" class="sr-only peer" />
-                  <div class="w-10 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
+                  <div class="w-10 h-5 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
                 </label>
               </div>
             </div>
 
             <!-- 3 Pillars of Suraksha Protection -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
-              <div class="suraksha-pillar-box p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/10 space-y-1.5">
-                <div class="font-bold text-rose-300 flex items-center space-x-1.5">
-                  <i data-lucide="eye-off" class="w-4 h-4 text-rose-400"></i>
-                  <span class="pillar-title font-extrabold text-white">Privacy Pin Guard</span>
+              <div class="p-3.5 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/30 space-y-1.5">
+                <div class="font-bold text-rose-800 dark:text-rose-300 flex items-center space-x-1.5">
+                  <i data-lucide="eye-off" class="w-4 h-4 text-rose-600 dark:text-rose-400"></i>
+                  <span class="font-extrabold text-slate-900 dark:text-white">Privacy Pin Guard</span>
                 </div>
-                <p class="pillar-desc text-[11px] text-slate-200 font-medium leading-relaxed">Hides your GPS pins & trips from non-female profiles. Highlights verified solo travelers.</p>
+                <p class="text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">Hides your GPS pins & trips from non-female profiles. Highlights verified solo travelers.</p>
               </div>
-              <div class="suraksha-pillar-box p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/10 space-y-1.5">
-                <div class="font-bold text-rose-300 flex items-center space-x-1.5">
-                  <svg class="w-4 h-4 text-rose-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                  <span class="pillar-title font-extrabold text-white">Anti-Scam Vault</span>
+              <div class="p-3.5 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/30 space-y-1.5">
+                <div class="font-bold text-rose-800 dark:text-rose-300 flex items-center space-x-1.5">
+                  <svg class="w-4 h-4 text-rose-600 dark:text-rose-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                  <span class="font-extrabold text-slate-900 dark:text-white">Anti-Scam Vault</span>
                 </div>
-                <p class="pillar-desc text-[11px] text-slate-200 font-medium leading-relaxed">Restricts off-platform phone numbers, fake UPI IDs, and unverified chat requests.</p>
+                <p class="text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">Restricts off-platform phone numbers, fake UPI IDs, and unverified chat requests.</p>
               </div>
-              <div class="suraksha-pillar-box p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/10 space-y-1.5 flex flex-col justify-between">
+              <div class="p-3.5 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/30 space-y-1.5 flex flex-col justify-between">
                 <div>
-                  <div class="font-bold text-rose-300 flex items-center space-x-1.5">
-                    <i data-lucide="phone-call" class="w-4 h-4 text-rose-400"></i>
-                    <span class="pillar-title font-extrabold text-white">Emergency Helplines</span>
+                  <div class="font-bold text-rose-800 dark:text-rose-300 flex items-center space-x-1.5">
+                    <i data-lucide="phone-call" class="w-4 h-4 text-rose-600 dark:text-rose-400"></i>
+                    <span class="font-extrabold text-slate-900 dark:text-white">Emergency Helplines</span>
                   </div>
-                  <p class="pillar-desc text-[11px] text-slate-200 font-medium leading-relaxed">Pan-India Police (112) & Women Safety Helpline (1091) quick dial.</p>
+                  <p class="text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">Pan-India Police (112) & Women Safety Helpline (1091) quick dial.</p>
                 </div>
-                <button type="button" onclick="openSurakshaEmergencyModal()" class="suraksha-link-btn mt-2 text-[11px] font-black text-rose-300 hover:text-white underline flex items-center space-x-1 cursor-pointer">
+                <button type="button" onclick="openSurakshaEmergencyModal()" class="mt-2 text-[11px] font-black text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-white underline flex items-center space-x-1 cursor-pointer">
                   <span>View SOS & Helplines →</span>
                 </button>
               </div>
@@ -1690,7 +1710,7 @@
           </div>
 
           <!-- Dedicated 256-Bit Encrypted Cloud Privacy Vault Card -->
-          <div class="rounded-3xl p-5 border-2 border-emerald-500/40 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 shadow-sm space-y-3">
+          <div class="rounded-3xl p-5 border border-slate-800 bg-slate-900 text-white shadow-sm space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-lg flex-shrink-0">
@@ -1701,7 +1721,7 @@
                     <h3 class="text-sm sm:text-base font-extrabold text-white">256-Bit Encrypted Cloud Privacy Vault</h3>
                     <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Zero Exposure Guarantee</span>
                   </div>
-                  <p class="text-xs text-slate-300 mt-0.5">Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.</p>
+                  <p class="text-xs text-slate-200 mt-0.5">Your phone number, email address, and personal documents are stored securely in a 256-bit encrypted cloud vault and are never displayed publicly.</p>
                 </div>
               </div>
               <button type="button" onclick="openVaultSecurityModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs shadow-xs transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-center flex-shrink-0">
@@ -1710,26 +1730,26 @@
               </button>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
                 <div class="font-bold text-emerald-300 text-[11px] flex items-center space-x-1">
                   <span>📱</span>
                   <span>Phone & Email Privacy</span>
                 </div>
-                <p class="text-[10px] text-slate-200 leading-snug">Never exposed on public traveler cards, itineraries, or map pins.</p>
+                <p class="text-[11px] text-slate-200 dark:text-slate-300 leading-snug">Never exposed on public traveler cards, itineraries, or map pins.</p>
               </div>
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
                 <div class="font-bold text-emerald-300 text-[11px] flex items-center space-x-1">
                   <span>💬</span>
                   <span>In-App Encrypted Chat</span>
                 </div>
-                <p class="text-[10px] text-slate-200 leading-snug">All conversations handled through encrypted in-app channels.</p>
+                <p class="text-[11px] text-slate-200 dark:text-slate-300 leading-snug">All conversations handled through encrypted in-app channels.</p>
               </div>
-              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 space-y-1">
                 <div class="font-bold text-emerald-300 text-[11px] flex items-center space-x-1">
                   <span>🔐</span>
                   <span>AES-GCM-256 Vault</span>
                 </div>
-                <p class="text-[10px] text-slate-200 leading-snug">Identity documents encrypted via military-grade 256-bit keys.</p>
+                <p class="text-[11px] text-slate-200 dark:text-slate-300 leading-snug">Identity documents encrypted via military-grade 256-bit keys.</p>
               </div>
             </div>
           </div>
@@ -1789,54 +1809,48 @@
 
             <!-- Verification Action Rows -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- 1. Live Selfie Verification -->
-              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
+              <!-- 1. Live Selfie Verification (Fraud-Proof WebRTC Only) -->
+              <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 shadow-xs">
                 <div class="flex items-start justify-between">
                   <div class="flex items-center space-x-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
                       <i data-lucide="camera" class="w-4 h-4"></i>
                     </div>
                     <div>
-                      <h4 class="text-xs font-bold text-slate-900">1. Live WebRTC / Photo Selfie</h4>
-                      <p class="text-[11px] text-slate-500">Camera stream with iframe fallback (&lt;80 KB)</p>
+                      <h4 class="text-xs font-bold text-slate-900 dark:text-white">1. Live WebRTC Selfie</h4>
+                      <p class="text-[11px] text-slate-500 dark:text-slate-400">Real-time camera verification (&lt;80 KB)</p>
                     </div>
                   </div>
-                  <span id="badge-selfie-state" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">
+                  <span id="badge-selfie-state" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                     Not Done
                   </span>
                 </div>
 
-                <div class="pt-1 flex items-center gap-2">
-                  <button type="button" onclick="openSelfieModal()" class="flex-1 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center justify-center space-x-1.5">
+                <div class="pt-1">
+                  <button type="button" onclick="openSelfieModal()" class="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs">
                     <i data-lucide="aperture" class="w-3.5 h-3.5"></i>
                     <span>Take Live Selfie</span>
                   </button>
-                  <!-- Direct File Fallback button if WebRTC is blocked -->
-                  <label for="camera-fallback-input" class="cursor-pointer py-2 px-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition flex items-center space-x-1">
-                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                    <span>Upload</span>
-                  </label>
-                  <input type="file" id="camera-fallback-input" accept="image/*" capture="user" class="hidden" onchange="handleSelfieFileSelected(event)" />
                 </div>
               </div>
 
               <!-- 2. Government Photo ID Verification -->
-              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
+              <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 shadow-xs">
                 <div class="flex items-start justify-between">
                   <div class="flex items-center space-x-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 flex items-center justify-center">
                       <i data-lucide="file-check" class="w-4 h-4"></i>
                     </div>
                     <div>
-                      <h4 class="text-xs font-bold text-slate-900">2. Indian Govt Photo ID</h4>
-                      <p class="text-[11px] text-slate-500">Aadhaar / Driving License / Voter ID</p>
+                      <h4 class="text-xs font-bold text-slate-900 dark:text-white">2. Indian Govt Photo ID</h4>
+                      <p class="text-[11px] text-slate-500 dark:text-slate-400">Aadhaar / Driving License / Voter ID</p>
                     </div>
                   </div>
-                  <span id="badge-govid-state" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">Mandatory *</span>
+                  <span id="badge-govid-state" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300">Mandatory *</span>
                 </div>
 
                 <div class="pt-1">
-                  <label for="govid-file-input" class="cursor-pointer w-full py-2 px-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition flex items-center justify-center space-x-1.5">
+                  <label for="govid-file-input" class="cursor-pointer w-full py-2.5 px-3 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs transition flex items-center justify-center space-x-1.5 shadow-xs">
                     <i data-lucide="upload" class="w-3.5 h-3.5"></i>
                     <span>Upload Govt ID Photo (&lt;100 KB)</span>
                   </label>
@@ -2439,25 +2453,25 @@
   </div>
 
   <!-- ==================== MODAL: LIVE WEBCAM SELFIE VERIFICATION ==================== -->
-  <div id="selfie-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[88dvh] overflow-y-auto overscroll-contain">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+  <div id="selfie-modal" class="hidden fixed inset-0 z-[1000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-4 max-h-[88dvh] overflow-y-auto overscroll-contain text-slate-900 dark:text-white">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
             <i data-lucide="camera" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="text-base font-bold text-slate-900">Live Selfie Verification</h3>
-            <p class="text-[11px] text-slate-500">Camera stream with iframe fallback (&lt;80 KB)</p>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Live Selfie Verification</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Real-time WebRTC device stream (&lt;80 KB)</p>
           </div>
         </div>
-        <button onclick="closeSelfieModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition">
+        <button onclick="closeSelfieModal()" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
       <!-- Live Video / Captured Photo Stage -->
-      <div class="relative w-full h-64 sm:h-72 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-slate-200">
+      <div class="relative w-full h-64 sm:h-72 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-slate-200 dark:border-slate-800">
         <video id="selfie-video" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
         <img id="selfie-captured-preview" class="hidden w-full h-full object-cover" alt="Captured Frame" />
         
@@ -2475,19 +2489,23 @@
           <span id="camera-loading-text">Requesting camera permission...</span>
         </div>
 
-        <!-- Fallback File Overlay if Camera is Blocked -->
-        <div id="camera-fallback-overlay" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center text-white text-xs space-y-3 p-6 text-center">
-          <i data-lucide="camera-off" class="w-8 h-8 text-rose-400"></i>
-          <p class="font-bold text-sm">Camera Stream Unavailable</p>
-          <p class="text-[11px] text-slate-300">Browser or iframe permissions blocked direct stream. You can upload or capture a selfie photo directly:</p>
-          <label for="camera-fallback-input" class="cursor-pointer py-2.5 px-4 rounded-xl bg-safar-600 hover:bg-safar-700 text-white font-bold text-xs shadow-md transition flex items-center space-x-1.5">
-            <i data-lucide="upload" class="w-4 h-4"></i>
-            <span>Choose Selfie Photo</span>
-          </label>
+        <!-- Security Warning if Camera is Denied (Strictly No File Upload Bypass) -->
+        <div id="camera-fallback-overlay" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center text-white text-xs space-y-3 p-6 text-center">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center">
+            <i data-lucide="camera-off" class="w-6 h-6"></i>
+          </div>
+          <p class="font-extrabold text-sm text-rose-300">Live Camera Access Required</p>
+          <p class="text-xs text-rose-100/90 leading-relaxed font-medium">
+            ⚠️ Live camera access is mandatory on SafarMatch to prevent catfishing and identity fraud. Please enable camera access in your browser settings.
+          </p>
+          <button type="button" onclick="openSelfieModal()" class="py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Retry Camera Access</span>
+          </button>
         </div>
       </div>
 
-      <div id="selfie-compression-status" class="text-center text-[11px] text-slate-500 font-mono">
+      <div id="selfie-compression-status" class="text-center text-[11px] text-slate-500 dark:text-slate-400 font-mono">
         Ready to capture selfie frame (&lt;80 KB compression enforced)
       </div>
 

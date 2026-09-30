@@ -35,12 +35,19 @@ html.dark ::-webkit-scrollbar-thumb {
   background: rgba(100, 116, 139, 0.7);
 }
 
-/* Leaflet Dark Mode Support */
-html.dark .leaflet-layer,
+/* Leaflet Dark Mode Support — Map tiles identical to day mode without distortion filters */
 html.dark .leaflet-control-zoom-in,
-html.dark .leaflet-control-zoom-out,
+html.dark .leaflet-control-zoom-out {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
 html.dark .leaflet-control-attribution {
-  filter: brightness(0.85) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  color: #94a3b8 !important;
+}
+html.dark .leaflet-control-attribution a {
+  color: #38bdf8 !important;
 }
 
 html.dark .leaflet-marker-icon,

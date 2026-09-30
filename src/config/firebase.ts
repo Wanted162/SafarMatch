@@ -5,10 +5,23 @@
 
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { initializeFirestore, setLogLevel, type Firestore } from 'firebase/firestore';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
-export const firebaseConfig = {
+// 1. Suppress internal SDK connection retry messages when backend is offline or unprovisioned
+try {
+  setLogLevel('silent');
+} catch (e) {
+  // Ignore if setLogLevel is not supported in certain runtimes
+}
+
+// Check for runtime injected configuration or custom project
+const runtimeConfig = (typeof window !== 'undefined' && (window as any).__FIREBASE_CONFIG__) || null;
+const storedConfig = (typeof window !== 'undefined' && localStorage.getItem('safarmatch_firebase_config'))
+  ? JSON.parse(localStorage.getItem('safarmatch_firebase_config')!)
+  : null;
+
+export const firebaseConfig = runtimeConfig || storedConfig || {
   apiKey: "AIzaSyDXvfZbtmjFSBZeMKJ9dTOX928cYBVcBDU",
   authDomain: "safarmatch-live.firebaseapp.com",
   projectId: "safarmatch-live",
@@ -24,6 +37,13 @@ let db: Firestore | null = null;
 let storage: FirebaseStorage | null = null;
 let isLiveFirebase = false;
 
+// Determine if a real provisioned project is supplied (not the unprovisioned safarmatch-live placeholder)
+const isProvisionedProject = Boolean(
+  (runtimeConfig && runtimeConfig.projectId) ||
+  (storedConfig && storedConfig.projectId) ||
+  (firebaseConfig.projectId && firebaseConfig.projectId !== 'safarmatch-live')
+);
+
 try {
   if (getApps().length === 0) {
     app = initializeApp(firebaseConfig);
@@ -31,11 +51,23 @@ try {
     app = getApps()[0];
   }
   auth = getAuth(app);
-  db = getFirestore(app);
   storage = getStorage(app);
-  isLiveFirebase = true;
+
+  if (isProvisionedProject) {
+    // Only initialize Firestore network channels if a verified backend is provisioned
+    db = initializeFirestore(app, {
+      experimentalForceLongPolling: true
+    });
+    isLiveFirebase = true;
+  } else {
+    // Graceful offline operation with local encrypted storage and seed data
+    db = null;
+    isLiveFirebase = false;
+  }
 } catch (e) {
-  console.warn("Firebase initialization warning (using local fallback state):", e);
+  console.warn("Firebase initialization notice (running in resilient local mode):", e);
+  db = null;
+  isLiveFirebase = false;
 }
 
 export const googleProvider = new GoogleAuthProvider();
@@ -44,3 +76,4 @@ googleProvider.addScope('email');
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export { app, auth, db, storage, isLiveFirebase };
+

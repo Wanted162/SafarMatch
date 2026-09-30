@@ -27,6 +27,11 @@ export function setTheme(theme: ThemeMode, _notify = false): void {
     localStorage.setItem('safarmatch_theme', theme);
   } catch (e) {}
   updateThemeSwitcherUI(theme);
+  if (typeof window !== 'undefined' && (window as any).syncMapTileTheme) {
+    try {
+      (window as any).syncMapTileTheme(isDark);
+    } catch (e) {}
+  }
 }
 
 export function initTheme(): void {

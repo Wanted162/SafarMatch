@@ -630,10 +630,12 @@ export function openSelfieModal(): void {
         console.warn("Camera stream rejected / blocked:", err);
         loading.classList.add('hidden');
         fallback.classList.remove('hidden');
+        showToast("⚠️ Live camera access is mandatory on SafarMatch to prevent catfishing and identity fraud. Please enable camera access in your browser settings.", "error");
       });
   } else {
     loading.classList.add('hidden');
     fallback.classList.remove('hidden');
+    showToast("⚠️ Live camera access is mandatory on SafarMatch to prevent catfishing and identity fraud. Please enable camera access in your browser settings.", "error");
   }
 }
 

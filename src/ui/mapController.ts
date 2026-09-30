@@ -14,13 +14,82 @@ import type { Traveler } from '../types';
 
 declare const L: any;
 
+const MAP_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+const MAP_ATTRIBUTION = 'Tiles &copy; Esri &mdash; OpenStreetMap contributors';
+const DAY_TILE_URL = MAP_TILE_URL;
+const NIGHT_TILE_URL = MAP_TILE_URL;
+const DAY_ATTRIBUTION = MAP_ATTRIBUTION;
+const NIGHT_ATTRIBUTION = MAP_ATTRIBUTION;
+
 let mapInstance: any = null;
+let currentTileLayer: any = null;
+let currentRefTileLayer: any = null;
 let mapMarkersLayer: any = null;
 let currentCircuitFilter = "all";
 let homeCityMiniMap: any = null;
 let homeCityMiniMarker: any = null;
+let miniMapTileLayer: any = null;
+let miniMapRefLayer: any = null;
 let landingMapInstance: any = null;
+let landingTileLayer: any = null;
+let landingRefLayer: any = null;
 let landingMapMarkersLayer: any = null;
+
+export function syncMapTileTheme(_isDark?: boolean): void {
+  if (typeof L === 'undefined') return;
+
+  // Main interactive map — exact same map in night mode as day mode
+  if (mapInstance) {
+    try {
+      if (currentRefTileLayer) {
+        mapInstance.removeLayer(currentRefTileLayer);
+        currentRefTileLayer = null;
+      }
+      if (!currentTileLayer || (currentTileLayer as any)._url !== MAP_TILE_URL) {
+        if (currentTileLayer) {
+          mapInstance.removeLayer(currentTileLayer);
+        }
+        currentTileLayer = L.tileLayer(MAP_TILE_URL, { attribution: MAP_ATTRIBUTION, maxZoom: 19 }).addTo(mapInstance);
+      }
+      if (mapMarkersLayer) mapMarkersLayer.bringToFront();
+    } catch (e) {}
+  }
+
+  // Public Landing Preview Map — exact same map in night mode as day mode
+  if (landingMapInstance) {
+    try {
+      if (landingRefLayer) {
+        landingMapInstance.removeLayer(landingRefLayer);
+        landingRefLayer = null;
+      }
+      if (!landingTileLayer || (landingTileLayer as any)._url !== MAP_TILE_URL) {
+        if (landingTileLayer) {
+          landingMapInstance.removeLayer(landingTileLayer);
+        }
+        landingTileLayer = L.tileLayer(MAP_TILE_URL, { attribution: MAP_ATTRIBUTION, maxZoom: 19 }).addTo(landingMapInstance);
+      }
+      if (landingMapMarkersLayer) landingMapMarkersLayer.bringToFront();
+    } catch (e) {}
+  }
+
+  // User Profile Home City Mini-Map — exact same map in night mode as day mode
+  if (homeCityMiniMap) {
+    try {
+      if (miniMapRefLayer) {
+        homeCityMiniMap.removeLayer(miniMapRefLayer);
+        miniMapRefLayer = null;
+      }
+      if (!miniMapTileLayer || (miniMapTileLayer as any)._url !== MAP_TILE_URL) {
+        if (miniMapTileLayer) {
+          homeCityMiniMap.removeLayer(miniMapTileLayer);
+        }
+        miniMapTileLayer = L.tileLayer(MAP_TILE_URL, { maxZoom: 18 }).addTo(homeCityMiniMap);
+      }
+      if (homeCityMiniMarker) homeCityMiniMarker.bringToFront();
+    } catch (e) {}
+  }
+}
+(window as any).syncMapTileTheme = syncMapTileTheme;
 
 export function initMap(): void {
   const mapEl = document.getElementById('map');
@@ -50,14 +119,9 @@ export function initMap(): void {
     attributionControl: true
   });
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; OpenStreetMap contributors',
-    maxZoom: 19
-  }).addTo(mapInstance);
-
   L.control.zoom({ position: 'topright' }).addTo(mapInstance);
   mapMarkersLayer = L.layerGroup().addTo(mapInstance);
-
+  syncMapTileTheme();
   renderTravelerPins(currentCircuitFilter);
 }
 
@@ -83,14 +147,9 @@ export function initLandingMap(): void {
     attributionControl: true
   });
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri',
-    maxZoom: 19
-  }).addTo(landingMapInstance);
-
   L.control.zoom({ position: 'topright' }).addTo(landingMapInstance);
   landingMapMarkersLayer = L.layerGroup().addTo(landingMapInstance);
-
+  syncMapTileTheme();
   renderLandingTravelerPins();
 
   setTimeout(() => {
@@ -308,29 +367,26 @@ export function renderTravelerPins(filterCircuit = "all"): void {
       const bioSnippet = traveler.bio ? (traveler.bio.length > 95 ? traveler.bio.substring(0, 95) + '...' : traveler.bio) : 'Traveler exploring India.';
 
       const popupContent = `
-        <div class="p-4 max-w-[250px] text-xs font-sans text-slate-100 bg-[#1e2538] rounded-2xl select-none">
-          <div class="flex items-center space-x-2.5 pb-2.5 border-b border-white/10">
-            <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-white/20 flex-shrink-0" />
+        <div class="p-3.5 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 max-w-[260px] text-xs">
+          <div class="flex items-center space-x-2.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <img src="${photo}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0" />
             <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1">
-                <h4 class="font-extrabold text-white text-xs truncate popup-name">${escapeHtml(traveler.name)} ${traveler.isCurrentUser ? '(You)' : ''}</h4>
-                ${isVerified ? '<span class="text-emerald-400 font-bold text-xs flex-shrink-0">✓</span>' : ''}
+              <div class="font-extrabold text-slate-900 dark:text-white truncate flex items-center gap-1">
+                <span>${escapeHtml(traveler.name)}</span> ${isVerified ? '<span class="text-emerald-600 text-[10px]">✓</span>' : ''}
               </div>
-              <p class="text-[11px] text-slate-300 font-semibold truncate popup-meta">${escapeHtml((traveler as any).upcomingCircuit || traveler.currentCircuit || 'India')} • ${escapeHtml(traveler.gender || 'Traveler')}</p>
+              <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${escapeHtml((traveler as any).upcomingCircuit || traveler.currentCircuit || 'India')} • ${escapeHtml(traveler.gender || 'Traveler')}</div>
             </div>
           </div>
-          <p class="text-[11px] text-slate-200 py-2.5 leading-relaxed font-normal popup-bio">${escapeHtml(bioSnippet)}</p>
-          <div class="pt-1 flex gap-1.5">
-            ${traveler.isCurrentUser ? `
-              <button onclick="window.switchView('profile')" class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-slate-950 font-black text-xs shadow-md cursor-pointer transition">
-                Edit Profile
-              </button>
-            ` : `
-              <button onclick="window.inspectTravelerFromMap('${escapeHtml(traveler.uid)}')" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-600 active:scale-[0.98] text-white font-black text-xs shadow-md cursor-pointer transition">
-                View Profile
-              </button>
-            `}
-          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-300 py-2.5 leading-relaxed line-clamp-3">${escapeHtml(bioSnippet)}</p>
+          ${traveler.isCurrentUser ? `
+            <button onclick="window.switchView('profile')" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1 cursor-pointer">
+              <span>Edit Profile</span>
+            </button>
+          ` : `
+            <button onclick="window.inspectTravelerFromMap('${escapeHtml(traveler.uid)}')" class="w-full py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1 cursor-pointer">
+              <span>View Profile</span>
+            </button>
+          `}
         </div>
       `;
 
@@ -426,9 +482,7 @@ export function initHomeCityMiniMap(initialLat: number, initialLng: number): voi
     attributionControl: false
   });
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 18
-  }).addTo(homeCityMiniMap);
+  syncMapTileTheme();
 
   homeCityMiniMarker = L.marker([lat, lng], { draggable: true }).addTo(homeCityMiniMap);
 
