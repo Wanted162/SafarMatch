@@ -109,6 +109,13 @@ export function setActiveChatUnsubscribe(fn: (() => void) | null): void {
   activeChatUnsubscribe = fn;
 }
 
+export function setActiveChatDocUnsubscribe(fn: (() => void) | null): void {
+  if (activeChatDocUnsubscribe) {
+    try { activeChatDocUnsubscribe(); } catch (e) {}
+  }
+  activeChatDocUnsubscribe = fn;
+}
+
 export function cleanupChatListeners(): void {
   if (activeChatUnsubscribe) {
     try { activeChatUnsubscribe(); } catch (e) {}

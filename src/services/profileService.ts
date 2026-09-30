@@ -37,10 +37,16 @@ let currentProfile: UserProfile = {
 };
 
 let profileSnapshotUnsubscribe: (() => void) | null = null;
+let vaultSnapshotUnsubscribe: (() => void) | null = null;
+let cachedVaultData: any = null;
 let lastKnownVerificationStatus: string | null = null;
 let lastKnownSubscriptionStatus: string | null = null;
 let cameraMediaStream: MediaStream | null = null;
 let capturedSelfieBlob: Blob | null = null;
+
+export function getCachedVaultData(): any {
+  return cachedVaultData;
+}
 
 export function getCurrentProfile(): UserProfile {
   return currentProfile;
@@ -100,8 +106,10 @@ export function updateProfileCompletionUI(): void {
   if (currentProfile.homeCity && currentProfile.homeCity.trim().length >= 2) score += 15;
   if (currentProfile.currentCircuit) score += 15;
   if (currentProfile.bio && currentProfile.bio.trim().length >= 10) score += 5;
-  if ((currentProfile as any).selfieData || (currentProfile as any).selfieSubmitted || (currentProfile.photoUrl && currentProfile.verificationStatus === 'verified')) score += 15;
-  if ((currentProfile as any).govtIdData || currentProfile.verificationStatus === 'verified') score += 15;
+  const hasSelfie = !!(cachedVaultData?.selfieData || (currentProfile as any).selfieData || (currentProfile as any).selfieSubmitted || (currentProfile.photoUrl && currentProfile.verificationStatus === 'verified'));
+  const hasGovId = !!(cachedVaultData?.govtIdData || (currentProfile as any).govtIdData || currentProfile.verificationStatus === 'verified');
+  if (hasSelfie) score += 15;
+  if (hasGovId) score += 15;
 
   const pct = Math.min(100, score);
 
@@ -120,10 +128,10 @@ export function updateProfileCompletionUI(): void {
     if (pct >= 100) {
       hintEl.textContent = "Profile 100% complete! Dual identity verification submitted.";
       hintEl.className = "text-[10px] text-emerald-600 font-medium";
-    } else if (!(currentProfile as any).selfieData && !(currentProfile as any).selfieSubmitted && currentProfile.verificationStatus !== 'verified') {
+    } else if (!hasSelfie && currentProfile.verificationStatus !== 'verified') {
       hintEl.textContent = "Add live selfie verification (+15%) to increase trust score.";
       hintEl.className = "text-[10px] text-rose-500 font-medium";
-    } else if (!(currentProfile as any).govtIdData && currentProfile.verificationStatus !== 'verified') {
+    } else if (!hasGovId && currentProfile.verificationStatus !== 'verified') {
       hintEl.textContent = "Upload Indian Government Photo ID (+15%) for full verification.";
       hintEl.className = "text-[10px] text-rose-500 font-medium";
     } else if (!currentProfile.bio || currentProfile.bio.trim().length < 10) {
@@ -219,12 +227,10 @@ export function updateJourneyStatusUI(): void {
 
 export function attachProfileRealtimeListener(uid: string): void {
   if (!uid || !isLiveFirebase || !db) return;
-  if (profileSnapshotUnsubscribe) {
-    try { profileSnapshotUnsubscribe(); } catch (e) {}
-    profileSnapshotUnsubscribe = null;
-  }
+  detachProfileRealtimeListener();
 
   try {
+    // 1. Real-time listener for public profile (profiles/{uid})
     const profileRef = doc(db, "profiles", uid);
     profileSnapshotUnsubscribe = onSnapshot(profileRef, (docSnap) => {
       if (!docSnap.exists()) return;
@@ -236,6 +242,17 @@ export function attachProfileRealtimeListener(uid: string): void {
       const paymentRejectionReason = sub.rejectionReason || "12-digit UTR was not found in SBI bank account credits.";
 
       currentProfile.verificationStatus = newVerificationStatus;
+      if (data.name) currentProfile.name = data.name;
+      if (data.age) currentProfile.age = data.age;
+      if (data.gender) currentProfile.gender = data.gender;
+      if (data.homeCity) currentProfile.homeCity = data.homeCity;
+      if (data.currentCircuit) currentProfile.currentCircuit = data.currentCircuit;
+      if (data.upcomingDestination) currentProfile.upcomingDestination = data.upcomingDestination;
+      if (data.bio) currentProfile.bio = data.bio;
+      if (data.photoUrl) currentProfile.photoUrl = data.photoUrl;
+      if (data.homeLat) currentProfile.homeLat = data.homeLat;
+      if (data.homeLng) currentProfile.homeLng = data.homeLng;
+
       if (data.verificationRejectionReason) {
         currentProfile.verificationRejectionReason = data.verificationRejectionReason;
       }
@@ -245,6 +262,7 @@ export function attachProfileRealtimeListener(uid: string): void {
 
       try {
         localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+        localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
         if (data.isVip || data.hasExplorerPass) {
           localStorage.setItem(STORAGE_KEYS.PASS_UNLOCKED, 'true');
         } else if (newSubStatus === 'rejected') {
@@ -252,7 +270,7 @@ export function attachProfileRealtimeListener(uid: string): void {
         }
       } catch (e) {}
 
-      // Verification transitions
+      // Verification transitions (Admin review notifications)
       if (lastKnownVerificationStatus !== null && lastKnownVerificationStatus !== newVerificationStatus) {
         if (newVerificationStatus === "verified") {
           if (!isNotificationSeen('verification', uid, 'verified')) {
@@ -283,13 +301,221 @@ export function attachProfileRealtimeListener(uid: string): void {
       lastKnownSubscriptionStatus = newSubStatus;
 
       updateVerificationBadgeUI(newVerificationStatus);
+      updateVerificationDocumentBadges();
+      updateProfileCompletionUI();
       updateJourneyStatusUI();
     }, (err) => {
       console.warn("Profile real-time listener error:", err);
     });
+
+    // 2. Real-time listener for confidential vault (vault/{uid})
+    const vaultRef = doc(db, "vault", uid);
+    vaultSnapshotUnsubscribe = onSnapshot(vaultRef, (vaultSnap) => {
+      if (!vaultSnap.exists()) return;
+      cachedVaultData = vaultSnap.data();
+      updateVerificationDocumentBadges();
+      updateProfileCompletionUI();
+      updateJourneyStatusUI();
+    }, (err) => {
+      console.warn("Vault real-time listener error:", err);
+    });
   } catch (err) {
-    console.warn("Could not attach profile real-time listener:", err);
+    console.warn("Could not attach profile/vault real-time listeners:", err);
   }
+}
+
+export function detachProfileRealtimeListener(): void {
+  if (profileSnapshotUnsubscribe) {
+    try { profileSnapshotUnsubscribe(); } catch (e) {}
+    profileSnapshotUnsubscribe = null;
+  }
+  if (vaultSnapshotUnsubscribe) {
+    try { vaultSnapshotUnsubscribe(); } catch (e) {}
+    vaultSnapshotUnsubscribe = null;
+  }
+}
+
+export function updateVerificationDocumentBadges(): void {
+  const selfieBadge = document.getElementById('badge-selfie-state');
+  const govidBadge = document.getElementById('badge-govid-state');
+
+  const isVerified = currentProfile.verificationStatus === 'verified';
+  const hasSelfie = !!(cachedVaultData?.selfieData || (currentProfile as any).selfieSubmitted || (currentProfile as any).selfieData);
+  const hasGovId = !!(cachedVaultData?.govtIdData || (currentProfile as any).govtIdData);
+
+  if (selfieBadge) {
+    if (isVerified) {
+      selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-600";
+      selfieBadge.textContent = "Verified ✓";
+    } else if (hasSelfie) {
+      selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-600";
+      selfieBadge.textContent = "Submitted (In Review)";
+    } else {
+      selfieBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300";
+      selfieBadge.textContent = "Not Done";
+    }
+  }
+
+  if (govidBadge) {
+    if (isVerified) {
+      govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-600";
+      govidBadge.textContent = "Verified ✓";
+    } else if (hasGovId) {
+      govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-600";
+      govidBadge.textContent = "Submitted (In Review)";
+    } else {
+      govidBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300";
+      govidBadge.textContent = "Mandatory *";
+    }
+  }
+}
+
+export async function hydrateProfileFromFirestore(uid: string, googleUser?: any): Promise<UserProfile> {
+  if (!uid) return currentProfile;
+
+  if (isLiveFirebase && db) {
+    try {
+      // 1. Fetch public profile (profiles/{uid})
+      const docRef = doc(db, "profiles", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        currentProfile = {
+          ...currentProfile,
+          uid,
+          ...data
+        };
+      } else {
+        currentProfile = {
+          ...currentProfile,
+          uid,
+          name: googleUser?.displayName || currentProfile.name || "Explorer",
+          photoUrl: googleUser?.photoURL || currentProfile.photoUrl || DEFAULT_AVATAR
+        };
+        const { selfieData, govtIdData, ...lightweightInit } = currentProfile as any;
+        await setDoc(docRef, { ...lightweightInit, updatedAt: serverTimestamp() }, { merge: true });
+      }
+
+      // 2. Fetch confidential KYC vault (vault/{uid})
+      const vaultRef = doc(db, "vault", uid);
+      const vaultSnap = await getDoc(vaultRef);
+      if (vaultSnap.exists()) {
+        cachedVaultData = vaultSnap.data();
+      }
+    } catch (e) {
+      console.warn("Firestore hydrateProfile error:", e);
+    }
+  }
+
+  // Restore all UI form inputs
+  const nameInput = document.getElementById('input-full-name') as HTMLInputElement | null;
+  const ageInput = document.getElementById('input-age') as HTMLInputElement | null;
+  const genderInput = document.getElementById('input-gender') as HTMLSelectElement | null;
+  const homeCityInput = document.getElementById('input-home-city') as HTMLInputElement | null;
+  const circuitInput = document.getElementById('input-upcoming-circuit') as HTMLInputElement | null;
+  const bioInput = document.getElementById('input-bio') as HTMLTextAreaElement | null;
+  const intentInput = document.getElementById('input-travel-intent') as HTMLInputElement | null;
+
+  if (nameInput) nameInput.value = currentProfile.name || '';
+  if (ageInput) ageInput.value = currentProfile.age ? String(currentProfile.age) : '';
+  if (genderInput) genderInput.value = currentProfile.gender || 'Male';
+  if (homeCityInput) homeCityInput.value = currentProfile.homeCity || '';
+  if (circuitInput) circuitInput.value = currentProfile.currentCircuit || currentProfile.upcomingDestination || '';
+  if (bioInput) bioInput.value = currentProfile.bio || '';
+  if (intentInput) intentInput.value = currentProfile.intent || 'companion';
+
+  // Restore avatars across UI
+  const avatarSrc = currentProfile.photoUrl || cachedVaultData?.selfieData || DEFAULT_AVATAR;
+  const profileAvatar = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
+  const headerAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+  const menuAvatar = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
+  if (profileAvatar) profileAvatar.src = avatarSrc;
+  if (headerAvatar) headerAvatar.src = avatarSrc;
+  if (menuAvatar) menuAvatar.src = avatarSrc;
+
+  // Restore user name in header and dropdown
+  const headerName = document.getElementById('header-user-name');
+  const menuName = document.getElementById('menu-user-name');
+  const profileDisplayName = document.getElementById('profile-display-name');
+  if (headerName && currentProfile.name) headerName.textContent = currentProfile.name.split(' ')[0];
+  if (menuName && currentProfile.name) menuName.textContent = currentProfile.name;
+  if (profileDisplayName && currentProfile.name) profileDisplayName.textContent = currentProfile.name;
+
+  // Hydrate map marker
+  if (currentProfile.homeLat && currentProfile.homeLng && (window as any).initHomeCityMiniMap) {
+    try {
+      (window as any).initHomeCityMiniMap(currentProfile.homeLat, currentProfile.homeLng);
+    } catch (e) {}
+  }
+
+  // Restore verification state badges
+  updateVerificationDocumentBadges();
+  updateVerificationBadgeUI(currentProfile.verificationStatus);
+  updateProfileCompletionUI();
+  updateJourneyStatusUI();
+
+  try {
+    localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+  } catch (e) {}
+
+  return currentProfile;
+}
+
+export function resetProfileToGuest(): void {
+  detachProfileRealtimeListener();
+  cachedVaultData = null;
+  currentProfile = {
+    uid: "guest_" + Math.random().toString(36).substring(2, 9),
+    name: "",
+    age: 21,
+    gender: "Male",
+    homeCity: "",
+    homeLat: 20.5937,
+    homeLng: 78.9629,
+    currentCircuit: "",
+    upcomingDestination: "",
+    upcomingLat: 20.5937,
+    upcomingLng: 78.9629,
+    vibe: "",
+    travelStyles: [],
+    intent: "companion",
+    bio: "",
+    photoUrl: DEFAULT_AVATAR,
+    verificationStatus: "unverified",
+    subscriptionStatus: "free",
+    isSurakshaEnabled: false
+  };
+
+  const nameInput = document.getElementById('input-full-name') as HTMLInputElement | null;
+  const ageInput = document.getElementById('input-age') as HTMLInputElement | null;
+  const homeCityInput = document.getElementById('input-home-city') as HTMLInputElement | null;
+  const circuitInput = document.getElementById('input-upcoming-circuit') as HTMLInputElement | null;
+  const bioInput = document.getElementById('input-bio') as HTMLTextAreaElement | null;
+  if (nameInput) nameInput.value = '';
+  if (ageInput) ageInput.value = '';
+  if (homeCityInput) homeCityInput.value = '';
+  if (circuitInput) circuitInput.value = '';
+  if (bioInput) bioInput.value = '';
+
+  const profileAvatar = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
+  const headerAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+  const menuAvatar = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
+  if (profileAvatar) profileAvatar.src = DEFAULT_AVATAR;
+  if (headerAvatar) headerAvatar.src = DEFAULT_AVATAR;
+  if (menuAvatar) menuAvatar.src = DEFAULT_AVATAR;
+
+  const headerUserName = document.getElementById('header-user-name');
+  const menuUserName = document.getElementById('menu-user-name');
+  const profileDisplayName = document.getElementById('profile-display-name');
+  if (headerUserName) headerUserName.textContent = "Guest";
+  if (menuUserName) menuUserName.textContent = "Guest";
+  if (profileDisplayName) profileDisplayName.textContent = "Your Traveler Profile";
+
+  updateVerificationDocumentBadges();
+  updateVerificationBadgeUI("unverified");
+  updateProfileCompletionUI();
+  updateJourneyStatusUI();
 }
 
 export function showVerificationApprovedCelebration(force = false): void {
@@ -420,6 +646,64 @@ export function closeSelfieModal(): void {
   if (modal) modal.classList.add('hidden');
 }
 
+/**
+ * HTML5 Canvas Image Compression Pipeline
+ * Scales uploaded images (camera stream or file) to max 480x480 (JPEG 0.7 quality),
+ * strictly guaranteeing files stay <60 KB to prevent document bloat and memory leaks.
+ */
+export function compressImageToCanvasBlob(
+  source: HTMLImageElement | HTMLVideoElement,
+  isMirrored = false
+): Promise<{ blob: Blob; base64: string }> {
+  return new Promise((resolve, reject) => {
+    try {
+      const maxDim = 480;
+      let width = source instanceof HTMLVideoElement ? source.videoWidth || 480 : source.naturalWidth || source.width;
+      let height = source instanceof HTMLVideoElement ? source.videoHeight || 480 : source.naturalHeight || source.height;
+
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      width = Math.max(1, width);
+      height = Math.max(1, height);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error("Unable to create canvas 2d context"));
+        return;
+      }
+
+      if (isMirrored) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+
+      ctx.drawImage(source, 0, 0, width, height);
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error("Canvas blob conversion failed"));
+          return;
+        }
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+        resolve({ blob, base64 });
+      }, 'image/jpeg', 0.7);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 export function captureSelfieFrame(): void {
   const video = document.getElementById('selfie-video') as HTMLVideoElement | null;
   const preview = document.getElementById('selfie-captured-preview') as HTMLImageElement | null;
@@ -430,19 +714,9 @@ export function captureSelfieFrame(): void {
 
   if (!video || !preview || !oval || !btnCapture || !btnRetake || !btnUpload) return;
 
-  const canvas = document.createElement('canvas');
-  canvas.width = 480;
-  canvas.height = 480;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  ctx.translate(canvas.width, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  canvas.toBlob((blob) => {
-    if (!blob) return;
+  compressImageToCanvasBlob(video, true).then(({ blob, base64 }) => {
     capturedSelfieBlob = blob;
+    (window as any).__lastCapturedSelfieBase64 = base64;
     preview.src = URL.createObjectURL(blob);
     preview.classList.remove('hidden');
     video.classList.add('hidden');
@@ -453,9 +727,12 @@ export function captureSelfieFrame(): void {
 
     const statusEl = document.getElementById('selfie-compression-status');
     if (statusEl) {
-      statusEl.textContent = `Frame captured & compressed: ${(blob.size / 1024).toFixed(1)} KB (<80 KB limit met)`;
+      statusEl.textContent = `Frame captured & compressed: ${(blob.size / 1024).toFixed(1)} KB (<60 KB limit met)`;
     }
-  }, 'image/jpeg', 0.75);
+  }).catch((err) => {
+    console.error("Selfie frame compression error:", err);
+    showToast("Failed to process camera frame. Please try uploading a photo.", "error");
+  });
 }
 
 export function retakeSelfieFrame(): void {
@@ -478,7 +755,8 @@ export function retakeSelfieFrame(): void {
 
 export function uploadCapturedSelfie(): void {
   if (!capturedSelfieBlob) return;
-  processVerificationSubmission("selfie", capturedSelfieBlob);
+  const base64 = (window as any).__lastCapturedSelfieBase64;
+  processVerificationSubmission("selfie", capturedSelfieBlob, base64);
   closeSelfieModal();
 }
 
@@ -491,17 +769,13 @@ export function handleSelfieFileSelected(e: Event): void {
   reader.onload = function(evt) {
     const img = new Image();
     img.onload = function() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 480;
-      canvas.height = 480;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        processVerificationSubmission("selfie", blob);
+      compressImageToCanvasBlob(img, false).then(({ blob, base64 }) => {
+        processVerificationSubmission("selfie", blob, base64);
         closeSelfieModal();
-      }, 'image/jpeg', 0.75);
+      }).catch(err => {
+        console.error("Selfie file compression error:", err);
+        showToast("Error compressing photo.", "error");
+      });
     };
     img.src = evt.target?.result as string;
   };
@@ -517,41 +791,34 @@ export function handleGovIdFileSelected(e: Event): void {
   reader.onload = function(evt) {
     const img = new Image();
     img.onload = function() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 600;
-      canvas.height = 400;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        processVerificationSubmission("gov_id", blob);
-      }, 'image/jpeg', 0.72);
+      compressImageToCanvasBlob(img, false).then(({ blob, base64 }) => {
+        processVerificationSubmission("gov_id", blob, base64);
+      }).catch(err => {
+        console.error("Gov ID compression error:", err);
+        showToast("Error compressing ID document.", "error");
+      });
     };
     img.src = evt.target?.result as string;
   };
   reader.readAsDataURL(file);
 }
 
-async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Blob): Promise<void> {
+async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Blob, precomputedBase64?: string): Promise<void> {
   if (!currentProfile) return;
   (currentProfile as any).selfieSubmitted = true;
   currentProfile.verificationStatus = "pending";
 
-  if (currentProfile.uid) {
-    resetNotificationSeen('verification', currentProfile.uid);
-    try {
-      localStorage.setItem(STORAGE_KEYS.AWAITING_VERIFICATION_PREFIX + currentProfile.uid, 'true');
-    } catch (e) {}
-  }
-  (currentProfile as any).verificationSubmittedAt = new Date().toISOString();
-  showToast(`⏳ Processing ${type === 'selfie' ? 'live selfie' : 'photo ID'} (${(blob.size / 1024).toFixed(1)} KB)...`, "info");
+  const sizeKb = (blob.size / 1024).toFixed(1);
+  showToast(`⏳ Uploading ${type === 'selfie' ? 'live selfie' : 'photo ID'} (${sizeKb} KB) to 256-bit Secure Vault...`, "info");
 
-  const reader = new FileReader();
-  reader.onload = async function(evt) {
-    const base64Data = evt.target?.result as string;
+  const commitToVault = async (base64Data: string) => {
     const fieldName = type === 'selfie' ? 'selfieData' : 'govtIdData';
-    (currentProfile as any)[fieldName] = base64Data;
+    cachedVaultData = {
+      ...cachedVaultData,
+      [fieldName]: base64Data,
+      verificationType: type,
+      status: 'pending_review'
+    };
 
     if (type === 'selfie' && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
       currentProfile.photoUrl = base64Data;
@@ -563,28 +830,21 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
 
     if (isLiveFirebase && db && currentProfile.uid) {
       try {
-        // 1. Isolate and encrypt sensitive KYC document in private cloud vault (Restricted Access)
-        const vaultEnvelope = await preparePrivateVaultPayload(currentProfile.uid, {
+        // 1. Upload compressed verification document to confidential vault/{user.uid} (<60 KB)
+        await setDoc(doc(db, "vault", currentProfile.uid), {
           [fieldName]: base64Data,
           verificationType: type,
-          submittedAt: new Date().toISOString()
-        });
-
-        await setDoc(doc(db, "vault", currentProfile.uid), {
-          ...vaultEnvelope,
+          status: 'pending_review',
+          verificationSubmittedAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         }, { merge: true });
 
-        // 2. Update public profile with sanitized metadata ONLY (Zero document/phone exposure)
-        const sanitizedProfile = sanitizePublicProfile({
-          ...currentProfile,
-          verificationStatus: "pending_review",
-          verificationSubmittedAt: serverTimestamp(),
-          vaultSecured: true,
-          [type === 'selfie' ? 'hasUploadedSelfie' : 'hasUploadedGovtId']: true
-        });
+        // 2. Update lightweight status ONLY in profiles/{user.uid} (NO Base64 strings in profiles collection)
+        await setDoc(doc(db, "profiles", currentProfile.uid), {
+          verificationStatus: "pending",
+          updatedAt: serverTimestamp()
+        }, { merge: true });
 
-        await setDoc(doc(db, "profiles", currentProfile.uid), sanitizedProfile, { merge: true });
         showToast("🔒 Identity securely uploaded to 256-bit Cloud Vault. Review pending.", "success");
       } catch (err) {
         console.warn("Firestore profile verification write error:", err);
@@ -595,9 +855,23 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
     }
 
     try {
+      localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
       localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
     } catch (e) {}
+
+    updateVerificationDocumentBadges();
+    updateProfileCompletionUI();
     updateJourneyStatusUI();
   };
-  reader.readAsDataURL(blob);
+
+  if (precomputedBase64) {
+    await commitToVault(precomputedBase64);
+  } else {
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      const base64Data = evt.target?.result as string;
+      await commitToVault(base64Data);
+    };
+    reader.readAsDataURL(blob);
+  }
 }

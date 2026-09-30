@@ -97,6 +97,17 @@ export function isStep1Complete(profile?: UserProfile | null): boolean {
   return hasName && hasCity && hasPhoto;
 }
 
+export function getMonthlyQuotaUsed(profile?: UserProfile | null): number {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  if (profile && profile.connectionsQuota) {
+    if (profile.connectionsQuota.month === currentMonth) {
+      return profile.connectionsQuota.used || 0;
+    }
+  }
+  const partners = getMonthlyConnectedPartners();
+  return partners.length;
+}
+
 /**
  * Verifies if user has quota to initiate or message a new connection.
  * If the partner was already connected this month, free chatting is permitted.
@@ -110,11 +121,11 @@ export function canUserMessagePartner(partnerUid: string, profile: UserProfile |
     return { allowed: true };
   }
 
-  const partners = getMonthlyConnectedPartners();
-  if (partners.length >= FREE_CONNECTS_LIMIT) {
+  const used = getMonthlyQuotaUsed(profile);
+  if (used >= FREE_CONNECTS_LIMIT) {
     return {
       allowed: false,
-      reason: `You have reached your limit of ${FREE_CONNECTS_LIMIT} free companion connections this month. Activate Explorer Pass (₹299/month) for unlimited connections across India!`
+      reason: "You have reached your limit of 2 free companion connects for this month. Upgrade to the Explorer Pass (₹299/month) for unlimited travel messaging."
     };
   }
 
@@ -129,14 +140,31 @@ export function consumeMonthlyConnect(partnerUid: string, profile?: UserProfile 
     return true;
   }
 
-  const partners = getMonthlyConnectedPartners();
-  if (partners.length >= FREE_CONNECTS_LIMIT) {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  let used = getMonthlyQuotaUsed(profile);
+  if (used >= FREE_CONNECTS_LIMIT) {
+    openPaywallModal("You have reached your limit of 2 free companion connects for this month. Upgrade to the Explorer Pass (₹299/month) for unlimited travel messaging.");
     return false;
   }
 
+  used += 1;
+  if (profile) {
+    profile.connectionsQuota = { month: currentMonth, used };
+    if (isLiveFirebase && db && profile.uid) {
+      setDoc(doc(db, "profiles", profile.uid), {
+        connectionsQuota: profile.connectionsQuota,
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(err => console.warn("Firestore quota update error:", err));
+    }
+    try {
+      localStorage.setItem('safarmatch_user_profile', JSON.stringify(profile));
+      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+    } catch (e) {}
+  }
+
   recordMonthlyConnectedPartner(partnerUid);
-  const remaining = Math.max(0, FREE_CONNECTS_LIMIT - (partners.length + 1));
-  showToast(`🤝 Companion connection established! (${remaining} free ${remaining === 1 ? 'connection' : 'connections'} remaining this month)`, "info");
+  const remaining = Math.max(0, FREE_CONNECTS_LIMIT - used);
+  showToast(`Free connection used! (${remaining} free ${remaining === 1 ? 'connection' : 'connections'} remaining this month)`, "info");
   return true;
 }
 
@@ -150,7 +178,7 @@ export function checkConnectQuotaOrPaywall(partnerUid: string, profile: UserProf
 
   const check = canUserMessagePartner(partnerUid, profile);
   if (!check.allowed) {
-    openPaywallModal(check.reason || `You have reached your limit of ${FREE_CONNECTS_LIMIT} free companion connections this month! Activate the Explorer Pass (₹299/mo) for unlimited chats, trip postings, and live GPS matching.`);
+    openPaywallModal(check.reason || "You have reached your limit of 2 free companion connects for this month. Upgrade to the Explorer Pass (₹299/month) for unlimited travel messaging.");
     return false;
   }
   return true;

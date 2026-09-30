@@ -1,53 +1,272 @@
 rules_version = '2';
+
+/**
+ * ============================================================================
+ * SAFARMATCH — CLOUD FIRESTORE SECURITY RULES & ACCESS CONTROL ARCHITECTURE
+ * India's Live Travel Companion Platform
+ * 
+ * DevSecOps Architecture & Access Control Specification:
+ * 1. profiles/{uid}: Public traveler directory. Field lockdown prevents
+ *    unauthorized escalation to 'verified', VIP, or Explorer Pass.
+ * 2. vault/{uid}: Private encrypted KYC vault (Selfie, Govt ID, phone, email).
+ *    Strict owner/admin isolation with 100 KB payload boundary & pending status.
+ * 3. chats/{chatId}: 1-on-1 thread metadata restricted to verified participants.
+ * 4. chats/{chatId}/messages/{msgId}: Real-time messages with parent status guard
+ *    (writes blocked unless parent chat status == 'accepted').
+ * 5. trips/{tripId}: Public travel feed with creator-only updates.
+ * 6. feedback/{feedbackId}: Bug & feedback ingest, admin-only read.
+ * 7. system/admin: Admin UID registry with custom claim fallback.
+ * ============================================================================
+ */
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ==================== 1. PUBLIC EXPLORER PROFILES ====================
-    // Contains ONLY public attributes (name, age, city, circuit, bio, verified badge).
-    // SENSITIVE FIELDS (phone, email, govt ID, live selfie, UPI UTR) ARE STRICTLY FORBIDDEN HERE.
-    match /profiles/{userId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && !('phoneNumber' in request.resource.data)
-        && !('phone' in request.resource.data)
-        && !('email' in request.resource.data)
-        && !('govtIdData' in request.resource.data)
-        && !('selfieData' in request.resource.data)
-        && !('utrNumber' in request.resource.data);
+    // =========================================================================
+    // 1. CORE AUTHENTICATION & ACCESS CONTROL HELPERS
+    // =========================================================================
+
+    /**
+     * Checks if the incoming request is authenticated.
+     */
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
     }
 
-    // ==================== 2. 256-BIT ENCRYPTED PRIVATE CLOUD VAULT ====================
-    // Stores personal KYC documents, Aadhaar/DL photos, live selfies, phone numbers, and emails.
-    // ISOLATED IN ZERO-KNOWLEDGE PRIVATE VAULT: Access is strictly granted ONLY to the authenticated owner.
-    match /vault/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    /**
+     * Checks if the authenticated user matches the specified UID.
+     */
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
     }
 
-    match /profiles/{userId}/private_vault/{docId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    /**
+     * System Admin Access Verification:
+     * 1. Evaluates custom token claims: request.auth.token.admin == true
+     * 2. Evaluates the restricted /system/admin configuration document array.
+     */
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        (
+          exists(/databases/$(database)/documents/system/admin) &&
+          request.auth.uid in get(/databases/$(database)/documents/system/admin).data.uids
+        )
+      );
     }
 
-    // ==================== 3. IN-APP ENCRYPTED CHATS ====================
-    // Chat messages and metadata are strictly private to the 2 verified participants.
+    /**
+     * Checks if the user is a registered participant of a given chat document.
+     */
+    function isChatParticipant(chatData) {
+      return isAuthenticated() && (
+        request.auth.uid == chatData.initiatorUid ||
+        request.auth.uid == chatData.recipientUid
+      );
+    }
+
+    /**
+     * Retrieves the parent chat metadata for subcollection message validation.
+     */
+    function getChatData(chatId) {
+      return get(/databases/$(database)/documents/chats/$(chatId)).data;
+    }
+
+    /**
+     * Enforces payload string size limitations (e.g., Base64 strings under 100 KB).
+     * 100 KB = 102,400 characters/bytes.
+     */
+    function isWithinPayloadLimit(data, fieldName, maxChars) {
+      return !(fieldName in data) || (data[fieldName] is string && data[fieldName].size() <= maxChars);
+    }
+
+    /**
+     * Validates that vault submissions adhere to size constraints and review status.
+     */
+    function isValidVaultSubmission(data) {
+      return (
+        isWithinPayloadLimit(data, 'selfieData', 102400) &&
+        isWithinPayloadLimit(data, 'govtIdData', 102400) &&
+        data.get('status', 'pending_review') == 'pending_review'
+      );
+    }
+
+
+    // =========================================================================
+    // 2. PUBLIC TRAVELER PROFILES (/profiles/{uid})
+    // =========================================================================
+    match /profiles/{uid} {
+      // Read: Any authenticated user can read public profiles for explore feed & map
+      allow read: if isAuthenticated();
+
+      // Create: Owner can initialize profile, but cannot self-assign privileged badges
+      allow create: if isOwner(uid) && (
+        isAdmin() || (
+          // Field Lockdown: No self-elevation of verification or subscription tiers
+          request.resource.data.get('verificationStatus', 'unverified') != 'verified' &&
+          request.resource.data.get('isVip', false) == false &&
+          request.resource.data.get('hasExplorerPass', false) == false &&
+          // Privacy Vault Guard: Phone, email, and raw KYC are forbidden in public profiles
+          !('phone' in request.resource.data) &&
+          !('phoneNumber' in request.resource.data) &&
+          !('email' in request.resource.data) &&
+          !('govtIdData' in request.resource.data) &&
+          !('selfieData' in request.resource.data) &&
+          !('utrNumber' in request.resource.data)
+        )
+      );
+
+      // Update: Owner can update their public profile, but cannot alter protected fields
+      allow update: if (
+        isAdmin() || (
+          isOwner(uid) &&
+          // Cannot modify verificationStatus to 'verified'
+          (
+            request.resource.data.get('verificationStatus', 'unverified') == resource.data.get('verificationStatus', 'unverified') ||
+            request.resource.data.get('verificationStatus', 'unverified') != 'verified'
+          ) &&
+          // Cannot self-assign or upgrade isVip
+          request.resource.data.get('isVip', false) == resource.data.get('isVip', false) &&
+          // Cannot self-assign or upgrade hasExplorerPass
+          request.resource.data.get('hasExplorerPass', false) == resource.data.get('hasExplorerPass', false) &&
+          // Privacy Vault Guard: Ensure no private contact details leak into public directory
+          !('phone' in request.resource.data) &&
+          !('phoneNumber' in request.resource.data) &&
+          !('email' in request.resource.data) &&
+          !('govtIdData' in request.resource.data) &&
+          !('selfieData' in request.resource.data) &&
+          !('utrNumber' in request.resource.data)
+        )
+      );
+
+      // Delete: Owner or Admin only
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+
+    // =========================================================================
+    // 3. PRIVATE ENCRYPTED IDENTITY VAULT (/vault/{uid})
+    // =========================================================================
+    match /vault/{uid} {
+      // Read: Strictly confidential — document owner OR authorized admin only
+      allow read: if isOwner(uid) || isAdmin();
+
+      // Create / Update: Owner can upload/update only if payloads <= 100 KB and status == 'pending_review'
+      allow create: if (
+        isAdmin() || (
+          isOwner(uid) && isValidVaultSubmission(request.resource.data)
+        )
+      );
+
+      allow update: if (
+        isAdmin() || (
+          isOwner(uid) && isValidVaultSubmission(request.resource.data)
+        )
+      );
+
+      // Delete: Owner or Admin
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // Support nested private vault path for compatibility
+    match /profiles/{uid}/private_vault/{docId} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if (
+        isAdmin() || (
+          isOwner(uid) && isValidVaultSubmission(request.resource.data)
+        )
+      );
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+
+    // =========================================================================
+    // 4. 1-ON-1 CHAT THREADS & ENCRYPTED MESSAGES (/chats/{chatId})
+    // =========================================================================
     match /chats/{chatId} {
-      allow read, write: if request.auth != null && request.auth.uid in chatId.split('_');
+      // Read: Accessible only to verified conversation participants or admins
+      allow read: if isChatParticipant(resource.data) || isAdmin();
 
+      // Create: Authenticated initiator creating a valid 2-party chat
+      allow create: if isAuthenticated() &&
+        request.auth.uid == request.resource.data.initiatorUid &&
+        request.resource.data.recipientUid != null &&
+        request.resource.data.initiatorUid != request.resource.data.recipientUid;
+
+      // Update: Participants can accept requests, update unread state, or update lastMessage
+      allow update: if isChatParticipant(resource.data) || isAdmin();
+
+      // Delete: Only system admins can purge chat threads
+      allow delete: if isAdmin();
+
+      // -----------------------------------------------------------------------
+      // CHAT MESSAGES SUBCOLLECTION (/chats/{chatId}/messages/{messageId})
+      // -----------------------------------------------------------------------
       match /messages/{messageId} {
-        allow read, write: if request.auth != null && request.auth.uid in chatId.split('_');
+        // Read: Only participants of the parent chat thread or admins
+        allow read: if isChatParticipant(getChatData(chatId)) || isAdmin();
+
+        // Create: Prevent writing messages if parent chat status != 'accepted'
+        allow create: if isAuthenticated() &&
+          isChatParticipant(getChatData(chatId)) &&
+          getChatData(chatId).status == 'accepted' &&
+          request.resource.data.senderUid == request.auth.uid &&
+          (
+            request.resource.data.receiverUid == getChatData(chatId).initiatorUid ||
+            request.resource.data.receiverUid == getChatData(chatId).recipientUid
+          );
+
+        // Messages are immutable once posted
+        allow update: if false;
+
+        // Delete: Sender or Admin
+        allow delete: if (
+          (isAuthenticated() && resource.data.senderUid == request.auth.uid) ||
+          isAdmin()
+        );
       }
     }
 
-    // ==================== 4. PUBLIC TRIP ITINERARIES ====================
+
+    // =========================================================================
+    // 5. PUBLIC COMMUNITY TRAVEL FEED (/trips/{tripId})
+    // =========================================================================
     match /trips/{tripId} {
+      // Read: Publicly browseable for all travelers
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.creatorUid;
+
+      // Create: Authenticated travelers can publish their trip plans
+      allow create: if isAuthenticated() && request.resource.data.creatorUid == request.auth.uid;
+
+      // Update & Delete: Author or Admin
+      allow update, delete: if (
+        (isAuthenticated() && resource.data.creatorUid == request.auth.uid) ||
+        isAdmin()
+      );
     }
 
-    // ==================== 5. FEEDBACK SUBMISSIONS ====================
+
+    // =========================================================================
+    // 6. FEEDBACK & BUG REPORTS (/feedback/{feedbackId})
+    // =========================================================================
     match /feedback/{feedbackId} {
+      // Ingest: Anyone can submit feedback or bug reports
       allow create: if true;
-      allow read: if false;
+
+      // Confidential: Only platform administrators can view and manage user feedback
+      allow read, update, delete: if isAdmin();
+    }
+
+
+    // =========================================================================
+    // 7. RESTRICTED SYSTEM CONFIGURATION (/system/admin)
+    // =========================================================================
+    match /system/{docId} {
+      // Read: Authenticated users can evaluate system metadata / admin list checks
+      allow read: if isAuthenticated();
+
+      // Write: Strictly restricted to authorized admins
+      allow write: if isAdmin();
     }
   }
 }

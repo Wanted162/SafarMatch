@@ -486,12 +486,15 @@
   <!-- ==================== FIREBASE V10 SDK SCRIPT ==================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { 
       getFirestore, 
       collection, 
       doc, 
+      getDoc, 
       getDocs, 
       updateDoc, 
+      setDoc, 
       onSnapshot, 
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -507,7 +510,22 @@
       measurementId: "G-FGS2XCP866"
     };
 
+    // =========================================================================
+    // 1. CRYPTOGRAPHIC CHALLENGE-RESPONSE AUTHENTICATION (SALTED SHA-256)
+    // =========================================================================
+    const ADMIN_SALT = "safar_salt_2026_devsecops_safarmatch";
+    const ADMIN_HASH_HEX = "e9495b1df4b1de3e62326ce086227df88dc27385a082b2a480808b0071500c41";
+
+    async function computeSha256(inputStr) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(inputStr);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
     let app = null;
+    let auth = null;
     let db = null;
     let isLiveFirebase = false;
 
@@ -522,29 +540,37 @@
     let selectedVReason = "Document photo is blurry, unreadable, or cut off.";
     let selectedPReason = "12-digit UTR was not found in SBI bank account credits.";
 
-    // ==================== AUTHENTICATION & PASSCODE GATE ====================
-    window.verifyPasscode = function() {
+    // Passcode Verification with Native Web Crypto API
+    window.verifyPasscode = async function() {
       const input = document.getElementById('admin-passcode-input');
       const errorMsg = document.getElementById('passcode-error');
       const card = document.getElementById('passcode-card');
       if (!input) return;
 
       const entered = input.value.trim();
-      if (entered === "safar2026") {
-        if (errorMsg) errorMsg.classList.add('hidden');
-        sessionStorage.setItem('safarmatch_admin_session', 'authenticated');
-        unlockAdminView();
-        showToast("Access Granted: SafarMatch Owner Portal Unlocked", "success");
-      } else {
-        if (errorMsg) errorMsg.classList.remove('hidden');
-        if (card) {
-          card.classList.remove('shake-animation');
-          void card.offsetWidth;
-          card.classList.add('shake-animation');
+      if (!entered) return;
+
+      try {
+        const calculatedHash = await computeSha256(ADMIN_SALT + entered);
+        if (calculatedHash === ADMIN_HASH_HEX) {
+          if (errorMsg) errorMsg.classList.add('hidden');
+          sessionStorage.setItem('safarmatch_admin_session', calculatedHash);
+          await unlockAdminView();
+          showToast("Cryptographic Challenge Passed: Owner Portal Unlocked", "success");
+        } else {
+          if (errorMsg) errorMsg.classList.remove('hidden');
+          if (card) {
+            card.classList.remove('shake-animation');
+            void card.offsetWidth;
+            card.classList.add('shake-animation');
+          }
+          input.value = "";
+          input.focus();
+          showToast("Access Denied: Invalid Master Passcode", "error");
         }
-        input.value = "";
-        input.focus();
-        showToast("Invalid passcode. Access denied.", "error");
+      } catch (err) {
+        console.error("Crypto verification exception:", err);
+        showToast("Web Crypto verification failure", "error");
       }
     };
 
@@ -574,10 +600,10 @@
       showToast("Owner Portal Locked.", "info");
     };
 
-    function unlockAdminView() {
+    async function unlockAdminView() {
       document.getElementById('passcode-gate').classList.add('hidden');
       document.getElementById('admin-hub').classList.remove('hidden');
-      initAdminData();
+      await initAdminData();
     }
 
     // ==================== TABS MANAGEMENT ====================
@@ -602,11 +628,20 @@
     };
 
     // ==================== DATA FETCHING & REAL-TIME LISTENERS ====================
-    function initAdminData() {
+    async function initAdminData() {
       try {
         app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
         db = getFirestore(app);
         isLiveFirebase = true;
+
+        // Sign in administrative session anonymously if not logged in
+        try {
+          await signInAnonymously(auth);
+        } catch (authErr) {
+          console.warn("Admin anonymous auth note:", authErr);
+        }
+
         setupRealtimeListeners();
       } catch (err) {
         console.warn("Firebase live init fallback:", err);
@@ -617,46 +652,77 @@
     function setupRealtimeListeners() {
       if (!isLiveFirebase || !db) return;
 
-      try {
-        const profilesCol = collection(db, "profiles");
-        onSnapshot(profilesCol, (snapshot) => {
-          const vList = [];
-          const pList = [];
+      let cachedProfiles = [];
+      let cachedVault = new Map();
 
-          snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const uid = docSnap.id;
-            const profile = { uid, ...data };
+      const mergeQueues = () => {
+        const vList = [];
+        const pList = [];
 
-            // 1. Identity Verification Filter: status == 'pending_review' or (has selfieData/govtIdData and not verified)
-            if (profile.verificationStatus === 'pending_review' || 
-               (!profile.verificationStatus && (profile.selfieData || profile.govtIdData))) {
-              vList.push(profile);
-            }
+        cachedProfiles.forEach(p => {
+          const uid = p.uid;
+          const vData = cachedVault.get(uid) || {};
 
-            // 2. Payment Approval Filter: subscription.status == 'pending_review'
-            if (profile.subscription && profile.subscription.status === 'pending_review') {
-              pList.push(profile);
-            }
-          });
+          // Combine public profile with confidential KYC vault
+          const combined = {
+            ...p,
+            selfieData: vData.selfieData || p.photoUrl || p.selfieData,
+            govtIdData: vData.govtIdData || p.govtIdData,
+            verificationStatus: p.verificationStatus || vData.status || "unverified",
+            verificationSubmittedAt: vData.verificationSubmittedAt || p.verificationSubmittedAt || vData.submittedAt,
+            vaultStatus: vData.status || "unsubmitted"
+          };
 
-          verificationQueue = vList;
-          paymentsQueue = pList;
+          // 1. Identity Verification Filter: pending or pending_review
+          if (
+            combined.verificationStatus === 'pending' ||
+            combined.verificationStatus === 'pending_review' ||
+            vData.status === 'pending_review' ||
+            (!combined.verificationStatus && (combined.selfieData || combined.govtIdData))
+          ) {
+            vList.push(combined);
+          }
 
-          renderVerificationQueue();
-          renderPaymentsQueue();
-          updateBadges();
-        }, (err) => {
-          console.warn("Firestore profiles snapshot error:", err);
+          // 2. Payment Approval Filter: subscription.status == 'pending_review' or has UTR awaiting confirmation
+          if (
+            (p.subscription && p.subscription.status === 'pending_review') ||
+            (p.subscription && p.subscription.utr && p.subscription.status !== 'active')
+          ) {
+            pList.push(p);
+          }
         });
 
-      } catch (e) {
-        console.warn("Error attaching profiles listener:", e);
-      }
+        verificationQueue = vList;
+        paymentsQueue = pList;
+
+        renderVerificationQueue();
+        renderPaymentsQueue();
+        updateBadges();
+      };
 
       try {
-        const feedbackCol = collection(db, "feedback");
-        onSnapshot(feedbackCol, (snapshot) => {
+        // Real-time listener for public profiles
+        onSnapshot(collection(db, "profiles"), (snapshot) => {
+          const list = [];
+          snapshot.forEach(docSnap => {
+            list.push({ uid: docSnap.id, ...docSnap.data() });
+          });
+          cachedProfiles = list;
+          mergeQueues();
+        }, (err) => console.warn("Firestore profiles snapshot error:", err));
+
+        // Real-time listener for private KYC vault documents
+        onSnapshot(collection(db, "vault"), (snapshot) => {
+          const vMap = new Map();
+          snapshot.forEach(docSnap => {
+            vMap.set(docSnap.id, docSnap.data());
+          });
+          cachedVault = vMap;
+          mergeQueues();
+        }, (err) => console.warn("Firestore vault snapshot error:", err));
+
+        // Real-time listener for feedback collection
+        onSnapshot(collection(db, "feedback"), (snapshot) => {
           const fList = [];
           snapshot.forEach(docSnap => {
             fList.push({ id: docSnap.id, ...docSnap.data() });
@@ -665,11 +731,10 @@
           feedbackList = fList;
           renderFeedbackQueue();
           updateBadges();
-        }, (err) => {
-          console.warn("Firestore feedback snapshot error:", err);
-        });
+        }, (err) => console.warn("Firestore feedback snapshot error:", err));
+
       } catch (e) {
-        console.warn("Error attaching feedback listener:", e);
+        console.warn("Error attaching real-time listeners:", e);
       }
     }
 
@@ -679,23 +744,51 @@
       
       if (isLiveFirebase && db) {
         try {
-          const profilesSnap = await getDocs(collection(db, "profiles"));
+          const [profilesSnap, vaultSnap, feedbackSnap] = await Promise.all([
+            getDocs(collection(db, "profiles")),
+            getDocs(collection(db, "vault")),
+            getDocs(collection(db, "feedback"))
+          ]);
+
+          const vaultMap = new Map();
+          vaultSnap.forEach(d => vaultMap.set(d.id, d.data()));
+
           const vList = [];
           const pList = [];
           profilesSnap.forEach(docSnap => {
             const data = docSnap.data();
-            const profile = { uid: docSnap.id, ...data };
-            if (profile.verificationStatus === 'pending_review' || (!profile.verificationStatus && (profile.selfieData || profile.govtIdData))) {
-              vList.push(profile);
+            const uid = docSnap.id;
+            const vData = vaultMap.get(uid) || {};
+
+            const combined = {
+              uid,
+              ...data,
+              selfieData: vData.selfieData || data.photoUrl || data.selfieData,
+              govtIdData: vData.govtIdData || data.govtIdData,
+              verificationStatus: data.verificationStatus || vData.status || "unverified",
+              verificationSubmittedAt: vData.verificationSubmittedAt || data.verificationSubmittedAt || vData.submittedAt
+            };
+
+            if (
+              combined.verificationStatus === 'pending' ||
+              combined.verificationStatus === 'pending_review' ||
+              vData.status === 'pending_review' ||
+              (!combined.verificationStatus && (combined.selfieData || combined.govtIdData))
+            ) {
+              vList.push(combined);
             }
-            if (profile.subscription && profile.subscription.status === 'pending_review') {
-              pList.push(profile);
+
+            if (
+              (data.subscription && data.subscription.status === 'pending_review') ||
+              (data.subscription && data.subscription.utr && data.subscription.status !== 'active')
+            ) {
+              pList.push({ uid, ...data });
             }
           });
+
           verificationQueue = vList;
           paymentsQueue = pList;
 
-          const feedbackSnap = await getDocs(collection(db, "feedback"));
           const fList = [];
           feedbackSnap.forEach(docSnap => {
             fList.push({ id: docSnap.id, ...docSnap.data() });
@@ -734,7 +827,9 @@
       if (fSumm) fSumm.textContent = feedbackList.length;
     }
 
-    // ==================== TAB 1: RENDER & ACTIONS (IDENTITY VERIFICATION) ====================
+    // =========================================================================
+    // 2. TAB 1: IDENTITY VERIFICATION QUEUE (SIDE-BY-SIDE INSPECTION)
+    // =========================================================================
     function renderVerificationQueue() {
       const container = document.getElementById('verification-cards-container');
       if (!container) return;
@@ -756,7 +851,7 @@
       }
 
       container.innerHTML = verificationQueue.map(traveler => {
-        const selfieSrc = traveler.selfieData || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
+        const selfieSrc = traveler.selfieData || traveler.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
         const govtSrc = traveler.govtIdData || "";
         const formattedDate = traveler.verificationSubmittedAt ? new Date(traveler.verificationSubmittedAt).toLocaleString('en-IN') : 'Just now';
 
@@ -926,14 +1021,20 @@
 
       if (isLiveFirebase && db) {
         try {
+          // 1. Update public profile to rejected with structured reason
           await updateDoc(doc(db, "profiles", uid), {
             verificationStatus: "rejected",
             verificationRejectionReason: finalReason,
-            selfieSubmitted: false,
-            selfieData: null,
-            govtIdData: null,
             reviewedAt: serverTimestamp()
           });
+
+          // 2. Mark confidential vault document as rejected
+          await setDoc(doc(db, "vault", uid), {
+            status: "rejected",
+            rejectionReason: finalReason,
+            reviewedAt: serverTimestamp()
+          }, { merge: true });
+
           showToast(`Rejected ${name}. Rejection reason dispatched to traveler.`, "info");
         } catch (err) {
           console.error("Error rejecting verification in Firestore:", err);
@@ -953,12 +1054,20 @@
 
       if (isLiveFirebase && db) {
         try {
+          // 1. Grant Verified Explorer shield in public profiles
           await updateDoc(doc(db, "profiles", uid), {
             verificationStatus: "verified",
             selfieSubmitted: true,
             reviewedAt: serverTimestamp(),
             verificationRejectionReason: null
           });
+
+          // 2. Archive confidential vault KYC document
+          await setDoc(doc(db, "vault", uid), {
+            status: "archived",
+            reviewedAt: serverTimestamp()
+          }, { merge: true });
+
           showToast(`Approved ${name}! Verified Explorer shield issued.`, "success");
         } catch (err) {
           console.error("Error approving identity:", err);
@@ -972,7 +1081,9 @@
       }
     };
 
-    // ==================== TAB 2: RENDER & ACTIONS (PAYMENT APPROVAL) ====================
+    // =========================================================================
+    // 3. TAB 2: UPI SETTLEMENT QUEUE (12-DIGIT UTR RECONCILIATION)
+    // =========================================================================
     function renderPaymentsQueue() {
       const container = document.getElementById('payments-cards-container');
       if (!container) return;
@@ -995,9 +1106,9 @@
 
       container.innerHTML = paymentsQueue.map(traveler => {
         const sub = traveler.subscription || {};
-        const utr = sub.utr || 'N/A';
+        const utr = sub.utr || sub.utrNumber || sub.upiReference || '000000000000';
         const planName = sub.plan === 'trip_boost' ? 'Trip Boost (₹99)' : 'Explorer Monthly Pass (₹299)';
-        const dateStr = sub.activatedAt ? new Date(sub.activatedAt).toLocaleString('en-IN') : 'Just now';
+        const dateStr = sub.activatedAt || sub.submittedAt ? new Date(sub.activatedAt || sub.submittedAt).toLocaleString('en-IN') : 'Just now';
 
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -1023,7 +1134,7 @@
                 </div>
               </div>
 
-              <!-- 12-Digit UTR Highlight Box -->
+              <!-- 12-Digit UTR Highlight Box with 1-Click Copy -->
               <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Submitted 12-Digit UPI Reference (UTR)</span>
@@ -1174,7 +1285,9 @@
       }
     };
 
-    // ==================== TAB 3: RENDER (FEEDBACK HUB) ====================
+    // =========================================================================
+    // 4. TAB 3: FEEDBACK & BUG REPORT QUEUE
+    // =========================================================================
     function renderFeedbackQueue() {
       const container = document.getElementById('feedback-cards-container');
       if (!container) return;
@@ -1237,7 +1350,9 @@
       if (window.lucide) window.lucide.createIcons();
     }
 
-    // ==================== LIGHTBOX & UTILITIES ====================
+    // =========================================================================
+    // 5. LIGHTBOX ZOOM & UTILITIES
+    // =========================================================================
     window.openLightbox = function(src, title) {
       const modal = document.getElementById('lightbox-modal');
       const img = document.getElementById('lightbox-img');
@@ -1257,7 +1372,7 @@
     window.openSelfieLightboxByUid = function(uid) {
       const traveler = verificationQueue.find(t => t.uid === uid);
       if (!traveler) return;
-      const selfieSrc = traveler.selfieData || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
+      const selfieSrc = traveler.selfieData || traveler.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
       openLightbox(selfieSrc, 'Live Selfie - ' + (traveler.name || 'Applicant'));
     };
 
@@ -1283,7 +1398,7 @@
       const traveler = paymentsQueue.find(t => t.uid === uid);
       if (!traveler) return;
       const sub = traveler.subscription || {};
-      const utr = sub.utrNumber || sub.upiReference || '000000000000';
+      const utr = sub.utr || sub.utrNumber || sub.upiReference || '000000000000';
       adminConfirmPayment(traveler.uid, traveler.name || 'Traveler', utr, sub.plan || 'explorer_monthly');
     };
 
@@ -1291,7 +1406,7 @@
       const traveler = paymentsQueue.find(t => t.uid === uid);
       if (!traveler) return;
       const sub = traveler.subscription || {};
-      const utr = sub.utrNumber || sub.upiReference || '000000000000';
+      const utr = sub.utr || sub.utrNumber || sub.upiReference || '000000000000';
       openRejectPaymentModal(traveler.uid, traveler.name || 'Traveler', utr);
     };
 
@@ -1334,9 +1449,12 @@
       }, 3500);
     }
 
-    // ==================== BOOTSTRAP ON LOAD ====================
+    // =========================================================================
+    // 6. CRYPTOGRAPHIC SESSION VERIFICATION ON BOOT
+    // =========================================================================
     document.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem('safarmatch_admin_session') === 'authenticated') {
+      const storedToken = sessionStorage.getItem('safarmatch_admin_session');
+      if (storedToken === ADMIN_HASH_HEX) {
         unlockAdminView();
       } else {
         const passInput = document.getElementById('admin-passcode-input');

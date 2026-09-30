@@ -444,12 +444,27 @@ export function initHomeCityMiniMap(initialLat: number, initialLng: number): voi
     }
   });
 
-  homeCityMiniMap.on('click', (e: any) => {
-    if (homeCityMiniMarker) {
-      homeCityMiniMarker.setLatLng(e.latlng);
-    }
-    if (coordsLabel) {
-      coordsLabel.textContent = `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
-    }
-  });
+  (window as any).homeCityMiniMap = homeCityMiniMap;
+  (window as any).homeCityMiniMarker = homeCityMiniMarker;
 }
+
+export function updateHomeCityMiniMapPosition(lat: number, lng: number): void {
+  const safeLat = (!isNaN(Number(lat)) && Number(lat) !== 0) ? Number(lat) : 18.5204;
+  const safeLng = (!isNaN(Number(lng)) && Number(lng) !== 0) ? Number(lng) : 73.8567;
+
+  if (homeCityMiniMap) {
+    try {
+      homeCityMiniMap.flyTo([safeLat, safeLng], 11);
+      if (homeCityMiniMarker) {
+        homeCityMiniMarker.setLatLng([safeLat, safeLng]);
+      }
+    } catch (e) {}
+  }
+
+  const coordsLabel = document.getElementById('home-city-coords-text');
+  if (coordsLabel) {
+    coordsLabel.textContent = `Lat: ${safeLat.toFixed(4)}, Lng: ${safeLng.toFixed(4)}`;
+  }
+}
+(window as any).updateHomeCityMiniMapPosition = updateHomeCityMiniMapPosition;
+

@@ -22,6 +22,7 @@ import {
   saveMessagesForPartner,
   isMessageFromMe,
   setActiveChatUnsubscribe,
+  setActiveChatDocUnsubscribe,
   cleanupChatListeners
 } from '../services/chatService';
 import { getAllTravelers } from '../services/travelerService';
@@ -321,10 +322,10 @@ export function renderMessagesList(msgs: ChatMessage[]): void {
 
       return `
         <div class="w-full flex justify-end items-end gap-1.5 my-1.5">
-          <div class="relative max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl rounded-tr-xs bg-emerald-600 text-white shadow-xs">
+          <div class="relative max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl rounded-tr-xs bg-rose-600 dark:bg-rose-600 text-white font-medium shadow-sm">
             <p class="text-xs leading-relaxed break-words whitespace-pre-wrap">${escapeHtml(m.text)}</p>
             <div class="flex items-center justify-end space-x-1 mt-0.5">
-              <span class="text-[9px] text-emerald-100 opacity-80">${escapeHtml(m.timestamp || '')}</span>
+              <span class="text-[9px] text-rose-100 opacity-90">${escapeHtml(m.timestamp || '')}</span>
               ${statusIcon}
             </div>
           </div>
@@ -334,13 +335,13 @@ export function renderMessagesList(msgs: ChatMessage[]): void {
       const partnerPhoto = activeChatPartner && (activeChatPartner as any).photoUrl ? (activeChatPartner as any).photoUrl : DEFAULT_AVATAR;
       return `
         <div class="w-full flex justify-start items-end gap-2 my-1.5">
-          <div class="w-7 h-7 rounded-full overflow-hidden bg-slate-200 border border-slate-300 flex-shrink-0 mb-0.5">
+          <div class="w-7 h-7 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 flex-shrink-0 mb-0.5">
             <img src="${partnerPhoto}" class="w-full h-full object-cover" />
           </div>
-          <div class="relative max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl rounded-tl-xs bg-white text-slate-800 shadow-xs border border-slate-200">
+          <div class="relative max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl rounded-tl-xs bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 shadow-xs">
             <p class="text-xs leading-relaxed break-words whitespace-pre-wrap">${escapeHtml(m.text)}</p>
             <div class="flex items-center justify-end space-x-1 mt-0.5">
-              <span class="text-[9px] text-slate-400">${escapeHtml(m.timestamp || '')}</span>
+              <span class="text-[9px] text-slate-500 dark:text-slate-400">${escapeHtml(m.timestamp || '')}</span>
             </div>
           </div>
         </div>
@@ -434,6 +435,65 @@ export function openChatWithTravelerById(partnerUid: string): void {
   openChatWithTraveler(trv);
 }
 
+export function updateHandshakeBanners(
+  chatStatus: string,
+  initiatorUid: string,
+  myUid: string,
+  partnerName: string
+): void {
+  const senderBanner = document.getElementById('chat-sender-pending-banner');
+  const recipientBanner = document.getElementById('chat-recipient-action-banner');
+  const declinedBanner = document.getElementById('chat-declined-banner');
+  const recipientNameEl = document.getElementById('chat-recipient-name');
+  const chatInput = document.getElementById('chat-message-input') as HTMLInputElement | null;
+  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+
+  if (chatStatus === 'pending') {
+    if (declinedBanner) declinedBanner.classList.add('hidden');
+    if (initiatorUid === myUid) {
+      // Current user sent the request — waiting for partner
+      if (senderBanner) senderBanner.classList.remove('hidden');
+      if (recipientBanner) recipientBanner.classList.add('hidden');
+      if (chatInput) {
+        chatInput.disabled = true;
+        chatInput.placeholder = `Waiting for ${partnerName} to accept...`;
+      }
+      if (sendBtn) sendBtn.disabled = true;
+    } else {
+      // Current user is recipient — show action banner
+      if (senderBanner) senderBanner.classList.add('hidden');
+      if (recipientBanner) recipientBanner.classList.remove('hidden');
+      if (recipientNameEl) recipientNameEl.textContent = partnerName;
+      if (chatInput) {
+        chatInput.disabled = true;
+        chatInput.placeholder = `${partnerName} wants to connect with you! Accept above to start messaging.`;
+      }
+      if (sendBtn) sendBtn.disabled = true;
+    }
+  } else if (chatStatus === 'declined') {
+    if (senderBanner) senderBanner.classList.add('hidden');
+    if (recipientBanner) recipientBanner.classList.add('hidden');
+    if (declinedBanner) declinedBanner.classList.remove('hidden');
+    if (chatInput) {
+      chatInput.disabled = true;
+      chatInput.placeholder = "Connection request was declined.";
+    }
+    if (sendBtn) sendBtn.disabled = true;
+  } else {
+    // Accepted: all banners hidden, input enabled
+    if (senderBanner) senderBanner.classList.add('hidden');
+    if (recipientBanner) recipientBanner.classList.add('hidden');
+    if (declinedBanner) declinedBanner.classList.add('hidden');
+    if (chatInput) {
+      chatInput.disabled = false;
+      chatInput.placeholder = "Type a message... (Anti-scam filter active)";
+    }
+    if (sendBtn) sendBtn.disabled = false;
+  }
+
+  if ((window as any).lucide) (window as any).lucide.createIcons();
+}
+
 export async function openChatWithTraveler(traveler: any): Promise<void> {
   if (!traveler || !traveler.uid) return;
   const currentProfile = getCurrentProfile();
@@ -444,7 +504,7 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
   setActiveChatPartner(traveler);
   recordChatPartner(partnerUid);
 
-  // Update Chat Header Bar (support both active-chat-* and chat-partner-* IDs)
+  // Update Chat Header Bar
   const headerAvatar = (document.getElementById('active-chat-avatar') || document.getElementById('chat-partner-avatar')) as HTMLImageElement | null;
   const headerName = document.getElementById('active-chat-name') || document.getElementById('chat-partner-name');
   const headerCircuit = document.getElementById('active-chat-meta') || document.getElementById('chat-partner-circuit');
@@ -468,7 +528,7 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
     }
   }
 
-  // 1. Check existing Firestore chats/{chatId} FIRST before creating metadata
+  // 1. Asynchronous check: getDoc(doc(db, "chats", chatId))
   let chatStatus = 'accepted';
   let initiatorUid = myUid;
   let existingMeta = getChatMeta(chatId);
@@ -478,13 +538,21 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
       const chatDocRef = doc(db, 'chats', chatId);
       const chatSnap = await getDoc(chatDocRef);
       if (chatSnap.exists()) {
+        // Document exists: read existing initiatorUid, recipientUid, and status
         const data = chatSnap.data();
         chatStatus = data.status || 'accepted';
         initiatorUid = data.initiatorUid || myUid;
         existingMeta = { ...existingMeta, ...data };
         saveChatMeta(chatId, existingMeta);
+
+        // Remove currentUser from unreadBy in Firestore
+        const unreadBy = Array.isArray(data.unreadBy) ? data.unreadBy : [];
+        if (unreadBy.includes(myUid)) {
+          const updatedUnread = unreadBy.filter((u: string) => u !== myUid);
+          setDoc(chatDocRef, { unreadBy: updatedUnread }, { merge: true }).catch(() => {});
+        }
       } else {
-        // Doc doesn't exist yet: establish pending handshake without overwriting
+        // Document does NOT exist: initialize pending handshake
         chatStatus = 'pending';
         initiatorUid = myUid;
         const newMeta = {
@@ -501,6 +569,20 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
         }, { merge: true });
         saveChatMeta(chatId, newMeta);
       }
+
+      // 2. Real-time snapshot on chat document: eliminates Mutual Waiting Deadlock
+      const unsubDoc = onSnapshot(chatDocRef, (docSnap) => {
+        if (docSnap.exists() && getActiveChatPartner()?.uid === partnerUid) {
+          const freshData = docSnap.data();
+          const freshStatus = freshData.status || 'accepted';
+          const freshInitiator = freshData.initiatorUid || initiatorUid;
+          saveChatMeta(chatId, { ...getChatMeta(chatId), ...freshData });
+          updateHandshakeBanners(freshStatus, freshInitiator, myUid, travelerName);
+          renderConversationList();
+        }
+      }, (err) => console.warn("Firestore chat doc snapshot warning:", err));
+      setActiveChatDocUnsubscribe(unsubDoc);
+
     } catch (e) {
       console.warn("Firestore chat handshake fetch error, using local fallback:", e);
       if (existingMeta && existingMeta.status) {
@@ -517,46 +599,10 @@ export async function openChatWithTraveler(traveler: any): Promise<void> {
     }
   }
 
-  // Handle Pending Handshake Banners
-  const senderBanner = document.getElementById('chat-sender-pending-banner');
-  const recipientBanner = document.getElementById('chat-recipient-action-banner');
-  const recipientNameEl = document.getElementById('chat-recipient-name');
-  const chatInput = document.getElementById('chat-message-input') as HTMLInputElement | null;
-  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+  // Render initial banners & states
+  updateHandshakeBanners(chatStatus, initiatorUid, myUid, travelerName);
 
-  if (chatStatus === 'pending') {
-    if (initiatorUid === myUid) {
-      // Current user sent the request
-      if (senderBanner) senderBanner.classList.remove('hidden');
-      if (recipientBanner) recipientBanner.classList.add('hidden');
-      if (chatInput) {
-        chatInput.disabled = true;
-        chatInput.placeholder = "Connection request sent. Waiting for traveler to accept...";
-      }
-      if (sendBtn) sendBtn.disabled = true;
-    } else {
-      // Current user is recipient
-      if (senderBanner) senderBanner.classList.add('hidden');
-      if (recipientBanner) recipientBanner.classList.remove('hidden');
-      if (recipientNameEl) recipientNameEl.textContent = travelerName;
-      if (chatInput) {
-        chatInput.disabled = true;
-        chatInput.placeholder = "Accept connection request above to start messaging.";
-      }
-      if (sendBtn) sendBtn.disabled = true;
-    }
-  } else {
-    // Accepted
-    if (senderBanner) senderBanner.classList.add('hidden');
-    if (recipientBanner) recipientBanner.classList.add('hidden');
-    if (chatInput) {
-      chatInput.disabled = false;
-      chatInput.placeholder = "Type a message... (Anti-scam filter active)";
-    }
-    if (sendBtn) sendBtn.disabled = false;
-  }
-
-  // Clear unread in meta
+  // Clear unread in local metadata
   const meta = getChatMeta(chatId);
   if (meta && Array.isArray(meta.unreadBy)) {
     meta.unreadBy = meta.unreadBy.filter((u: string) => u !== myUid);
@@ -915,4 +961,47 @@ export function closeVaultSecurityModal(): void {
   const modal = document.getElementById('vault-security-modal');
   if (modal) modal.classList.add('hidden');
 }
+
+let globalChatsUnsub: (() => void) | null = null;
+
+export function initGlobalChatUnreadListener(myUid: string): void {
+  if (!isLiveFirebase || !db || !myUid) return;
+  if (globalChatsUnsub) {
+    try { globalChatsUnsub(); } catch (e) {}
+    globalChatsUnsub = null;
+  }
+
+  try {
+    const chatsCol = collection(db, 'chats');
+    globalChatsUnsub = onSnapshot(chatsCol, (snap) => {
+      let hasUnread = false;
+      snap.forEach(d => {
+        const data = d.data();
+        if (data.unreadBy && Array.isArray(data.unreadBy) && data.unreadBy.includes(myUid)) {
+          hasUnread = true;
+        }
+      });
+      const unreadDot1 = document.getElementById('sidebar-chat-unread-dot');
+      const unreadDot2 = document.getElementById('mobile-chat-unread-dot');
+      if (unreadDot1) {
+        if (hasUnread) unreadDot1.classList.remove('hidden');
+        else unreadDot1.classList.add('hidden');
+      }
+      if (unreadDot2) {
+        if (hasUnread) unreadDot2.classList.remove('hidden');
+        else unreadDot2.classList.add('hidden');
+      }
+    }, (err) => console.warn("Global chats unread listener warning:", err));
+  } catch (e) {
+    console.warn("Could not attach global chats unread listener:", e);
+  }
+}
+
+export function cleanupGlobalChatUnreadListener(): void {
+  if (globalChatsUnsub) {
+    try { globalChatsUnsub(); } catch (e) {}
+    globalChatsUnsub = null;
+  }
+}
+
 

@@ -170,7 +170,9 @@ import {
   acceptChatRequest,
   declineChatRequest,
   openVaultSecurityModal,
-  closeVaultSecurityModal
+  closeVaultSecurityModal,
+  initGlobalChatUnreadListener,
+  cleanupGlobalChatUnreadListener
 } from './ui/chatController';
 
 import {
@@ -212,6 +214,7 @@ import {
 
 import { showToast } from './utils/toast';
 import { moderateMessageText } from './utils/moderation';
+import { initAllLocationAutocompletes } from './utils/locationAutocomplete';
 
 // ==================== BIND GLOBAL WINDOW OBJECT FOR HTML ONCLICK COMPATIBILITY ====================
 const globalObj = window as any;
@@ -584,12 +587,7 @@ globalObj.moderateMessageText = moderateMessageText;
 
 // ==================== APP BOOTSTRAP INITIALIZATION ====================
 function bootApp(): void {
-  // If no user is logged in, ensure zero leftover data on the client device
-  if (!getCurrentUser()) {
-    purgeAllUserDataFromClient();
-  }
-
-  // 1. Initialize local cache and session state
+  // 1. Initialize local cache and session state from persistent storage
   const profile = initProfileState();
   initTravelersCache(profile);
   initTripsCache();
@@ -599,7 +597,7 @@ function bootApp(): void {
   updateJourneyStatusUI();
   initHeaderDropdown();
 
-  // 3. Initialize Auth listener
+  // 3. Initialize Auth listener with cloud-first hydration
   initAuthListener((user) => {
     if (user) {
       const authBtnText = document.getElementById('btn-auth-text');
@@ -608,13 +606,10 @@ function bootApp(): void {
       if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
       const profileSignoutBtn = document.getElementById('profile-signout-btn');
       if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
-      if (user.uid) {
-        attachProfileRealtimeListener(user.uid);
-      }
       syncHeaderDropdownUI();
       hideLandingPage();
+      initGlobalChatUnreadListener(user.uid);
     } else {
-      purgeAllUserDataFromClient();
       const authBtnText = document.getElementById('btn-auth-text');
       if (authBtnText) authBtnText.textContent = "Sign In";
       const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
@@ -622,13 +617,14 @@ function bootApp(): void {
       const profileSignoutBtn = document.getElementById('profile-signout-btn');
       if (profileSignoutBtn) profileSignoutBtn.classList.add('hidden');
       syncHeaderDropdownUI();
-      showLandingPage();
+      cleanupGlobalChatUnreadListener();
     }
   });
 
-  // 4. Initialize Map
+  // 4. Initialize Map & Location Autocompletes
   initMap();
   initLandingMap();
+  initAllLocationAutocompletes();
 
   // 5. Fetch live Firestore feeds in background if connected
   if (isLiveFirebase && db) {

@@ -2,6 +2,7 @@
  * SafarMatch — Authentication Service
  * Fully functional native Google Sign-In with official Google OAuth permissions prompt.
  * Zero manual text boxes: obtains real verified identity, email, and avatar directly from Google.
+ * Enforces cloud-first profile hydration and resilient session persistence.
  */
 
 import { 
@@ -12,11 +13,16 @@ import {
   onAuthStateChanged, 
   type User 
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db, googleProvider, isLiveFirebase } from '../config/firebase';
-import { STORAGE_KEYS, clearAllSessionAndCacheData } from '../utils/storage';
-import { setSessionCookie, getSessionCookie, clearAllAuthCookies } from '../utils/cookieUtils';
+import { auth, isLiveFirebase, googleProvider } from '../config/firebase';
+import { STORAGE_KEYS } from '../utils/storage';
+import { setSessionCookie, clearAllAuthCookies } from '../utils/cookieUtils';
 import { showToast } from '../utils/toast';
+import { 
+  hydrateProfileFromFirestore, 
+  attachProfileRealtimeListener, 
+  detachProfileRealtimeListener, 
+  resetProfileToGuest 
+} from './profileService';
 import type { UserProfile } from '../types';
 
 let currentUser: any = null;
@@ -43,7 +49,7 @@ export function onAuthChanged(callback: (user: User | null) => void): () => void
  * Automatically saves verified Google profile, syncs to Firestore, and sets origin-bound cookies.
  */
 export async function loginWithGoogle(
-  currentProfile: UserProfile, 
+  _currentProfile: UserProfile, 
   onProfileMerged: (updated: UserProfile) => void
 ): Promise<User | null> {
   if (!isLiveFirebase || !auth) {
@@ -57,39 +63,11 @@ export async function loginWithGoogle(
     const googleUser = res.user;
     currentUser = googleUser;
 
-    const updatedProfile: UserProfile = {
-      ...currentProfile,
-      uid: googleUser.uid,
-      name: googleUser.displayName || currentProfile.name || "Explorer",
-      photoUrl: googleUser.photoURL || currentProfile.photoUrl,
-      verificationStatus: 'verified'
-    };
-
-    // 1. Sync verified profile with Firestore
-    if (db) {
-      try {
-        const docRef = doc(db, "profiles", googleUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          Object.assign(updatedProfile, docSnap.data(), { 
-            uid: googleUser.uid, 
-            name: googleUser.displayName || updatedProfile.name,
-            photoUrl: googleUser.photoURL || updatedProfile.photoUrl
-          });
-        } else {
-          await setDoc(docRef, updatedProfile, { merge: true });
-        }
-      } catch (e) {
-        console.warn("Firestore profile sync notice:", e);
-      }
-    }
-
-    // 2. Set origin-bound secure session cookie (SameSite=Strict)
+    // 1. Set origin-bound secure session cookie
     setSessionCookie(googleUser.uid, true);
 
-    // 3. Save session in localStorage
+    // 2. Cache user credentials
     try {
-      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(updatedProfile));
       localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify({
         uid: googleUser.uid,
         displayName: googleUser.displayName,
@@ -97,15 +75,23 @@ export async function loginWithGoogle(
         photoURL: googleUser.photoURL
       }));
     } catch (e) {
-      console.error("Storage error:", e);
+      console.warn("Storage error caching user:", e);
     }
 
-    onProfileMerged(updatedProfile);
+    // 3. Cloud-first hydration from Firestore (profiles/{uid} and vault/{uid})
+    const hydrated = await hydrateProfileFromFirestore(googleUser.uid, googleUser);
+    attachProfileRealtimeListener(googleUser.uid);
+    onProfileMerged(hydrated);
     setCurrentUser(googleUser);
 
     // 4. Update header UI
     const authBtnText = document.getElementById('btn-auth-text');
     if (authBtnText) authBtnText.textContent = "Sign Out";
+    const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+    if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
+    const profileSignoutBtn = document.getElementById('profile-signout-btn');
+    if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
+
     const headerUserName = document.getElementById('header-user-name');
     if (headerUserName && googleUser.displayName) {
       headerUserName.textContent = googleUser.displayName.split(' ')[0];
@@ -158,10 +144,17 @@ export async function loginWithGoogle(
 }
 
 /**
- * Signs out the current user, clears all session cookies, and completely wipes all local & session caches.
+ * Signs out the current user:
+ * 1. Detaches all active Firestore listeners cleanly.
+ * 2. Clears authentication cookies and local session tokens.
+ * 3. Resets form fields and returns to unauthenticated visitor state.
+ * 4. Never overwrites or corrupts existing Firestore records with guest defaults.
  */
 export async function signOutUser(): Promise<void> {
-  // 1. Firebase signout
+  // 1. Detach all active Firestore listeners immediately
+  detachProfileRealtimeListener();
+
+  // 2. Firebase sign out
   if (auth) {
     try {
       await fbSignOut(auth);
@@ -170,17 +163,22 @@ export async function signOutUser(): Promise<void> {
     }
   }
 
-  // 2. Clear all authentication & session cookies (SameSite=Strict, Max-Age=0)
+  // 3. Clear all authentication & session cookies (SameSite=Strict, Max-Age=0)
   clearAllAuthCookies();
 
-  // 3. Purge all user cache, local storage keys, session storage, and cache API
-  await clearAllSessionAndCacheData();
+  // 4. Clear active session tokens from localStorage without wiping valid user accounts
+  try {
+    localStorage.removeItem(STORAGE_KEYS.LOGGED_IN_USER);
+  } catch (e) {}
 
-  // 4. Wipe runtime in-memory user
+  // 5. Reset local state to an unauthenticated visitor state
+  resetProfileToGuest();
+
+  // 6. Wipe runtime in-memory user
   currentUser = null;
   setCurrentUser(null);
   
-  // 5. Reset header & sidebar UI to Guest state
+  // 7. Reset header & sidebar UI to Guest state
   const authBtnText = document.getElementById('btn-auth-text');
   if (authBtnText) authBtnText.textContent = "Sign In";
   const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
@@ -196,15 +194,18 @@ export async function signOutUser(): Promise<void> {
 }
 
 /**
- * Listens for auth state changes, checks session cookies, and captures any redirect result.
+ * Listens for auth state changes and captures redirect result.
+ * Implements cloud-first hydration on sign in and clean detachment on sign out.
  */
 export function initAuthListener(onUserDetected: (user: User | null) => void): void {
   // 1. Handle redirect result if user returned from Google redirect flow
   if (isLiveFirebase && auth) {
-    getRedirectResult(auth).then((result) => {
+    getRedirectResult(auth).then(async (result) => {
       if (result && result.user) {
         currentUser = result.user;
         setSessionCookie(result.user.uid, true);
+        await hydrateProfileFromFirestore(result.user.uid, result.user);
+        attachProfileRealtimeListener(result.user.uid);
         onUserDetected(result.user);
       }
     }).catch((e) => {
@@ -212,53 +213,51 @@ export function initAuthListener(onUserDetected: (user: User | null) => void): v
     });
   }
 
-  // 2. Check cached session against active session cookie
-  const sessionCookie = getSessionCookie();
-  let cachedUser: any = null;
-
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.LOGGED_IN_USER);
-    if (stored && sessionCookie.token) {
-      cachedUser = JSON.parse(stored);
-      currentUser = cachedUser;
-      onUserDetected(cachedUser);
-
-      // Restore header & sidebar UI
-      const authBtnText = document.getElementById('btn-auth-text');
-      if (authBtnText) authBtnText.textContent = "Sign Out";
-      const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
-      if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
-      const profileSignoutBtn = document.getElementById('profile-signout-btn');
-      if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
-      const headerUserName = document.getElementById('header-user-name');
-      if (headerUserName && cachedUser.displayName) {
-        headerUserName.textContent = cachedUser.displayName.split(' ')[0];
-      }
-      const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
-      if (headerUserAvatar && cachedUser.photoURL) {
-        headerUserAvatar.src = cachedUser.photoURL;
-      }
-    } else if (stored && !sessionCookie.token) {
-      // Stale or cleared cookie: enforce logout
-      localStorage.removeItem(STORAGE_KEYS.LOGGED_IN_USER);
-      localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
-    }
-  } catch (e) {
-    console.warn("Cached user parse error:", e);
-  }
-
-  // 3. Listen to real Firebase Auth state changes
+  // 2. Listen to real Firebase Auth state changes
   if (isLiveFirebase && auth) {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
+        setSessionCookie(user.uid, true);
+        try {
+          localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify({
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL
+          }));
+        } catch (e) {}
+
+        // Cloud-first hydration on auth change: fetch profiles/{uid} and vault/{uid}
+        await hydrateProfileFromFirestore(user.uid, user);
+        attachProfileRealtimeListener(user.uid);
+
+        // Update header & sidebar UI
+        const authBtnText = document.getElementById('btn-auth-text');
+        if (authBtnText) authBtnText.textContent = "Sign Out";
+        const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+        if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
+        const profileSignoutBtn = document.getElementById('profile-signout-btn');
+        if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
+
+        const headerUserName = document.getElementById('header-user-name');
+        if (headerUserName && user.displayName) {
+          headerUserName.textContent = user.displayName.split(' ')[0];
+        }
+        const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+        if (headerUserAvatar && user.photoURL) {
+          headerUserAvatar.src = user.photoURL;
+        }
+
         onUserDetected(user);
-      } else if (!cachedUser) {
+      } else {
         currentUser = null;
+        detachProfileRealtimeListener();
+        resetProfileToGuest();
         onUserDetected(null);
       }
     });
-  } else if (!cachedUser) {
+  } else {
     onUserDetected(null);
   }
 }

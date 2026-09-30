@@ -257,15 +257,20 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
 
   if (isLiveFirebase && db && currentProfile.uid) {
     try {
-      const publicClean = sanitizePublicProfile({
-        ...currentProfile,
+      const { selfieData, govtIdData, ...lightweightProfile } = currentProfile as any;
+      await setDoc(doc(db, "profiles", currentProfile.uid), {
+        ...lightweightProfile,
         updatedAt: serverTimestamp()
-      });
-      await setDoc(doc(db, "profiles", currentProfile.uid), publicClean, { merge: true });
+      }, { merge: true });
     } catch (err) {
       console.warn("Firestore profile save error:", err);
     }
   }
+
+  try {
+    localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+  } catch (e) {}
 
   updateJourneyStatusUI();
   renderTravelerPins();

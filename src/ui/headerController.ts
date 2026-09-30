@@ -8,7 +8,7 @@ import { openFeedbackModal } from './feedbackController';
 import { openCabSplitModal } from '../services/paymentService';
 import { openSurakshaEmergencyModal } from '../services/surakshaService';
 import { getCurrentProfile } from '../services/profileService';
-import { setTheme } from '../theme/themeManager';
+import { setTheme, toggleTheme } from '../theme/themeManager';
 
 let isHeaderDropdownOpen = false;
 
@@ -117,7 +117,8 @@ export function syncHeaderDropdownUI(): void {
 
 // Global actions fired from dropdown items
 export function handleDropdownThemeSelect(): void {
-  setTheme('safarbloom');
+  toggleTheme();
+  closeHeaderDropdown();
 }
 
 export function handleDropdownFeedback(): void {

@@ -91,6 +91,9 @@ export interface UserProfile {
   photoUrl: string;
   govIdUrl?: string;
   selfieUrl?: string;
+  selfieData?: string;
+  govtIdData?: string;
+  connectionsQuota?: { month: string; used: number };
   verificationStatus: VerificationStatus;
   verificationRejectionReason?: string;
   subscriptionStatus: SubscriptionStatus;
