@@ -1,6 +1,6 @@
 {
   "name": "SafarMatch",
-  "description": "Never Just A Destination. Find Someone Who Remembers You Along The Way. — India's verified travel dating and companion finder platform for solo travelers, women explorers, and backpackers.",
+  "description": "A place where someone still thinks about you is a place you can call home. — Discover verified backpackers, roadtrip partners, and hostel splits across Bharat.",
   "requestFramePermissions": ["camera", "geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -213,10 +213,14 @@ export function openUpiModal(plan = "explorer", amount = 299): void {
   const amountEl = document.getElementById('upi-plan-amount');
   const noteEl = document.getElementById('upi-order-note');
   const vpaEl = document.getElementById('upi-payee-vpa');
+  const subtitleEl = document.getElementById('upi-modal-subtitle');
+  const mobileBtnText = document.getElementById('upi-mobile-btn-text');
 
   if (planEl) planEl.textContent = planName;
   if (amountEl) amountEl.textContent = `₹${amount}`;
   if (vpaEl) vpaEl.textContent = UPI_CONFIG.PAYEE_VPA;
+  if (subtitleEl) subtitleEl.textContent = `${planName} — ₹${amount}`;
+  if (mobileBtnText) mobileBtnText.textContent = `Pay ₹${amount} via Any UPI App (GPay / PhonePe / Paytm)`;
 
   const orderId = `SAFAR_${Date.now().toString().slice(-6)}`;
   if (noteEl) noteEl.textContent = `Txn Ref: ${orderId}`;
@@ -293,6 +297,7 @@ export async function submitUtrVerification(profile: UserProfile | null, onUpdat
         await setDoc(doc(db, "profiles", profile.uid), {
           subscription: {
             status: "pending_review",
+            utr,
             utrNumber: utr,
             upiReference: utr,
             plan: activeUpiPlan || "explorer_monthly",

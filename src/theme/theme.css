@@ -35,19 +35,37 @@ html.dark ::-webkit-scrollbar-thumb {
   background: rgba(100, 116, 139, 0.7);
 }
 
-/* Leaflet Dark Mode Support — Map tiles identical to day mode without distortion filters */
+/* Leaflet Dark Mode Support — Pure Dark Matter Map Styles */
+html.dark .leaflet-container {
+  background-color: #0b1329 !important;
+  background: #0b1329 !important;
+}
+
+html.dark .leaflet-tile-pane {
+  background-color: #0b1329 !important;
+}
+
 html.dark .leaflet-control-zoom-in,
 html.dark .leaflet-control-zoom-out {
-  background-color: #1e293b !important;
+  background-color: #0f172a !important;
   color: #f8fafc !important;
   border-color: #334155 !important;
 }
+html.dark .leaflet-control-zoom-in:hover,
+html.dark .leaflet-control-zoom-out:hover {
+  background-color: #1e293b !important;
+  color: #fb7185 !important;
+}
 html.dark .leaflet-control-attribution {
-  background-color: rgba(15, 23, 42, 0.85) !important;
+  background-color: rgba(15, 23, 42, 0.88) !important;
   color: #94a3b8 !important;
+  border: 1px solid rgba(51, 65, 85, 0.5) !important;
+  border-radius: 0.5rem !important;
+  padding: 2px 6px !important;
+  margin: 4px !important;
 }
 html.dark .leaflet-control-attribution a {
-  color: #38bdf8 !important;
+  color: #fb7185 !important;
 }
 
 html.dark .leaflet-marker-icon,
@@ -55,20 +73,24 @@ html.dark .leaflet-popup-pane {
   filter: none !important;
 }
 
-/* Leaflet Popups */
+/* Leaflet Popups — High Contrast Frameless Card Architecture */
 .leaflet-popup-content-wrapper {
-  background: #ffffff !important;
-  color: #0f172a !important;
+  background: transparent !important;
+  color: inherit !important;
   border-radius: 1rem !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border: none !important;
 }
-html.dark .leaflet-popup-content-wrapper {
-  background: #1e293b !important;
-  color: #f8fafc !important;
-  border: 1px solid #334155 !important;
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: normal !important;
+}
+.leaflet-popup-tip {
+  background: #ffffff !important;
 }
 html.dark .leaflet-popup-tip {
-  background: #1e293b !important;
+  background: #0f172a !important;
 }
 
 /* Safe area padding utilities */
@@ -78,3 +100,221 @@ html.dark .leaflet-popup-tip {
 .pt-safe {
   padding-top: max(0.75rem, env(safe-area-inset-top));
 }
+
+/* ==================== GOOGLE MAPS TIMEZONE & SOLAR SHADE ENGINE ==================== */
+#map, #home-city-mini-map {
+  transition: filter 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth ambient atmospheric shades for time of day */
+.map-shade-dawn {
+  filter: contrast(1.02) saturate(1.1) brightness(1.02) sepia(0.06) hue-rotate(-6deg);
+}
+
+.map-shade-day {
+  filter: contrast(1.0) saturate(1.05) brightness(1.0);
+}
+
+.map-shade-golden {
+  filter: contrast(1.06) saturate(1.22) brightness(0.98) sepia(0.2) hue-rotate(-8deg);
+}
+
+.map-shade-dusk {
+  filter: contrast(1.1) saturate(1.25) brightness(0.92) hue-rotate(12deg);
+}
+
+.map-shade-night {
+  filter: contrast(1.08) brightness(0.97);
+}
+
+/* Google Maps InfoWindow Modern Styling */
+.gm-style .gm-style-iw-c {
+  padding: 0 !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.gm-style .gm-style-iw-tc::after {
+  background: #ffffff !important;
+}
+
+html.dark .gm-style .gm-style-iw-tc::after {
+  background: #0f172a !important;
+}
+
+.gm-style .gm-ui-hover-effect {
+  top: 6px !important;
+  right: 6px !important;
+  width: 24px !important;
+  height: 24px !important;
+  background: rgba(15, 23, 42, 0.5) !important;
+  border-radius: 9999px !important;
+}
+
+.gm-style .gm-ui-hover-effect > span {
+  background-color: #ffffff !important;
+}
+
+/* ==================== TRAVELER DETAILS USER FILL-OUT FONT COLOR (SOLID GREEN) ==================== */
+/* Solid green font color for day and night modes for the traveler details which users fill out */
+#profile-form input,
+#profile-form select,
+#profile-form textarea,
+#input-full-name,
+#input-age,
+#input-gender,
+#input-home-city,
+#input-upcoming-circuit,
+#input-bio {
+  color: #16a34a !important; /* Solid Green */
+  -webkit-text-fill-color: #16a34a !important;
+}
+
+#profile-form select option {
+  color: #16a34a !important;
+  background-color: #ffffff;
+}
+
+#profile-form input::placeholder,
+#profile-form textarea::placeholder {
+  color: #16a34a !important;
+  -webkit-text-fill-color: #16a34a !important;
+  opacity: 0.7;
+}
+
+#profile-form input:-webkit-autofill,
+#profile-form input:-webkit-autofill:hover, 
+#profile-form input:-webkit-autofill:focus,
+#profile-form textarea:-webkit-autofill,
+#profile-form textarea:-webkit-autofill:hover,
+#profile-form textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: #16a34a !important;
+}
+
+html.dark #profile-form input,
+html.dark #profile-form select,
+html.dark #profile-form textarea,
+html.dark #input-full-name,
+html.dark #input-age,
+html.dark #input-gender,
+html.dark #input-home-city,
+html.dark #input-upcoming-circuit,
+html.dark #input-bio {
+  color: #16a34a !important; /* Solid Green in Night Mode */
+  -webkit-text-fill-color: #16a34a !important;
+}
+
+html.dark #profile-form select option {
+  color: #16a34a !important;
+  background-color: #0f172a;
+}
+
+html.dark #profile-form input::placeholder,
+html.dark #profile-form textarea::placeholder {
+  color: #16a34a !important;
+  -webkit-text-fill-color: #16a34a !important;
+  opacity: 0.7;
+}
+
+/* Inspected traveler details (the info filled out by users) */
+#traveler-detail-modal #modal-traveler-name,
+#traveler-detail-modal #modal-traveler-city,
+#traveler-detail-modal #modal-traveler-bio,
+#traveler-detail-modal #modal-traveler-styles span,
+#modal-traveler-name,
+#modal-traveler-city,
+#modal-traveler-bio,
+#modal-traveler-styles span {
+  color: #16a34a !important; /* Solid Green */
+  -webkit-text-fill-color: #16a34a !important;
+}
+
+html.dark #traveler-detail-modal #modal-traveler-name,
+html.dark #traveler-detail-modal #modal-traveler-city,
+html.dark #traveler-detail-modal #modal-traveler-bio,
+html.dark #traveler-detail-modal #modal-traveler-styles span,
+html.dark #modal-traveler-name,
+html.dark #modal-traveler-city,
+html.dark #modal-traveler-bio,
+html.dark #modal-traveler-styles span {
+  color: #16a34a !important; /* Solid Green in Night Mode */
+  -webkit-text-fill-color: #16a34a !important;
+}
+
+/* ==================== NIGHT MODE PROFILE BOXES (VERY LOW SHADE WHITE) ==================== */
+/* Change profile boxes that are white in color to very low shade white in night mode so they do not disturb eyes */
+html.dark #view-profile .bg-white,
+html.dark #profile-form {
+  background-color: #0d1527 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark #view-profile .bg-slate-50 {
+  background-color: #0b1120 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark #profile-form input,
+html.dark #profile-form select,
+html.dark #profile-form textarea {
+  background-color: #0a0f1d !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark #profile-form input:focus,
+html.dark #profile-form select:focus,
+html.dark #profile-form textarea:focus {
+  background-color: #0d1527 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+html.dark #view-profile h2,
+html.dark #view-profile h3,
+html.dark #view-profile h4 {
+  color: #f8fafc !important;
+}
+
+html.dark #view-profile label {
+  color: #cbd5e1 !important;
+}
+
+html.dark #profile-form .intent-pill:not(.bg-rose-100),
+html.dark #profile-form .style-pill:not(.bg-rose-50) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark #profile-signout-btn {
+  background-color: rgba(244, 63, 94, 0.12) !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+  color: #fda4af !important;
+}
+
+html.dark #view-profile .border-slate-100 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark #view-profile .border-slate-200,
+html.dark #view-profile .border-slate-200\/80 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark #view-profile .text-slate-500,
+html.dark #view-profile .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+

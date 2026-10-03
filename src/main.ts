@@ -6,6 +6,26 @@
 import './index.css';
 import { createIcons, icons } from 'lucide';
 
+// Google Maps Platform Quota Defense (Mandatory Case A Requirement)
+(window as any).gm_authFailure = () => {
+  window.dispatchEvent(new CustomEvent('gmp-quota-exceeded'));
+};
+const origError = console.error;
+console.error = (...args: unknown[]) => {
+  origError.apply(console, args);
+  const msg = args.map((a) => String(a)).join(' ');
+  if (msg.includes('OverQuotaMapError') || msg.includes('QuotaExceededError')) {
+    window.dispatchEvent(new CustomEvent('gmp-quota-exceeded'));
+  }
+};
+
+window.addEventListener('gmp-quota-exceeded', () => {
+  const banner = document.getElementById('gmp-quota-banner');
+  if (banner) {
+    banner.classList.remove('hidden');
+  }
+});
+
 // Ensure bundled Lucide icons are immediately available globally without network dependency
 (window as any).lucide = {
   createIcons: (options: any = {}) => {
@@ -30,7 +50,8 @@ try {
   (window as any).lucide.createIcons();
 } catch (e) {}
 
-import { initTheme, setTheme, cycleTheme, getSavedTheme } from './theme/themeManager';
+import { initTheme, setTheme, cycleTheme, getSavedTheme } from './utils/theme';
+import './ui/modalController';
 // Initialize theme right away to prevent any flash
 initTheme();
 
@@ -151,7 +172,11 @@ import {
   invalidateMapSize,
   flyToDestination,
   locateUserPosition,
-  initHomeCityMiniMap
+  initHomeCityMiniMap,
+  setMapShadePreset,
+  toggleTimezoneAutoSync,
+  handleMapTimeScrub,
+  syncMapTileTheme
 } from './ui/mapController';
 
 import {
@@ -214,7 +239,7 @@ import {
 
 import { showToast } from './utils/toast';
 import { moderateMessageText } from './utils/moderation';
-import { initAllLocationAutocompletes } from './utils/locationAutocomplete';
+import { initAllLocationAutocompletes } from './utils/geocoding';
 
 // ==================== BIND GLOBAL WINDOW OBJECT FOR HTML ONCLICK COMPATIBILITY ====================
 const globalObj = window as any;
@@ -381,6 +406,10 @@ globalObj.clearMapDestinationSearch = () => {
   if (input) input.value = '';
   filterMapCircuit('all');
 };
+globalObj.setMapShadePreset = setMapShadePreset;
+globalObj.toggleTimezoneAutoSync = toggleTimezoneAutoSync;
+globalObj.handleMapTimeScrub = handleMapTimeScrub;
+globalObj.syncMapTileTheme = syncMapTileTheme;
 
 // Trips
 globalObj.renderTripsFeed = renderTripsFeed;

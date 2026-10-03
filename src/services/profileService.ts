@@ -4,7 +4,8 @@
  */
 
 import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { db, isLiveFirebase } from '../config/firebase';
+import { signInAnonymously } from 'firebase/auth';
+import { db, auth, isLiveFirebase } from '../config/firebase';
 import { STORAGE_KEYS, isNotificationSeen, markNotificationSeen, resetNotificationSeen } from '../utils/storage';
 import { showToast } from '../utils/toast';
 import { INDIAN_CIRCUITS_LOOKUP } from '../config/constants';
@@ -807,6 +808,17 @@ export function handleGovIdFileSelected(e: Event): void {
 
 async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Blob, precomputedBase64?: string): Promise<void> {
   if (!currentProfile) return;
+
+  // Auto-Anonymous Auth: If a guest submits verification, ensure signed in so Firestore rules do not reject the write
+  if (auth && !auth.currentUser) {
+    try {
+      const cred = await signInAnonymously(auth);
+      currentProfile.uid = cred.user.uid;
+    } catch (e) {
+      console.warn("Auto-anonymous authentication error:", e);
+    }
+  }
+
   (currentProfile as any).selfieSubmitted = true;
   currentProfile.verificationStatus = "pending";
 

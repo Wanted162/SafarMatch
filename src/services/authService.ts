@@ -10,13 +10,34 @@ import {
   signInWithRedirect, 
   getRedirectResult, 
   signOut as fbSignOut, 
-  onAuthStateChanged, 
+  onAuthStateChanged,
+  signInAnonymously,
   type User 
 } from 'firebase/auth';
 import { auth, isLiveFirebase, googleProvider } from '../config/firebase';
 import { STORAGE_KEYS } from '../utils/storage';
 import { setSessionCookie, clearAllAuthCookies } from '../utils/cookieUtils';
 import { showToast } from '../utils/toast';
+
+export async function ensureAuthenticatedSession(): Promise<string | null> {
+  if (currentUser && currentUser.uid) {
+    return currentUser.uid;
+  }
+  if (auth) {
+    if (auth.currentUser) {
+      currentUser = auth.currentUser;
+      return auth.currentUser.uid;
+    }
+    try {
+      const cred = await signInAnonymously(auth);
+      currentUser = cred.user;
+      return cred.user.uid;
+    } catch (e) {
+      console.warn("Anonymous sign-in:", e);
+    }
+  }
+  return null;
+}
 import { 
   hydrateProfileFromFirestore, 
   attachProfileRealtimeListener, 

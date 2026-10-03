@@ -97,16 +97,22 @@ export function inspectTravelerFromMap(uid: string): void {
 
   if (badgeEl) {
     if (traveler.verificationStatus === 'verified') {
-      badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex-shrink-0";
+      badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-[#16a34a] flex-shrink-0";
       badgeEl.textContent = "Verified Explorer ✓";
     } else {
-      badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0";
+      badgeEl.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-[#16a34a] flex-shrink-0";
       badgeEl.textContent = "⚪ Unverified";
     }
   }
 
-  if (cityEl) cityEl.textContent = `${(traveler as any).upcomingCircuit || traveler.currentCircuit || 'All India'} • ${(traveler as any).homeCity || traveler.city || 'India'}`;
-  if (bioEl) bioEl.textContent = traveler.bio || "Fellow explorer on the Bharat backpacking circuit!";
+  if (cityEl) {
+    cityEl.className = "text-xs text-[#16a34a] font-medium truncate mt-0.5";
+    cityEl.textContent = `${(traveler as any).upcomingCircuit || traveler.currentCircuit || 'All India'} • ${(traveler as any).homeCity || traveler.city || 'India'}`;
+  }
+  if (bioEl) {
+    bioEl.className = "text-[#16a34a] bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed max-h-36 overflow-y-auto font-medium";
+    bioEl.textContent = traveler.bio || "Fellow explorer on the Bharat backpacking circuit!";
+  }
 
   if (stylesContainer) {
     stylesContainer.innerHTML = '';
@@ -115,7 +121,7 @@ export function inspectTravelerFromMap(uid: string): void {
       : ['Backpacker', 'Hostels'];
     styles.forEach((s: string) => {
       const span = document.createElement('span');
-      span.className = "px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-100";
+      span.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-[#16a34a] border border-emerald-200";
       span.textContent = s;
       stylesContainer.appendChild(span);
     });

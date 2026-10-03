@@ -36,6 +36,11 @@ export function populateProfileForm(): void {
   if (bioInput) bioInput.value = profile.bio || '';
   if (intentInput) intentInput.value = profile.intent || '';
 
+  const latInp = document.getElementById('input-home-lat') as HTMLInputElement | null;
+  const lngInp = document.getElementById('input-home-lng') as HTMLInputElement | null;
+  if (latInp && profile.homeLat) latInp.value = String(profile.homeLat);
+  if (lngInp && profile.homeLng) lngInp.value = String(profile.homeLng);
+
   // Sync Intent Pills
   document.querySelectorAll('.intent-pill').forEach(pill => {
     const intent = pill.getAttribute('data-intent');
@@ -216,9 +221,21 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
   currentProfile.bio = bio;
   currentProfile.intent = travelIntent as any;
 
-  if (INDIAN_CIRCUITS_LOOKUP[upcomingCircuit]) {
+  const rawLat = parseFloat((document.getElementById('input-home-lat') as HTMLInputElement)?.value);
+  const rawLng = parseFloat((document.getElementById('input-home-lng') as HTMLInputElement)?.value);
+
+  if (!isNaN(rawLat) && !isNaN(rawLng) && rawLat !== 0 && rawLng !== 0) {
+    currentProfile.homeLat = rawLat;
+    currentProfile.homeLng = rawLng;
+  } else if (INDIAN_CIRCUITS_LOOKUP[homeCity]) {
+    currentProfile.homeLat = INDIAN_CIRCUITS_LOOKUP[homeCity].lat;
+    currentProfile.homeLng = INDIAN_CIRCUITS_LOOKUP[homeCity].lng;
+  } else if (INDIAN_CIRCUITS_LOOKUP[upcomingCircuit]) {
     currentProfile.homeLat = INDIAN_CIRCUITS_LOOKUP[upcomingCircuit].lat;
     currentProfile.homeLng = INDIAN_CIRCUITS_LOOKUP[upcomingCircuit].lng;
+  } else {
+    currentProfile.homeLat = 18.5204;
+    currentProfile.homeLng = 73.8567;
   }
 
   try {
