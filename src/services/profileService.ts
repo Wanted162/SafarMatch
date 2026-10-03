@@ -73,6 +73,21 @@ export function initProfileState(): UserProfile {
       }
       currentProfile = { ...currentProfile, ...parsed };
     }
+
+    // Hydrate confidential KYC vault data from persistent storage
+    const storedVault = localStorage.getItem('safarmatch_vault_' + (currentProfile.uid || 'guest')) ||
+                        localStorage.getItem('safarmatch_vault_data');
+    if (storedVault) {
+      try {
+        cachedVaultData = JSON.parse(storedVault);
+        if (cachedVaultData?.selfieData && !currentProfile.selfieData) {
+          currentProfile.selfieData = cachedVaultData.selfieData;
+        }
+        if (cachedVaultData?.govtIdData && !currentProfile.govtIdData) {
+          currentProfile.govtIdData = cachedVaultData.govtIdData;
+        }
+      } catch (e) {}
+    }
   } catch (e) {
     console.error("Error reading saved profile:", e);
   }
@@ -819,7 +834,11 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
     }
   }
 
-  (currentProfile as any).selfieSubmitted = true;
+  if (type === 'selfie') {
+    (currentProfile as any).selfieSubmitted = true;
+  } else {
+    (currentProfile as any).govtIdSubmitted = true;
+  }
   currentProfile.verificationStatus = "pending";
 
   const sizeKb = (blob.size / 1024).toFixed(1);
@@ -827,19 +846,91 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
 
   const commitToVault = async (base64Data: string) => {
     const fieldName = type === 'selfie' ? 'selfieData' : 'govtIdData';
+    if (type === 'selfie') {
+      currentProfile.selfieData = base64Data;
+      (currentProfile as any).selfieSubmitted = true;
+      if (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR) {
+        currentProfile.photoUrl = base64Data;
+        const profileAvatar = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
+        const headerAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+        if (profileAvatar) profileAvatar.src = base64Data;
+        if (headerAvatar) headerAvatar.src = base64Data;
+      }
+    } else {
+      currentProfile.govtIdData = base64Data;
+      (currentProfile as any).govtIdSubmitted = true;
+    }
+
     cachedVaultData = {
       ...cachedVaultData,
+      uid: currentProfile.uid || 'guest',
       [fieldName]: base64Data,
       verificationType: type,
-      status: 'pending_review'
+      status: 'pending_review',
+      submittedAt: new Date().toISOString()
     };
 
-    if (type === 'selfie' && (!currentProfile.photoUrl || currentProfile.photoUrl === DEFAULT_AVATAR)) {
-      currentProfile.photoUrl = base64Data;
-      const profileAvatar = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
-      const headerAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
-      if (profileAvatar) profileAvatar.src = base64Data;
-      if (headerAvatar) headerAvatar.src = base64Data;
+    // Save to persistent storage so images are never lost and are visible in Admin Portal
+    try {
+      const userUid = currentProfile.uid || 'guest';
+      localStorage.setItem('safarmatch_vault_' + userUid, JSON.stringify(cachedVaultData));
+      localStorage.setItem('safarmatch_vault_data', JSON.stringify(cachedVaultData));
+      localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+
+      // Construct verification record for Admin Portal queue
+      const verificationRecord = {
+        uid: userUid,
+        name: currentProfile.name || 'Traveler',
+        age: currentProfile.age || 24,
+        gender: currentProfile.gender || 'Explorer',
+        homeCity: currentProfile.homeCity || 'India',
+        upcomingCircuit: (currentProfile as any).upcomingCircuit || currentProfile.upcomingDestination || currentProfile.currentCircuit || 'Goa Circuit',
+        photoUrl: currentProfile.photoUrl || (type === 'selfie' ? base64Data : DEFAULT_AVATAR),
+        selfieData: cachedVaultData.selfieData || currentProfile.selfieData,
+        govtIdData: cachedVaultData.govtIdData || currentProfile.govtIdData,
+        verificationStatus: 'pending',
+        verificationSubmittedAt: new Date().toISOString(),
+        status: 'pending_review'
+      };
+      localStorage.setItem(STORAGE_KEYS.AWAITING_VERIFICATION_PREFIX + userUid, JSON.stringify(verificationRecord));
+
+      // Update travelers list if current user is present
+      const travelersRaw = localStorage.getItem(STORAGE_KEYS.ALL_TRAVELERS);
+      if (travelersRaw) {
+        try {
+          const list = JSON.parse(travelersRaw);
+          if (Array.isArray(list)) {
+            const idx = list.findIndex(t => t.uid === userUid);
+            if (idx >= 0) {
+              list[idx] = {
+                ...list[idx],
+                ...currentProfile,
+                selfieData: cachedVaultData.selfieData || currentProfile.selfieData,
+                govtIdData: cachedVaultData.govtIdData || currentProfile.govtIdData,
+                verificationStatus: 'pending'
+              };
+              localStorage.setItem(STORAGE_KEYS.ALL_TRAVELERS, JSON.stringify(list));
+            }
+          }
+        } catch (te) {}
+      }
+
+      // Notify other open tabs/windows (such as Admin Portal)
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: STORAGE_KEYS.AWAITING_VERIFICATION_PREFIX + userUid,
+        newValue: JSON.stringify(verificationRecord)
+      }));
+
+      try {
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('safarmatch_sync_channel');
+          bc.postMessage({ type: 'VERIFICATION_SUBMITTED', uid: userUid });
+          bc.close();
+        }
+      } catch (be) {}
+    } catch (e) {
+      console.warn("Storage write error for verification vault:", e);
     }
 
     if (isLiveFirebase && db && currentProfile.uid) {
@@ -856,6 +947,7 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
         // 2. Update lightweight status ONLY in profiles/{user.uid} (NO Base64 strings in profiles collection)
         await setDoc(doc(db, "profiles", currentProfile.uid), {
           verificationStatus: "pending",
+          selfieSubmitted: true,
           updatedAt: serverTimestamp()
         }, { merge: true });
 
@@ -867,11 +959,6 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
     } else {
       showToast("🔒 Identity securely encrypted in local vault. Review pending.", "info");
     }
-
-    try {
-      localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
-      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
-    } catch (e) {}
 
     updateVerificationDocumentBadges();
     updateProfileCompletionUI();

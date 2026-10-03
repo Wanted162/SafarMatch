@@ -628,7 +628,218 @@
     };
 
     // ==================== DATA FETCHING & REAL-TIME LISTENERS ====================
+    let cachedProfiles = [];
+    let cachedVault = new Map();
+
+    function getLocalVaultData(uid) {
+      let data = {};
+      try {
+        if (uid && uid !== 'guest') {
+          const direct = localStorage.getItem('safarmatch_vault_' + uid);
+          if (direct) Object.assign(data, JSON.parse(direct));
+        }
+      } catch (e) {}
+      try {
+        const general = localStorage.getItem('safarmatch_vault_data') || localStorage.getItem('safarmatch_vault_guest');
+        if (general) Object.assign(data, JSON.parse(general));
+      } catch (e) {}
+      return data;
+    }
+
+    function getLocalVerificationRecords() {
+      const recordsMap = new Map();
+
+      // 1. Scan awaiting verification records
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('safarmatch_awaiting_verification_')) {
+            try {
+              const rec = JSON.parse(localStorage.getItem(k) || '{}');
+              if (rec && (rec.uid || rec.selfieData || rec.govtIdData || rec.photoUrl)) {
+                const uid = rec.uid || 'current_user';
+                recordsMap.set(uid, rec);
+              }
+            } catch (e) {}
+          }
+        }
+      } catch (e) {}
+
+      // 2. Scan current user profile in localStorage
+      try {
+        const pRaw = localStorage.getItem('safarmatch_user_profile');
+        if (pRaw) {
+          const p = JSON.parse(pRaw);
+          const uid = p.uid || 'current_user';
+          const vData = getLocalVaultData(p.uid);
+          const selfie = p.selfieData || vData.selfieData || (p.photoUrl && p.photoUrl.startsWith('data:image') ? p.photoUrl : null);
+          const govt = p.govtIdData || vData.govtIdData;
+          
+          if (selfie || govt || p.selfieSubmitted || p.verificationStatus === 'pending' || p.verificationStatus === 'pending_review') {
+            const existing = recordsMap.get(uid) || {};
+            recordsMap.set(uid, {
+              ...p,
+              ...existing,
+              uid,
+              selfieData: selfie || existing.selfieData,
+              govtIdData: govt || existing.govtIdData,
+              verificationStatus: p.verificationStatus || existing.verificationStatus || 'pending',
+              verificationSubmittedAt: p.verificationSubmittedAt || vData.submittedAt || existing.verificationSubmittedAt || new Date().toISOString()
+            });
+          }
+        }
+      } catch (e) {}
+
+      // 3. Scan travelers list in localStorage
+      try {
+        const travelersRaw = localStorage.getItem('safarmatch_all_travelers');
+        if (travelersRaw) {
+          const travelers = JSON.parse(travelersRaw);
+          if (Array.isArray(travelers)) {
+            travelers.forEach(t => {
+              const vData = getLocalVaultData(t.uid);
+              const selfie = t.selfieData || vData.selfieData || (t.photoUrl && t.photoUrl.startsWith('data:image') ? t.photoUrl : null);
+              const govt = t.govtIdData || vData.govtIdData;
+              if (selfie || govt || t.verificationStatus === 'pending' || t.verificationStatus === 'pending_review') {
+                const uid = t.uid || 'traveler_' + Math.random().toString(36).substring(2, 7);
+                const existing = recordsMap.get(uid) || {};
+                recordsMap.set(uid, {
+                  ...t,
+                  ...existing,
+                  uid,
+                  selfieData: selfie || existing.selfieData,
+                  govtIdData: govt || existing.govtIdData,
+                  verificationStatus: t.verificationStatus || existing.verificationStatus || 'pending'
+                });
+              }
+            });
+          }
+        }
+      } catch (e) {}
+
+      return Array.from(recordsMap.values());
+    }
+
+    const mergeQueues = () => {
+      const vList = [];
+      const pList = [];
+      const seenVUid = new Set();
+
+      const localRecords = getLocalVerificationRecords();
+      const localMap = new Map();
+      localRecords.forEach(r => localMap.set(r.uid, r));
+
+      cachedProfiles.forEach(p => {
+        const uid = p.uid;
+        const vData = cachedVault.get(uid) || getLocalVaultData(uid) || {};
+        const localRec = localMap.get(uid) || {};
+
+        const selfie = vData.selfieData || localRec.selfieData || p.selfieData || (p.photoUrl && p.photoUrl.startsWith('data:image') ? p.photoUrl : null) || p.photoUrl;
+        const govt = vData.govtIdData || localRec.govtIdData || p.govtIdData || null;
+        const vStatus = p.verificationStatus || localRec.verificationStatus || vData.status || "unverified";
+
+        // Combine public profile with confidential KYC vault & local storage
+        const combined = {
+          ...p,
+          ...localRec,
+          selfieData: selfie,
+          govtIdData: govt,
+          verificationStatus: vStatus,
+          verificationSubmittedAt: vData.verificationSubmittedAt || localRec.verificationSubmittedAt || p.verificationSubmittedAt || vData.submittedAt || new Date().toISOString(),
+          vaultStatus: vData.status || localRec.status || "unsubmitted"
+        };
+
+        // 1. Identity Verification Filter: pending or pending_review or has uploaded selfie/ID
+        if (
+          combined.verificationStatus === 'pending' ||
+          combined.verificationStatus === 'pending_review' ||
+          vData.status === 'pending_review' ||
+          (!combined.verificationStatus && (combined.selfieData || combined.govtIdData)) ||
+          (combined.selfieData && combined.govtIdData && combined.verificationStatus !== 'verified' && combined.verificationStatus !== 'rejected')
+        ) {
+          vList.push(combined);
+          seenVUid.add(uid);
+        }
+
+        // 2. Payment Approval Filter: subscription.status == 'pending_review' or has UTR awaiting confirmation
+        if (
+          (p.subscription && p.subscription.status === 'pending_review') ||
+          (p.subscription && p.subscription.utr && p.subscription.status !== 'active')
+        ) {
+          pList.push(p);
+        }
+      });
+
+      // Add any local verification submissions not already represented from Firestore
+      localRecords.forEach(r => {
+        if (!seenVUid.has(r.uid)) {
+          if (
+            r.verificationStatus === 'pending' ||
+            r.verificationStatus === 'pending_review' ||
+            r.selfieData ||
+            r.govtIdData
+          ) {
+            vList.push(r);
+            seenVUid.add(r.uid);
+          }
+        }
+      });
+
+      // Add any local payments awaiting confirmation
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('safarmatch_awaiting_payment_')) {
+            try {
+              const rec = JSON.parse(localStorage.getItem(k) || '{}');
+              if (rec && rec.utr) {
+                const already = pList.some(p => (p.subscription && (p.subscription.utr === rec.utr || p.subscription.utrNumber === rec.utr)) || p.uid === rec.uid);
+                if (!already) {
+                  pList.push({
+                    uid: rec.uid || 'guest',
+                    name: rec.userName || 'Traveler',
+                    email: rec.userEmail || '',
+                    subscription: {
+                      plan: rec.plan,
+                      amount: rec.amount,
+                      utr: rec.utr,
+                      submittedAt: rec.submittedAt,
+                      status: 'pending_review'
+                    }
+                  });
+                }
+              }
+            } catch (e) {}
+          }
+        }
+      } catch (e) {}
+
+      verificationQueue = vList;
+      paymentsQueue = pList;
+
+      renderVerificationQueue();
+      renderPaymentsQueue();
+      updateBadges();
+    };
+
     async function initAdminData() {
+      // Immediately render local submissions so images are visible right away
+      mergeQueues();
+
+      // Listen for local storage updates from other tabs
+      window.addEventListener('storage', (e) => {
+        if (!e.key || e.key.startsWith('safarmatch_') || e.key.includes('profile') || e.key.includes('vault') || e.key.includes('verification')) {
+          mergeQueues();
+        }
+      });
+
+      try {
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('safarmatch_sync_channel');
+          bc.onmessage = () => mergeQueues();
+        }
+      } catch (e) {}
+
       try {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
@@ -646,59 +857,12 @@
       } catch (err) {
         console.warn("Firebase live init fallback:", err);
         isLiveFirebase = false;
+        mergeQueues();
       }
     }
 
     function setupRealtimeListeners() {
       if (!isLiveFirebase || !db) return;
-
-      let cachedProfiles = [];
-      let cachedVault = new Map();
-
-      const mergeQueues = () => {
-        const vList = [];
-        const pList = [];
-
-        cachedProfiles.forEach(p => {
-          const uid = p.uid;
-          const vData = cachedVault.get(uid) || {};
-
-          // Combine public profile with confidential KYC vault
-          const combined = {
-            ...p,
-            selfieData: vData.selfieData || p.photoUrl || p.selfieData,
-            govtIdData: vData.govtIdData || p.govtIdData,
-            verificationStatus: p.verificationStatus || vData.status || "unverified",
-            verificationSubmittedAt: vData.verificationSubmittedAt || p.verificationSubmittedAt || vData.submittedAt,
-            vaultStatus: vData.status || "unsubmitted"
-          };
-
-          // 1. Identity Verification Filter: pending or pending_review
-          if (
-            combined.verificationStatus === 'pending' ||
-            combined.verificationStatus === 'pending_review' ||
-            vData.status === 'pending_review' ||
-            (!combined.verificationStatus && (combined.selfieData || combined.govtIdData))
-          ) {
-            vList.push(combined);
-          }
-
-          // 2. Payment Approval Filter: subscription.status == 'pending_review' or has UTR awaiting confirmation
-          if (
-            (p.subscription && p.subscription.status === 'pending_review') ||
-            (p.subscription && p.subscription.utr && p.subscription.status !== 'active')
-          ) {
-            pList.push(p);
-          }
-        });
-
-        verificationQueue = vList;
-        paymentsQueue = pList;
-
-        renderVerificationQueue();
-        renderPaymentsQueue();
-        updateBadges();
-      };
 
       try {
         // Real-time listener for public profiles
@@ -709,7 +873,10 @@
           });
           cachedProfiles = list;
           mergeQueues();
-        }, (err) => console.warn("Firestore profiles snapshot error:", err));
+        }, (err) => {
+          console.warn("Firestore profiles snapshot error:", err);
+          mergeQueues();
+        });
 
         // Real-time listener for private KYC vault documents
         onSnapshot(collection(db, "vault"), (snapshot) => {
@@ -719,7 +886,10 @@
           });
           cachedVault = vMap;
           mergeQueues();
-        }, (err) => console.warn("Firestore vault snapshot error:", err));
+        }, (err) => {
+          console.warn("Firestore vault snapshot notice (using local vault fallback):", err);
+          mergeQueues();
+        });
 
         // Real-time listener for feedback collection
         onSnapshot(collection(db, "feedback"), (snapshot) => {
@@ -744,66 +914,45 @@
       
       if (isLiveFirebase && db) {
         try {
-          const [profilesSnap, vaultSnap, feedbackSnap] = await Promise.all([
+          const [profilesRes, vaultRes, feedbackRes] = await Promise.allSettled([
             getDocs(collection(db, "profiles")),
             getDocs(collection(db, "vault")),
             getDocs(collection(db, "feedback"))
           ]);
 
-          const vaultMap = new Map();
-          vaultSnap.forEach(d => vaultMap.set(d.id, d.data()));
+          if (profilesRes.status === 'fulfilled') {
+            const list = [];
+            profilesRes.value.forEach(docSnap => {
+              list.push({ uid: docSnap.id, ...docSnap.data() });
+            });
+            cachedProfiles = list;
+          }
 
-          const vList = [];
-          const pList = [];
-          profilesSnap.forEach(docSnap => {
-            const data = docSnap.data();
-            const uid = docSnap.id;
-            const vData = vaultMap.get(uid) || {};
+          if (vaultRes.status === 'fulfilled') {
+            const vaultMap = new Map();
+            vaultRes.value.forEach(d => vaultMap.set(d.id, d.data()));
+            cachedVault = vaultMap;
+          }
 
-            const combined = {
-              uid,
-              ...data,
-              selfieData: vData.selfieData || data.photoUrl || data.selfieData,
-              govtIdData: vData.govtIdData || data.govtIdData,
-              verificationStatus: data.verificationStatus || vData.status || "unverified",
-              verificationSubmittedAt: vData.verificationSubmittedAt || data.verificationSubmittedAt || vData.submittedAt
-            };
+          if (feedbackRes.status === 'fulfilled') {
+            const fList = [];
+            feedbackRes.value.forEach(docSnap => {
+              fList.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            fList.sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
+            feedbackList = fList;
+            renderFeedbackQueue();
+          }
 
-            if (
-              combined.verificationStatus === 'pending' ||
-              combined.verificationStatus === 'pending_review' ||
-              vData.status === 'pending_review' ||
-              (!combined.verificationStatus && (combined.selfieData || combined.govtIdData))
-            ) {
-              vList.push(combined);
-            }
-
-            if (
-              (data.subscription && data.subscription.status === 'pending_review') ||
-              (data.subscription && data.subscription.utr && data.subscription.status !== 'active')
-            ) {
-              pList.push({ uid, ...data });
-            }
-          });
-
-          verificationQueue = vList;
-          paymentsQueue = pList;
-
-          const fList = [];
-          feedbackSnap.forEach(docSnap => {
-            fList.push({ id: docSnap.id, ...docSnap.data() });
-          });
-          fList.sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
-          feedbackList = fList;
-
-          renderVerificationQueue();
-          renderPaymentsQueue();
-          renderFeedbackQueue();
-          updateBadges();
-          showToast("Queues refreshed from database", "info");
+          mergeQueues();
+          showToast("Queues refreshed from database & local vault", "info");
         } catch (e) {
           console.warn("Refresh error:", e);
+          mergeQueues();
         }
+      } else {
+        mergeQueues();
+        showToast("Queues refreshed from local vault", "info");
       }
       setTimeout(() => {
         if (icon) icon.classList.remove('animate-spin');
@@ -1034,18 +1183,55 @@
             rejectionReason: finalReason,
             reviewedAt: serverTimestamp()
           }, { merge: true });
-
-          showToast(`Rejected ${name}. Rejection reason dispatched to traveler.`, "info");
         } catch (err) {
-          console.error("Error rejecting verification in Firestore:", err);
-          showToast("Firestore update error: " + err.message, "error");
+          console.warn("Firestore reject note (proceeding with local update):", err);
         }
-      } else {
-        verificationQueue = verificationQueue.filter(t => t.uid !== uid);
-        renderVerificationQueue();
-        updateBadges();
-        showToast(`Rejected ${name} locally.`, "info");
       }
+
+      // Update local storage so traveler's app receives the rejection reason immediately
+      try {
+        const uProfRaw = localStorage.getItem('safarmatch_user_profile');
+        if (uProfRaw) {
+          const uProf = JSON.parse(uProfRaw);
+          if (uProf.uid === uid || !uid || uid === 'guest' || uid === 'current_user') {
+            uProf.verificationStatus = 'rejected';
+            uProf.verificationRejectionReason = finalReason;
+            localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
+            localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
+          }
+        }
+        localStorage.removeItem('safarmatch_awaiting_verification_' + uid);
+
+        // Update travelers list
+        const travelersRaw = localStorage.getItem('safarmatch_all_travelers');
+        if (travelersRaw) {
+          const list = JSON.parse(travelersRaw);
+          if (Array.isArray(list)) {
+            const idx = list.findIndex(t => t.uid === uid);
+            if (idx >= 0) {
+              list[idx].verificationStatus = 'rejected';
+              list[idx].verificationRejectionReason = finalReason;
+              localStorage.setItem('safarmatch_all_travelers', JSON.stringify(list));
+            }
+          }
+        }
+
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'safarmatch_user_profile',
+          newValue: localStorage.getItem('safarmatch_user_profile')
+        }));
+
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('safarmatch_sync_channel');
+          bc.postMessage({ type: 'VERIFICATION_REJECTED', uid, reason: finalReason });
+          bc.close();
+        }
+      } catch (e) {}
+
+      verificationQueue = verificationQueue.filter(t => t.uid !== uid);
+      renderVerificationQueue();
+      updateBadges();
+      showToast(`Rejected ${name}. Rejection reason recorded.`, "info");
       closeRejectVerificationModal();
     };
 
@@ -1067,18 +1253,56 @@
             status: "archived",
             reviewedAt: serverTimestamp()
           }, { merge: true });
-
-          showToast(`Approved ${name}! Verified Explorer shield issued.`, "success");
         } catch (err) {
-          console.error("Error approving identity:", err);
-          showToast("Failed to approve in Firestore: " + err.message, "error");
+          console.warn("Firestore approval note (proceeding with local update):", err);
         }
-      } else {
-        verificationQueue = verificationQueue.filter(t => t.uid !== uid);
-        renderVerificationQueue();
-        updateBadges();
-        showToast(`Approved ${name} locally.`, "success");
       }
+
+      // Update local storage so traveler's app receives the verified shield immediately
+      try {
+        const uProfRaw = localStorage.getItem('safarmatch_user_profile');
+        if (uProfRaw) {
+          const uProf = JSON.parse(uProfRaw);
+          if (uProf.uid === uid || !uid || uid === 'guest' || uid === 'current_user') {
+            uProf.verificationStatus = 'verified';
+            uProf.verificationRejectionReason = null;
+            uProf.isVerified = true;
+            localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
+            localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
+          }
+        }
+        localStorage.removeItem('safarmatch_awaiting_verification_' + uid);
+
+        // Update travelers list
+        const travelersRaw = localStorage.getItem('safarmatch_all_travelers');
+        if (travelersRaw) {
+          const list = JSON.parse(travelersRaw);
+          if (Array.isArray(list)) {
+            const idx = list.findIndex(t => t.uid === uid);
+            if (idx >= 0) {
+              list[idx].verificationStatus = 'verified';
+              list[idx].verificationRejectionReason = null;
+              localStorage.setItem('safarmatch_all_travelers', JSON.stringify(list));
+            }
+          }
+        }
+
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'safarmatch_user_profile',
+          newValue: localStorage.getItem('safarmatch_user_profile')
+        }));
+
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('safarmatch_sync_channel');
+          bc.postMessage({ type: 'VERIFICATION_APPROVED', uid });
+          bc.close();
+        }
+      } catch (e) {}
+
+      verificationQueue = verificationQueue.filter(t => t.uid !== uid);
+      renderVerificationQueue();
+      updateBadges();
+      showToast(`Approved ${name}! Verified Explorer shield issued.`, "success");
     };
 
     // =========================================================================

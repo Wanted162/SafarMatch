@@ -37,11 +37,11 @@ let db: Firestore | null = null;
 let storage: FirebaseStorage | null = null;
 let isLiveFirebase = false;
 
-// Determine if a real provisioned project is supplied (not the unprovisioned safarmatch-live placeholder)
+// Determine if a real provisioned project is supplied
 const isProvisionedProject = Boolean(
   (runtimeConfig && runtimeConfig.projectId) ||
   (storedConfig && storedConfig.projectId) ||
-  (firebaseConfig.projectId && firebaseConfig.projectId !== 'safarmatch-live')
+  firebaseConfig.projectId
 );
 
 try {
