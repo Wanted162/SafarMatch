@@ -74,6 +74,8 @@ export interface ChatMetadata {
 
 export interface UserProfile {
   uid: string;
+  email?: string;
+  accountKey?: string;
   name: string;
   age: number;
   gender: 'Female' | 'Male' | 'Non-Binary' | '';

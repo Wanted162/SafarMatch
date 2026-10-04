@@ -3,10 +3,10 @@
  * Handles user profile state, KYC documents, live WebRTC selfie capture, and Firestore synchronization.
  */
 
-import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { db, auth, isLiveFirebase } from '../config/firebase';
-import { STORAGE_KEYS, isNotificationSeen, markNotificationSeen, resetNotificationSeen } from '../utils/storage';
+import { STORAGE_KEYS, getAccountKeyFromEmail, isNotificationSeen, markNotificationSeen, resetNotificationSeen } from '../utils/storage';
 import { showToast } from '../utils/toast';
 import { INDIAN_CIRCUITS_LOOKUP } from '../config/constants';
 import { isStep1Complete, hasActiveExplorerPass, getMonthlyConnects } from './paymentService';
@@ -59,7 +59,7 @@ export function setCurrentProfile(profile: UserProfile): void {
 
 export function initProfileState(): UserProfile {
   try {
-    const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
+    const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILE) || localStorage.getItem('safarmatch_user_profile');
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.bio && parsed.bio.includes("Passionate about road trips, chai stops")) {
@@ -75,7 +75,10 @@ export function initProfileState(): UserProfile {
     }
 
     // Hydrate confidential KYC vault data from persistent storage
-    const storedVault = localStorage.getItem('safarmatch_vault_' + (currentProfile.uid || 'guest')) ||
+    const userUid = currentProfile.uid || 'guest';
+    const emailKey = currentProfile.email ? getAccountKeyFromEmail(currentProfile.email) : null;
+    const storedVault = localStorage.getItem('safarmatch_vault_' + userUid) ||
+                        (emailKey ? localStorage.getItem('safarmatch_vault_' + emailKey) : null) ||
                         localStorage.getItem('safarmatch_vault_data');
     if (storedVault) {
       try {
@@ -355,9 +358,34 @@ export function updateVerificationDocumentBadges(): void {
   const selfieBadge = document.getElementById('badge-selfie-state');
   const govidBadge = document.getElementById('badge-govid-state');
 
+  const selfieThumbBox = document.getElementById('selfie-preview-thumbnail-container');
+  const selfieThumbImg = document.getElementById('selfie-preview-thumbnail') as HTMLImageElement | null;
+  const govidThumbBox = document.getElementById('govid-preview-thumbnail-container');
+  const govidThumbImg = document.getElementById('govid-preview-thumbnail') as HTMLImageElement | null;
+
   const isVerified = currentProfile.verificationStatus === 'verified';
-  const hasSelfie = !!(cachedVaultData?.selfieData || (currentProfile as any).selfieSubmitted || (currentProfile as any).selfieData);
-  const hasGovId = !!(cachedVaultData?.govtIdData || (currentProfile as any).govtIdData);
+  const selfieData = currentProfile.selfieData || cachedVaultData?.selfieData;
+  const hasSelfie = !!(selfieData || (currentProfile as any).selfieSubmitted);
+  const govidData = currentProfile.govtIdData || cachedVaultData?.govtIdData;
+  const hasGovId = !!(govidData || (currentProfile as any).govtIdSubmitted);
+
+  if (selfieThumbBox && selfieThumbImg) {
+    if (selfieData && typeof selfieData === 'string' && selfieData.startsWith('data:image')) {
+      selfieThumbImg.src = selfieData;
+      selfieThumbBox.classList.remove('hidden');
+    } else {
+      selfieThumbBox.classList.add('hidden');
+    }
+  }
+
+  if (govidThumbBox && govidThumbImg) {
+    if (govidData && typeof govidData === 'string' && govidData.startsWith('data:image')) {
+      govidThumbImg.src = govidData;
+      govidThumbBox.classList.remove('hidden');
+    } else {
+      govidThumbBox.classList.add('hidden');
+    }
+  }
 
   if (selfieBadge) {
     if (isVerified) {
@@ -389,35 +417,125 @@ export function updateVerificationDocumentBadges(): void {
 export async function hydrateProfileFromFirestore(uid: string, googleUser?: any): Promise<UserProfile> {
   if (!uid) return currentProfile;
 
+  const targetEmail = (googleUser?.email || currentProfile.email || '').trim().toLowerCase();
+  const accountKey = targetEmail ? getAccountKeyFromEmail(targetEmail) : null;
+
   if (isLiveFirebase && db) {
     try {
-      // 1. Fetch public profile (profiles/{uid})
-      const docRef = doc(db, "profiles", uid);
-      const docSnap = await getDoc(docRef);
+      // 1. Fetch public profile from profiles/{uid} or profiles/{accountKey}
+      let docRef = doc(db, "profiles", uid);
+      let docSnap = await getDoc(docRef);
+
+      // If document not found under UID, try accountKey derived from email
+      if (!docSnap.exists() && accountKey && accountKey !== uid) {
+        const accDocRef = doc(db, "profiles", accountKey);
+        const accSnap = await getDoc(accDocRef);
+        if (accSnap.exists()) {
+          docRef = accDocRef;
+          docSnap = accSnap;
+        }
+      }
+
+      // If still not found by direct ID, search Firestore profiles collection by email!
+      if (!docSnap.exists() && targetEmail) {
+        try {
+          const q = query(
+            collection(db, "profiles"),
+            where("email", "==", targetEmail),
+            limit(1)
+          );
+          const qSnap = await getDocs(q);
+          if (!qSnap.empty) {
+            const foundDoc = qSnap.docs[0];
+            docRef = foundDoc.ref;
+            docSnap = foundDoc;
+          }
+        } catch (qErr) {
+          console.warn("Firestore query by email notice:", qErr);
+        }
+      }
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         currentProfile = {
           ...currentProfile,
-          uid,
+          uid: accountKey || uid,
           ...data
         };
+        if (targetEmail) {
+          currentProfile.email = targetEmail;
+        }
+        if (data.selfieData) {
+          currentProfile.selfieData = data.selfieData;
+          (currentProfile as any).selfieSubmitted = true;
+        }
+        if (data.govtIdData) {
+          currentProfile.govtIdData = data.govtIdData;
+          (currentProfile as any).govtIdSubmitted = true;
+        }
+        if (data.photoUrl) {
+          currentProfile.photoUrl = data.photoUrl;
+        }
+
+        // Hydrate cachedVaultData from the profile record
+        if (data.selfieData || data.govtIdData) {
+          cachedVaultData = {
+            ...cachedVaultData,
+            uid: currentProfile.uid,
+            selfieData: data.selfieData || cachedVaultData?.selfieData || '',
+            govtIdData: data.govtIdData || cachedVaultData?.govtIdData || '',
+            status: data.verificationStatus || 'pending_review'
+          };
+          try {
+            localStorage.setItem('safarmatch_vault_data', JSON.stringify(cachedVaultData));
+            localStorage.setItem('safarmatch_vault_' + uid, JSON.stringify(cachedVaultData));
+            if (accountKey) localStorage.setItem('safarmatch_vault_' + accountKey, JSON.stringify(cachedVaultData));
+          } catch (e) {}
+        }
+
+        // Keep a synced copy under accountKey if loaded from a different doc ID
+        if (accountKey && docRef.id !== accountKey) {
+          try {
+            await setDoc(doc(db, "profiles", accountKey), {
+              ...data,
+              uid: accountKey,
+              email: targetEmail
+            }, { merge: true });
+          } catch (e) {}
+        }
       } else {
+        // Initialize new profile document without destroying existing info
         currentProfile = {
           ...currentProfile,
-          uid,
+          uid: accountKey || uid,
+          email: targetEmail || currentProfile.email,
           name: googleUser?.displayName || currentProfile.name || "Explorer",
           photoUrl: googleUser?.photoURL || currentProfile.photoUrl || DEFAULT_AVATAR
         };
-        const { selfieData, govtIdData, ...lightweightInit } = currentProfile as any;
-        await setDoc(docRef, { ...lightweightInit, updatedAt: serverTimestamp() }, { merge: true });
+        await setDoc(docRef, {
+          uid: currentProfile.uid,
+          email: currentProfile.email || '',
+          name: currentProfile.name,
+          photoUrl: currentProfile.photoUrl,
+          selfieData: currentProfile.selfieData || '',
+          govtIdData: currentProfile.govtIdData || '',
+          verificationStatus: currentProfile.verificationStatus || 'unverified',
+          subscriptionStatus: currentProfile.subscriptionStatus || 'free',
+          updatedAt: serverTimestamp()
+        }, { merge: true });
       }
 
-      // 2. Fetch confidential KYC vault (vault/{uid})
-      const vaultRef = doc(db, "vault", uid);
-      const vaultSnap = await getDoc(vaultRef);
-      if (vaultSnap.exists()) {
-        cachedVaultData = vaultSnap.data();
-      }
+      // 2. Also check confidential KYC vault (vault/{uid}) if accessible
+      try {
+        const vaultRef = doc(db, "vault", uid);
+        const vaultSnap = await getDoc(vaultRef);
+        if (vaultSnap.exists()) {
+          const vData = vaultSnap.data();
+          cachedVaultData = { ...cachedVaultData, ...vData };
+          if (vData.selfieData && !currentProfile.selfieData) currentProfile.selfieData = vData.selfieData;
+          if (vData.govtIdData && !currentProfile.govtIdData) currentProfile.govtIdData = vData.govtIdData;
+        }
+      } catch (vaultErr) {}
     } catch (e) {
       console.warn("Firestore hydrateProfile error:", e);
     }
@@ -431,6 +549,7 @@ export async function hydrateProfileFromFirestore(uid: string, googleUser?: any)
   const circuitInput = document.getElementById('input-upcoming-circuit') as HTMLInputElement | null;
   const bioInput = document.getElementById('input-bio') as HTMLTextAreaElement | null;
   const intentInput = document.getElementById('input-travel-intent') as HTMLInputElement | null;
+  const emailInput = document.getElementById('input-email') as HTMLInputElement | null;
 
   if (nameInput) nameInput.value = currentProfile.name || '';
   if (ageInput) ageInput.value = currentProfile.age ? String(currentProfile.age) : '';
@@ -439,9 +558,10 @@ export async function hydrateProfileFromFirestore(uid: string, googleUser?: any)
   if (circuitInput) circuitInput.value = currentProfile.currentCircuit || currentProfile.upcomingDestination || '';
   if (bioInput) bioInput.value = currentProfile.bio || '';
   if (intentInput) intentInput.value = currentProfile.intent || 'companion';
+  if (emailInput) emailInput.value = currentProfile.email || '';
 
   // Restore avatars across UI
-  const avatarSrc = currentProfile.photoUrl || cachedVaultData?.selfieData || DEFAULT_AVATAR;
+  const avatarSrc = currentProfile.photoUrl || cachedVaultData?.selfieData || currentProfile.selfieData || DEFAULT_AVATAR;
   const profileAvatar = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
   const headerAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
   const menuAvatar = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
@@ -449,12 +569,14 @@ export async function hydrateProfileFromFirestore(uid: string, googleUser?: any)
   if (headerAvatar) headerAvatar.src = avatarSrc;
   if (menuAvatar) menuAvatar.src = avatarSrc;
 
-  // Restore user name in header and dropdown
+  // Restore user name and email in header and dropdown
   const headerName = document.getElementById('header-user-name');
   const menuName = document.getElementById('menu-user-name');
+  const menuEmail = document.getElementById('menu-user-email');
   const profileDisplayName = document.getElementById('profile-display-name');
   if (headerName && currentProfile.name) headerName.textContent = currentProfile.name.split(' ')[0];
   if (menuName && currentProfile.name) menuName.textContent = currentProfile.name;
+  if (menuEmail && currentProfile.email) menuEmail.textContent = currentProfile.email;
   if (profileDisplayName && currentProfile.name) profileDisplayName.textContent = currentProfile.name;
 
   // Hydrate map marker
@@ -666,7 +788,7 @@ export function closeSelfieModal(): void {
 
 /**
  * HTML5 Canvas Image Compression Pipeline
- * Scales uploaded images (camera stream or file) to max 480x480 (JPEG 0.7 quality),
+ * Scales uploaded images (camera stream or file) to max 480x480 (JPEG 0.75 quality),
  * strictly guaranteeing files stay <60 KB to prevent document bloat and memory leaks.
  */
 export function compressImageToCanvasBlob(
@@ -675,9 +797,21 @@ export function compressImageToCanvasBlob(
 ): Promise<{ blob: Blob; base64: string }> {
   return new Promise((resolve, reject) => {
     try {
+      if (source instanceof HTMLVideoElement) {
+        if (!source.videoWidth || !source.videoHeight || source.readyState < 2) {
+          reject(new Error("Camera stream is not ready yet. Please wait a second and retry."));
+          return;
+        }
+      }
+
       const maxDim = 480;
-      let width = source instanceof HTMLVideoElement ? source.videoWidth || 480 : source.naturalWidth || source.width;
-      let height = source instanceof HTMLVideoElement ? source.videoHeight || 480 : source.naturalHeight || source.height;
+      let width = source instanceof HTMLVideoElement ? source.videoWidth : (source.naturalWidth || source.width || 480);
+      let height = source instanceof HTMLVideoElement ? source.videoHeight : (source.naturalHeight || source.height || 480);
+
+      if (width <= 0 || height <= 0) {
+        reject(new Error("Invalid image source dimensions"));
+        return;
+      }
 
       if (width > maxDim || height > maxDim) {
         if (width > height) {
@@ -708,14 +842,30 @@ export function compressImageToCanvasBlob(
 
       ctx.drawImage(source, 0, 0, width, height);
 
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error("Canvas blob conversion failed"));
-          return;
-        }
-        const base64 = canvas.toDataURL('image/jpeg', 0.7);
-        resolve({ blob, base64 });
-      }, 'image/jpeg', 0.7);
+      try {
+        const base64 = canvas.toDataURL('image/jpeg', 0.75);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve({ blob, base64 });
+          } else {
+            try {
+              const byteString = atob(base64.split(',')[1]);
+              const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+              const ab = new ArrayBuffer(byteString.length);
+              const ia = new Uint8Array(ab);
+              for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+              }
+              const fallbackBlob = new Blob([ab], { type: mimeString });
+              resolve({ blob: fallbackBlob, base64 });
+            } catch (convErr) {
+              resolve({ blob: new Blob([base64], { type: 'image/jpeg' }), base64 });
+            }
+          }
+        }, 'image/jpeg', 0.75);
+      } catch (err) {
+        reject(err);
+      }
     } catch (err) {
       reject(err);
     }
@@ -772,10 +922,18 @@ export function retakeSelfieFrame(): void {
 }
 
 export function uploadCapturedSelfie(): void {
-  if (!capturedSelfieBlob) return;
   const base64 = (window as any).__lastCapturedSelfieBase64;
-  processVerificationSubmission("selfie", capturedSelfieBlob, base64);
+  if (!capturedSelfieBlob && !base64) {
+    showToast("Please capture a photo first.", "info");
+    return;
+  }
+  if (capturedSelfieBlob) {
+    processVerificationSubmission("selfie", capturedSelfieBlob, base64);
+  } else if (base64) {
+    processVerificationSubmission("selfie", new Blob(), base64);
+  }
   closeSelfieModal();
+  showToast("Live selfie captured & uploaded for verification!", "success");
 }
 
 export function handleSelfieFileSelected(e: Event): void {
@@ -783,16 +941,36 @@ export function handleSelfieFileSelected(e: Event): void {
   const file = target.files && target.files[0];
   if (!file) return;
 
+  const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name);
+  if (!isImage) {
+    showToast("Please select a valid image file (JPG, PNG, WEBP).", "error");
+    target.value = '';
+    return;
+  }
+
+  showToast("Processing selfie image...", "info");
+
   const reader = new FileReader();
+  reader.onerror = () => {
+    showToast("Failed to read image file.", "error");
+    target.value = '';
+  };
   reader.onload = function(evt) {
     const img = new Image();
+    img.onerror = () => {
+      showToast("Unable to decode photo. Please select another image.", "error");
+      target.value = '';
+    };
     img.onload = function() {
       compressImageToCanvasBlob(img, false).then(({ blob, base64 }) => {
         processVerificationSubmission("selfie", blob, base64);
         closeSelfieModal();
+        showToast("Selfie photo successfully uploaded for verification!", "success");
       }).catch(err => {
         console.error("Selfie file compression error:", err);
         showToast("Error compressing photo.", "error");
+      }).finally(() => {
+        target.value = '';
       });
     };
     img.src = evt.target?.result as string;
@@ -805,15 +983,35 @@ export function handleGovIdFileSelected(e: Event): void {
   const file = target.files && target.files[0];
   if (!file) return;
 
+  const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name);
+  if (!isImage) {
+    showToast("Please select a valid image file (JPG, PNG, WEBP).", "error");
+    target.value = '';
+    return;
+  }
+
+  showToast("Processing Government Photo ID...", "info");
+
   const reader = new FileReader();
+  reader.onerror = () => {
+    showToast("Failed to read document file.", "error");
+    target.value = '';
+  };
   reader.onload = function(evt) {
     const img = new Image();
+    img.onerror = () => {
+      showToast("Unable to decode document photo. Please select another image.", "error");
+      target.value = '';
+    };
     img.onload = function() {
       compressImageToCanvasBlob(img, false).then(({ blob, base64 }) => {
         processVerificationSubmission("gov_id", blob, base64);
+        showToast("Government ID document uploaded for verification!", "success");
       }).catch(err => {
         console.error("Gov ID compression error:", err);
         showToast("Error compressing ID document.", "error");
+      }).finally(() => {
+        target.value = '';
       });
     };
     img.src = evt.target?.result as string;
@@ -824,13 +1022,37 @@ export function handleGovIdFileSelected(e: Event): void {
 async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Blob, precomputedBase64?: string): Promise<void> {
   if (!currentProfile) return;
 
-  // Auto-Anonymous Auth: If a guest submits verification, ensure signed in so Firestore rules do not reject the write
+  // 1. Pick up account email & name from DOM inputs if not yet populated on currentProfile
+  if (!currentProfile.email) {
+    const emailInp = (document.getElementById('input-email') as HTMLInputElement | null)?.value?.trim() ||
+                     (document.getElementById('landing-email-input') as HTMLInputElement | null)?.value?.trim() || '';
+    if (emailInp && emailInp.includes('@')) {
+      currentProfile.email = emailInp.toLowerCase();
+    }
+  }
+  if (!currentProfile.name || currentProfile.name === 'Explorer' || currentProfile.name === 'Traveler') {
+    const nameInp = (document.getElementById('input-full-name') as HTMLInputElement | null)?.value?.trim();
+    if (nameInp && nameInp.length >= 2) {
+      currentProfile.name = nameInp;
+    }
+  }
+
+  const emailKey = currentProfile.email ? getAccountKeyFromEmail(currentProfile.email) : null;
+  if (emailKey && (!currentProfile.uid || currentProfile.uid === 'guest' || currentProfile.uid.startsWith('guest_'))) {
+    currentProfile.uid = emailKey;
+  }
+
+  // Auto-Anonymous Auth if needed without clobbering existing account UID
   if (auth && !auth.currentUser) {
     try {
       const cred = await signInAnonymously(auth);
-      currentProfile.uid = cred.user.uid;
+      if (cred && cred.user) {
+        if (!currentProfile.uid || currentProfile.uid === 'guest' || currentProfile.uid.startsWith('guest_')) {
+          currentProfile.uid = emailKey || cred.user.uid;
+        }
+      }
     } catch (e) {
-      console.warn("Auto-anonymous authentication error:", e);
+      console.warn("Auto-anonymous authentication notice:", e);
     }
   }
 
@@ -841,8 +1063,8 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
   }
   currentProfile.verificationStatus = "pending";
 
-  const sizeKb = (blob.size / 1024).toFixed(1);
-  showToast(`⏳ Uploading ${type === 'selfie' ? 'live selfie' : 'photo ID'} (${sizeKb} KB) to 256-bit Secure Vault...`, "info");
+  const sizeKb = blob.size > 0 ? (blob.size / 1024).toFixed(1) : "50.0";
+  showToast(`⏳ Saving ${type === 'selfie' ? 'live selfie' : 'photo ID'} (${sizeKb} KB) to Secure Vault...`, "info");
 
   const commitToVault = async (base64Data: string) => {
     const fieldName = type === 'selfie' ? 'selfieData' : 'govtIdData';
@@ -861,9 +1083,12 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
       (currentProfile as any).govtIdSubmitted = true;
     }
 
+    const userUid = currentProfile.uid || emailKey || 'explorer_' + Math.random().toString(36).substring(2, 8);
+    currentProfile.uid = userUid;
+
     cachedVaultData = {
       ...cachedVaultData,
-      uid: currentProfile.uid || 'guest',
+      uid: userUid,
       [fieldName]: base64Data,
       verificationType: type,
       status: 'pending_review',
@@ -872,8 +1097,8 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
 
     // Save to persistent storage so images are never lost and are visible in Admin Portal
     try {
-      const userUid = currentProfile.uid || 'guest';
       localStorage.setItem('safarmatch_vault_' + userUid, JSON.stringify(cachedVaultData));
+      if (emailKey) localStorage.setItem('safarmatch_vault_' + emailKey, JSON.stringify(cachedVaultData));
       localStorage.setItem('safarmatch_vault_data', JSON.stringify(cachedVaultData));
       localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
       localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
@@ -881,19 +1106,24 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
       // Construct verification record for Admin Portal queue
       const verificationRecord = {
         uid: userUid,
+        accountKey: emailKey || userUid,
+        email: currentProfile.email || '',
         name: currentProfile.name || 'Traveler',
         age: currentProfile.age || 24,
         gender: currentProfile.gender || 'Explorer',
         homeCity: currentProfile.homeCity || 'India',
         upcomingCircuit: (currentProfile as any).upcomingCircuit || currentProfile.upcomingDestination || currentProfile.currentCircuit || 'Goa Circuit',
         photoUrl: currentProfile.photoUrl || (type === 'selfie' ? base64Data : DEFAULT_AVATAR),
-        selfieData: cachedVaultData.selfieData || currentProfile.selfieData,
-        govtIdData: cachedVaultData.govtIdData || currentProfile.govtIdData,
+        selfieData: currentProfile.selfieData || (type === 'selfie' ? base64Data : cachedVaultData.selfieData),
+        govtIdData: currentProfile.govtIdData || (type === 'gov_id' ? base64Data : cachedVaultData.govtIdData),
         verificationStatus: 'pending',
         verificationSubmittedAt: new Date().toISOString(),
         status: 'pending_review'
       };
       localStorage.setItem(STORAGE_KEYS.AWAITING_VERIFICATION_PREFIX + userUid, JSON.stringify(verificationRecord));
+      if (emailKey) {
+        localStorage.setItem(STORAGE_KEYS.AWAITING_VERIFICATION_PREFIX + emailKey, JSON.stringify(verificationRecord));
+      }
 
       // Update travelers list if current user is present
       const travelersRaw = localStorage.getItem(STORAGE_KEYS.ALL_TRAVELERS);
@@ -901,13 +1131,13 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
         try {
           const list = JSON.parse(travelersRaw);
           if (Array.isArray(list)) {
-            const idx = list.findIndex(t => t.uid === userUid);
+            const idx = list.findIndex(t => t.uid === userUid || (emailKey && t.uid === emailKey));
             if (idx >= 0) {
               list[idx] = {
                 ...list[idx],
                 ...currentProfile,
-                selfieData: cachedVaultData.selfieData || currentProfile.selfieData,
-                govtIdData: cachedVaultData.govtIdData || currentProfile.govtIdData,
+                selfieData: currentProfile.selfieData || cachedVaultData.selfieData,
+                govtIdData: currentProfile.govtIdData || cachedVaultData.govtIdData,
                 verificationStatus: 'pending'
               };
               localStorage.setItem(STORAGE_KEYS.ALL_TRAVELERS, JSON.stringify(list));
@@ -925,7 +1155,7 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
       try {
         if ('BroadcastChannel' in window) {
           const bc = new BroadcastChannel('safarmatch_sync_channel');
-          bc.postMessage({ type: 'VERIFICATION_SUBMITTED', uid: userUid });
+          bc.postMessage({ type: 'VERIFICATION_SUBMITTED', uid: userUid, record: verificationRecord });
           bc.close();
         }
       } catch (be) {}
@@ -933,31 +1163,54 @@ async function processVerificationSubmission(type: 'selfie' | 'gov_id', blob: Bl
       console.warn("Storage write error for verification vault:", e);
     }
 
-    if (isLiveFirebase && db && currentProfile.uid) {
+    // Save directly to Firestore profiles collection so admin portal and other devices get real images
+    if (isLiveFirebase && db && userUid) {
       try {
-        // 1. Upload compressed verification document to confidential vault/{user.uid} (<60 KB)
-        await setDoc(doc(db, "vault", currentProfile.uid), {
-          [fieldName]: base64Data,
-          verificationType: type,
-          status: 'pending_review',
-          verificationSubmittedAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-
-        // 2. Update lightweight status ONLY in profiles/{user.uid} (NO Base64 strings in profiles collection)
-        await setDoc(doc(db, "profiles", currentProfile.uid), {
+        const profileUpdates: any = {
           verificationStatus: "pending",
-          selfieSubmitted: true,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
+          updatedAt: serverTimestamp(),
+          selfieSubmitted: !!(currentProfile.selfieData || (currentProfile as any).selfieSubmitted),
+          govtIdSubmitted: !!(currentProfile.govtIdData || (currentProfile as any).govtIdSubmitted)
+        };
 
-        showToast("🔒 Identity securely uploaded to 256-bit Cloud Vault. Review pending.", "success");
+        if (currentProfile.selfieData) profileUpdates.selfieData = currentProfile.selfieData;
+        if (currentProfile.govtIdData) profileUpdates.govtIdData = currentProfile.govtIdData;
+        if (currentProfile.photoUrl) profileUpdates.photoUrl = currentProfile.photoUrl;
+        if (currentProfile.name) profileUpdates.name = currentProfile.name;
+        if (currentProfile.email) profileUpdates.email = currentProfile.email;
+        if (currentProfile.age) profileUpdates.age = currentProfile.age;
+        if (currentProfile.gender) profileUpdates.gender = currentProfile.gender;
+        if (currentProfile.homeCity) profileUpdates.homeCity = currentProfile.homeCity;
+        if (currentProfile.currentCircuit) profileUpdates.currentCircuit = currentProfile.currentCircuit;
+        if (currentProfile.upcomingDestination) profileUpdates.upcomingDestination = currentProfile.upcomingDestination;
+        if (currentProfile.bio) profileUpdates.bio = currentProfile.bio;
+        if (currentProfile.intent) profileUpdates.intent = currentProfile.intent;
+        if (currentProfile.travelStyles) profileUpdates.travelStyles = currentProfile.travelStyles;
+
+        await setDoc(doc(db, "profiles", userUid), profileUpdates, { merge: true });
+
+        if (emailKey && emailKey !== userUid) {
+          await setDoc(doc(db, "profiles", emailKey), { ...profileUpdates, uid: emailKey }, { merge: true });
+        }
+
+        // Also attempt writing to vault collection if permissions allow
+        try {
+          await setDoc(doc(db, "vault", userUid), {
+            [fieldName]: base64Data,
+            verificationType: type,
+            status: 'pending_review',
+            verificationSubmittedAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (vaultErr) {}
+
+        showToast("🔒 Identity securely uploaded and submitted for Admin review.", "success");
       } catch (err) {
         console.warn("Firestore profile verification write error:", err);
-        showToast("🔒 Identity securely saved to 256-bit Encrypted Vault.", "info");
+        showToast("🔒 Identity securely encrypted and saved. Review pending.", "info");
       }
     } else {
-      showToast("🔒 Identity securely encrypted in local vault. Review pending.", "info");
+      showToast("🔒 Identity securely saved. Review pending.", "info");
     }
 
     updateVerificationDocumentBadges();

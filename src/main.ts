@@ -66,6 +66,8 @@ import { purgeAllUserDataFromClient } from './utils/storage';
 import { 
   getCurrentUser, 
   loginWithGoogle, 
+  loginWithEmail,
+  getAccountKeyFromEmail,
   signOutUser, 
   initAuthListener
 } from './services/authService';
@@ -363,6 +365,54 @@ globalObj.loginWithGoogleFromLanding = async () => {
   }
 };
 
+globalObj.loginWithEmailFromLanding = async (email?: string) => {
+  const emailInput = document.getElementById('landing-email-input') as HTMLInputElement | null;
+  const targetEmail = (email || (emailInput ? emailInput.value : '')).trim().toLowerCase();
+  if (!targetEmail || !targetEmail.includes('@') || !targetEmail.includes('.')) {
+    showToast("Please enter a valid email address.", "error");
+    return;
+  }
+
+  const btn = document.getElementById('landing-email-submit-btn') as HTMLButtonElement | null;
+  const btnText = document.getElementById('landing-email-btn-text');
+  const spinner = document.getElementById('landing-email-spinner');
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.textContent = "Syncing Account...";
+  if (spinner) spinner.classList.remove('hidden');
+
+  try {
+    const profile = await loginWithEmail(targetEmail, (merged) => {
+      setCurrentProfile(merged);
+      populateProfileForm();
+      updateJourneyStatusUI();
+      updateVerificationBadgeUI(merged.verificationStatus);
+    });
+
+    if (profile) {
+      attachProfileRealtimeListener(profile.uid);
+      const authBtnText = document.getElementById('btn-auth-text');
+      if (authBtnText) authBtnText.textContent = "Sign Out";
+      const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+      if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
+      const profileSignoutBtn = document.getElementById('profile-signout-btn');
+      if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
+      hideLandingPage();
+    }
+  } catch (err) {
+    console.error("Email login flow error:", err);
+    showToast("Error loading account. Please try again.", "error");
+  } finally {
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = "Continue with Email";
+    if (spinner) spinner.classList.add('hidden');
+  }
+};
+
+globalObj.handleEmailLoginFromLanding = (e: Event) => {
+  if (e && e.preventDefault) e.preventDefault();
+  globalObj.loginWithEmailFromLanding();
+};
+
 globalObj.handleGuestLoginFromLanding = () => {
   globalObj.loginWithGoogleFromLanding();
 };
@@ -377,7 +427,7 @@ globalObj.handleAuthAction = () => {
       showLandingPage();
     });
   } else {
-    globalObj.loginWithGoogleFromLanding();
+    showLandingPage();
   }
 };
 

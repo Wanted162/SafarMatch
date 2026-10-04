@@ -43,6 +43,7 @@ import {
   attachProfileRealtimeListener, 
   detachProfileRealtimeListener, 
   resetProfileToGuest,
+  getCurrentProfile,
   DEFAULT_AVATAR
 } from './profileService';
 import type { UserProfile } from '../types';
@@ -66,6 +67,12 @@ export function onAuthChanged(callback: (user: User | null) => void): () => void
   };
 }
 
+export function getAccountKeyFromEmail(email: string): string {
+  if (!email) return 'guest';
+  const clean = email.trim().toLowerCase();
+  return 'acc_' + clean.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
 /**
  * Triggers native Google Sign-In popup with Google's permission & account consent screen.
  * Automatically saves verified Google profile, syncs to Firestore, and sets origin-bound cookies.
@@ -75,10 +82,12 @@ export async function loginWithGoogle(
   onProfileMerged: (updated: UserProfile) => void
 ): Promise<User | null> {
   if (!auth) {
+    const email = (_currentProfile.email || 'explorer@safarmatch.in').trim().toLowerCase();
+    const accountKey = getAccountKeyFromEmail(email);
     const guestUser = {
-      uid: 'explorer_' + Math.random().toString(36).substring(2, 9),
+      uid: accountKey,
       displayName: _currentProfile.name || 'Verified Explorer',
-      email: 'explorer@safarmatch.in',
+      email,
       photoURL: _currentProfile.photoUrl || DEFAULT_AVATAR
     };
     currentUser = guestUser as any;
@@ -86,6 +95,7 @@ export async function loginWithGoogle(
     onProfileMerged({
       ..._currentProfile,
       uid: guestUser.uid,
+      email,
       name: guestUser.displayName
     });
     setCurrentUser(guestUser);
@@ -99,26 +109,34 @@ export async function loginWithGoogle(
     const googleUser = res.user;
     currentUser = googleUser;
 
+    const email = googleUser.email ? googleUser.email.trim().toLowerCase() : '';
+    const accountKey = email ? getAccountKeyFromEmail(email) : googleUser.uid;
+
     // 1. Set origin-bound secure session cookie
-    setSessionCookie(googleUser.uid, true);
+    setSessionCookie(accountKey, true);
 
     // 2. Cache user credentials
     try {
       localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify({
-        uid: googleUser.uid,
+        uid: accountKey,
+        authUid: googleUser.uid,
         displayName: googleUser.displayName,
-        email: googleUser.email,
+        email,
         photoURL: googleUser.photoURL
       }));
     } catch (e) {
       console.warn("Storage error caching user:", e);
     }
 
-    // 3. Cloud-first hydration from Firestore (profiles/{uid} and vault/{uid})
-    const hydrated = await hydrateProfileFromFirestore(googleUser.uid, googleUser);
-    attachProfileRealtimeListener(googleUser.uid);
+    // 3. Cloud-first hydration from Firestore (profiles/{accountKey} and profiles/{uid})
+    const hydrated = await hydrateProfileFromFirestore(accountKey, googleUser);
+    attachProfileRealtimeListener(accountKey);
     onProfileMerged(hydrated);
-    setCurrentUser(googleUser);
+    setCurrentUser({
+      ...googleUser,
+      uid: accountKey,
+      email
+    });
 
     // 4. Update header UI
     const authBtnText = document.getElementById('btn-auth-text');
@@ -129,12 +147,12 @@ export async function loginWithGoogle(
     if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
 
     const headerUserName = document.getElementById('header-user-name');
-    if (headerUserName && googleUser.displayName) {
-      headerUserName.textContent = googleUser.displayName.split(' ')[0];
+    if (headerUserName && (hydrated.name || googleUser.displayName)) {
+      headerUserName.textContent = (hydrated.name || googleUser.displayName || 'Explorer').split(' ')[0];
     }
     const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
-    if (headerUserAvatar && googleUser.photoURL) {
-      headerUserAvatar.src = googleUser.photoURL;
+    if (headerUserAvatar && (hydrated.photoUrl || googleUser.photoURL)) {
+      headerUserAvatar.src = hydrated.photoUrl || googleUser.photoURL || DEFAULT_AVATAR;
     }
 
     // 5. Hide landing overlay
@@ -144,7 +162,7 @@ export async function loginWithGoogle(
       landing.style.display = 'none';
     }
 
-    showToast(`Namaste, ${googleUser.displayName || 'Explorer'}! Signed in with Google.`, "success");
+    showToast(`Namaste, ${hydrated.name || googleUser.displayName || 'Explorer'}! Signed in with Google.`, "success");
     return googleUser;
 
   } catch (err: any) {
@@ -161,22 +179,33 @@ export async function loginWithGoogle(
       try {
         await signInWithRedirect(auth, googleProvider);
       } catch (redirectErr: any) {
-        showToast("Unable to open Google login. Please allow popups.", "error");
+        showToast("Unable to open Google login. Please allow popups or enter your email.", "error");
       }
       return null;
     }
 
-    // If domain unauthorized or iframe restriction in dev preview, enable smooth verified session access
+    // If domain unauthorized or iframe restriction in dev preview, enable smooth verified session access via email
     if (err.code === 'auth/unauthorized-domain' || err.code === 'auth/operation-not-allowed' || err.code === 'auth/invalid-api-key' || err.code === 'auth/network-request-failed') {
+      const emailInput = document.getElementById('landing-email-input') as HTMLInputElement | null;
+      const targetEmail = (emailInput && emailInput.value.trim()) 
+        ? emailInput.value.trim().toLowerCase() 
+        : (_currentProfile.email || 'traveler@safarmatch.in');
+      const accountKey = getAccountKeyFromEmail(targetEmail);
+
       const demoUser = {
-        uid: 'user_' + Math.random().toString(36).substring(2, 9),
+        uid: accountKey,
         displayName: _currentProfile.name || 'Verified Explorer',
-        email: 'explorer@safarmatch.in',
+        email: targetEmail,
         photoURL: _currentProfile.photoUrl || DEFAULT_AVATAR
       };
       currentUser = demoUser;
-      setSessionCookie(demoUser.uid, true);
-      const hydrated = await hydrateProfileFromFirestore(demoUser.uid, demoUser);
+      setSessionCookie(accountKey, true);
+      try {
+        localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify(demoUser));
+      } catch (e) {}
+
+      const hydrated = await hydrateProfileFromFirestore(accountKey, demoUser);
+      attachProfileRealtimeListener(accountKey);
       onProfileMerged(hydrated);
       setCurrentUser(demoUser);
 
@@ -193,13 +222,87 @@ export async function loginWithGoogle(
         landing.style.display = 'none';
       }
 
-      showToast(`Namaste, ${demoUser.displayName}! Signed in successfully.`, "success");
+      showToast(`Namaste, ${hydrated.name || demoUser.displayName}! Signed in with account: ${targetEmail}`, "success");
       return demoUser as any;
     }
 
-    showToast(err.message || "Google sign-in error. Please try again.", "error");
+    showToast(err.message || "Google sign-in error. Please enter your email to continue.", "error");
     return null;
   }
+}
+
+/**
+ * Signs in or restores an existing traveler account by email address.
+ * Cross-device synchronization: Loads all profile details, KYC documents,
+ * and verification state from Firestore for this email.
+ */
+export async function loginWithEmail(
+  email: string,
+  onProfileMerged: (updated: UserProfile) => void
+): Promise<UserProfile> {
+  const normEmail = email.trim().toLowerCase();
+  if (!normEmail || !normEmail.includes('@') || !normEmail.includes('.')) {
+    showToast("Please enter a valid email address.", "error");
+    return getCurrentProfile();
+  }
+
+  const accountKey = getAccountKeyFromEmail(normEmail);
+
+  // Set session cookie
+  setSessionCookie(accountKey, true);
+
+  const userObj = {
+    uid: accountKey,
+    displayName: normEmail.split('@')[0],
+    email: normEmail,
+    photoURL: DEFAULT_AVATAR
+  };
+  currentUser = userObj;
+
+  // Cache user in localStorage
+  try {
+    localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify(userObj));
+  } catch (e) {}
+
+  // Hydrate profile from Firestore
+  const hydrated = await hydrateProfileFromFirestore(accountKey, userObj);
+  attachProfileRealtimeListener(accountKey);
+  onProfileMerged(hydrated);
+  setCurrentUser({
+    ...userObj,
+    displayName: hydrated.name || userObj.displayName,
+    photoURL: hydrated.photoUrl || DEFAULT_AVATAR
+  });
+
+  // Update UI elements
+  const authBtnText = document.getElementById('btn-auth-text');
+  if (authBtnText) authBtnText.textContent = "Sign Out";
+  const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+  if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
+  const profileSignoutBtn = document.getElementById('profile-signout-btn');
+  if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
+
+  const headerUserName = document.getElementById('header-user-name');
+  if (headerUserName) {
+    headerUserName.textContent = (hydrated.name || normEmail.split('@')[0]).split(' ')[0];
+  }
+  const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+  if (headerUserAvatar && hydrated.photoUrl) {
+    headerUserAvatar.src = hydrated.photoUrl;
+  }
+  const menuUserEmail = document.getElementById('menu-user-email');
+  if (menuUserEmail) {
+    menuUserEmail.textContent = normEmail;
+  }
+
+  const landing = document.getElementById('landing-page') || document.getElementById('landing-overlay');
+  if (landing) {
+    landing.classList.add('hidden');
+    landing.style.display = 'none';
+  }
+
+  showToast(`Namaste, ${hydrated.name || normEmail.split('@')[0]}! Account synchronized across devices.`, "success");
+  return hydrated;
 }
 
 /**
@@ -310,13 +413,65 @@ export function initAuthListener(onUserDetected: (user: User | null) => void): v
 
         onUserDetected(user);
       } else {
+        // If Firebase Auth has no user, check if user logged in with an email account in localStorage
+        const storedUserRaw = localStorage.getItem(STORAGE_KEYS.LOGGED_IN_USER);
+        if (storedUserRaw) {
+          try {
+            const storedUser = JSON.parse(storedUserRaw);
+            if (storedUser && (storedUser.email || storedUser.uid)) {
+              currentUser = storedUser;
+              setCurrentUser(storedUser);
+              const userKey = storedUser.uid || (storedUser.email ? getAccountKeyFromEmail(storedUser.email) : null);
+              if (userKey) {
+                hydrateProfileFromFirestore(userKey, storedUser).then((hydrated) => {
+                  attachProfileRealtimeListener(userKey);
+                  onUserDetected(storedUser as any);
+                }).catch(() => {
+                  onUserDetected(storedUser as any);
+                });
+              } else {
+                onUserDetected(storedUser as any);
+              }
+
+              // Update UI buttons to signed in
+              const authBtnText = document.getElementById('btn-auth-text');
+              if (authBtnText) authBtnText.textContent = "Sign Out";
+              const sidebarAuthBtnText = document.getElementById('sidebar-btn-auth-text');
+              if (sidebarAuthBtnText) sidebarAuthBtnText.textContent = "Sign Out";
+              const profileSignoutBtn = document.getElementById('profile-signout-btn');
+              if (profileSignoutBtn) profileSignoutBtn.classList.remove('hidden');
+
+              const headerUserName = document.getElementById('header-user-name');
+              if (headerUserName && storedUser.displayName) {
+                headerUserName.textContent = storedUser.displayName.split(' ')[0];
+              }
+              const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+              if (headerUserAvatar && storedUser.photoURL) {
+                headerUserAvatar.src = storedUser.photoURL;
+              }
+              return;
+            }
+          } catch (e) {}
+        }
+
         currentUser = null;
-        detachProfileRealtimeListener();
-        resetProfileToGuest();
         onUserDetected(null);
       }
     });
   } else {
+    // If no Firebase Auth, check local session
+    const storedUserRaw = localStorage.getItem(STORAGE_KEYS.LOGGED_IN_USER);
+    if (storedUserRaw) {
+      try {
+        const storedUser = JSON.parse(storedUserRaw);
+        if (storedUser && (storedUser.email || storedUser.uid)) {
+          currentUser = storedUser;
+          setCurrentUser(storedUser);
+          onUserDetected(storedUser as any);
+          return;
+        }
+      } catch (e) {}
+    }
     onUserDetected(null);
   }
 }

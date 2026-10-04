@@ -7,7 +7,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, isLiveFirebase } from '../config/firebase';
 import { getCurrentProfile, updateJourneyStatusUI, DEFAULT_AVATAR } from '../services/profileService';
 import { getAllTravelers, setAllTravelers } from '../services/travelerService';
-import { STORAGE_KEYS, saveStoredTravelers } from '../utils/storage';
+import { STORAGE_KEYS, getAccountKeyFromEmail, saveStoredTravelers } from '../utils/storage';
 import { showToast } from '../utils/toast';
 import { moderateMessageText } from '../utils/moderation';
 import { sanitizePlainText } from '../utils/security';
@@ -27,6 +27,7 @@ export function populateProfileForm(): void {
   const circuitInput = document.getElementById('input-upcoming-circuit') as HTMLSelectElement | null;
   const bioInput = document.getElementById('input-bio') as HTMLTextAreaElement | null;
   const intentInput = document.getElementById('input-travel-intent') as HTMLInputElement | null;
+  const emailInput = document.getElementById('input-email') as HTMLInputElement | null;
 
   if (nameInput) nameInput.value = profile.name || '';
   if (ageInput) ageInput.value = profile.age ? String(profile.age) : '';
@@ -35,6 +36,7 @@ export function populateProfileForm(): void {
   if (circuitInput) circuitInput.value = profile.currentCircuit || '';
   if (bioInput) bioInput.value = profile.bio || '';
   if (intentInput) intentInput.value = profile.intent || '';
+  if (emailInput && profile.email) emailInput.value = profile.email;
 
   const latInp = document.getElementById('input-home-lat') as HTMLInputElement | null;
   const lngInp = document.getElementById('input-home-lng') as HTMLInputElement | null;
@@ -75,14 +77,35 @@ export function handleAvatarFileSelected(e: Event): void {
   const file = target.files && target.files[0];
   if (!file) return;
 
+  const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name);
+  if (!isImage) {
+    showToast("Please select a valid image file (JPG, PNG, WEBP).", "error");
+    target.value = '';
+    return;
+  }
+
   const reader = new FileReader();
+  reader.onerror = () => {
+    showToast("Error reading selected photo file.", "error");
+    target.value = '';
+  };
   reader.onload = function(evt) {
     const img = new Image();
+    img.onerror = () => {
+      showToast("Invalid photo format. Please select a valid JPG or PNG image.", "error");
+      target.value = '';
+    };
     img.onload = function() {
       const canvas = document.createElement('canvas');
       const maxDim = 400;
-      let width = img.width;
-      let height = img.height;
+      let width = img.naturalWidth || img.width;
+      let height = img.naturalHeight || img.height;
+
+      if (width <= 0 || height <= 0) {
+        showToast("Invalid image dimensions.", "error");
+        target.value = '';
+        return;
+      }
 
       if (width > height) {
         if (width > maxDim) {
@@ -96,10 +119,13 @@ export function handleAvatarFileSelected(e: Event): void {
         }
       }
 
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = Math.max(1, width);
+      canvas.height = Math.max(1, height);
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        showToast("Unable to process photo canvas context.", "error");
+        return;
+      }
 
       ctx.drawImage(img, 0, 0, width, height);
       const base64Data = canvas.toDataURL('image/jpeg', 0.8);
@@ -109,18 +135,55 @@ export function handleAvatarFileSelected(e: Event): void {
         currentProfile.photoUrl = base64Data;
         try {
           localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
         } catch (err) {}
 
         const profileAvatar = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
         const headerAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+        const menuAvatar = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
         if (profileAvatar) profileAvatar.src = base64Data;
         if (headerAvatar) headerAvatar.src = base64Data;
+        if (menuAvatar) menuAvatar.src = base64Data;
 
-        if (isLiveFirebase && db && currentProfile.uid) {
-          setDoc(doc(db, "profiles", currentProfile.uid), {
-            photoUrl: base64Data
-          }, { merge: true }).catch(err => console.warn("Firestore avatar update error:", err));
+        // Update in travelers list
+        const allList = [...getAllTravelers()];
+        const existingIdx = allList.findIndex(t => t.uid === currentProfile.uid);
+        if (existingIdx >= 0) {
+          allList[existingIdx].photo = base64Data;
+          setAllTravelers(allList);
+          saveStoredTravelers(allList);
         }
+
+        if (isLiveFirebase && db) {
+          if (currentProfile.uid) {
+            setDoc(doc(db, "profiles", currentProfile.uid), {
+              photoUrl: base64Data,
+              updatedAt: serverTimestamp()
+            }, { merge: true }).catch(err => console.warn("Firestore avatar update error:", err));
+          }
+          if (currentProfile.email) {
+            const accKey = getAccountKeyFromEmail(currentProfile.email);
+            if (accKey !== currentProfile.uid) {
+              setDoc(doc(db, "profiles", accKey), {
+                photoUrl: base64Data,
+                updatedAt: serverTimestamp()
+              }, { merge: true }).catch(() => {});
+            }
+          }
+        }
+
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: STORAGE_KEYS.USER_PROFILE,
+          newValue: JSON.stringify(currentProfile)
+        }));
+
+        try {
+          if ('BroadcastChannel' in window) {
+            const bc = new BroadcastChannel('safarmatch_sync_channel');
+            bc.postMessage({ type: 'AVATAR_UPDATED', uid: currentProfile.uid });
+            bc.close();
+          }
+        } catch (be) {}
 
         updateJourneyStatusUI();
         showToast("📸 Profile photo updated successfully!", "success");
@@ -129,6 +192,7 @@ export function handleAvatarFileSelected(e: Event): void {
     img.src = evt.target?.result as string;
   };
   reader.readAsDataURL(file);
+  target.value = '';
 }
 
 export function selectTravelIntent(btn: HTMLElement): void {
@@ -221,6 +285,27 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
   currentProfile.bio = bio;
   currentProfile.intent = travelIntent as any;
 
+  const emailInput = document.getElementById('input-email') as HTMLInputElement | null;
+  if (emailInput && emailInput.value.trim()) {
+    currentProfile.email = emailInput.value.trim().toLowerCase();
+  }
+
+  let accKey: string | null = null;
+  if (currentProfile.email) {
+    accKey = getAccountKeyFromEmail(currentProfile.email);
+    if (!currentProfile.uid || currentProfile.uid === 'guest' || currentProfile.uid.startsWith('guest_')) {
+      currentProfile.uid = accKey;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEYS.LOGGED_IN_USER, JSON.stringify({
+        uid: currentProfile.uid,
+        email: currentProfile.email,
+        displayName: currentProfile.name,
+        photoURL: currentProfile.photoUrl
+      }));
+    } catch (e) {}
+  }
+
   const rawLat = parseFloat((document.getElementById('input-home-lat') as HTMLInputElement)?.value);
   const rawLng = parseFloat((document.getElementById('input-home-lng') as HTMLInputElement)?.value);
 
@@ -240,6 +325,7 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
 
   try {
     localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+    localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
   } catch (err) {}
 
   const allList = [...getAllTravelers()];
@@ -272,13 +358,44 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
   setAllTravelers(allList);
   saveStoredTravelers(allList);
 
-  if (isLiveFirebase && db && currentProfile.uid) {
+  if (isLiveFirebase && db) {
     try {
-      const { selfieData, govtIdData, ...lightweightProfile } = currentProfile as any;
-      await setDoc(doc(db, "profiles", currentProfile.uid), {
-        ...lightweightProfile,
+      const fullProfilePayload = {
+        uid: currentProfile.uid,
+        name: currentProfile.name || '',
+        email: currentProfile.email || '',
+        age: currentProfile.age || 24,
+        gender: currentProfile.gender || 'Male',
+        homeCity: currentProfile.homeCity || '',
+        homeLat: currentProfile.homeLat || 20.5937,
+        homeLng: currentProfile.homeLng || 78.9629,
+        currentCircuit: currentProfile.currentCircuit || currentProfile.upcomingDestination || '',
+        upcomingDestination: currentProfile.upcomingDestination || currentProfile.currentCircuit || '',
+        upcomingLat: currentProfile.upcomingLat || 20.5937,
+        upcomingLng: currentProfile.upcomingLng || 78.9629,
+        bio: currentProfile.bio || '',
+        intent: currentProfile.intent || 'companion',
+        vibe: currentProfile.vibe || '',
+        travelStyles: currentProfile.travelStyles || [],
+        photoUrl: currentProfile.photoUrl || DEFAULT_AVATAR,
+        selfieData: currentProfile.selfieData || '',
+        govtIdData: currentProfile.govtIdData || '',
+        verificationStatus: currentProfile.verificationStatus || 'unverified',
+        verificationRejectionReason: currentProfile.verificationRejectionReason || null,
+        subscriptionStatus: currentProfile.subscriptionStatus || 'free',
+        isSurakshaEnabled: currentProfile.isSurakshaEnabled || false,
+        selfieSubmitted: !!(currentProfile.selfieData || (currentProfile as any).selfieSubmitted),
+        govtIdSubmitted: !!(currentProfile.govtIdData || (currentProfile as any).govtIdSubmitted),
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      };
+
+      if (currentProfile.uid) {
+        await setDoc(doc(db, "profiles", currentProfile.uid), fullProfilePayload, { merge: true });
+      }
+
+      if (accKey && accKey !== currentProfile.uid) {
+        await setDoc(doc(db, "profiles", accKey), { ...fullProfilePayload, uid: accKey }, { merge: true });
+      }
     } catch (err) {
       console.warn("Firestore profile save error:", err);
     }
@@ -291,5 +408,5 @@ export async function handleSaveProfile(e?: Event): Promise<void> {
 
   updateJourneyStatusUI();
   renderTravelerPins();
-  showToast("✅ Profile saved! Your backpacker passport is updated.", "success");
+  showToast("✅ Profile saved! Your backpacker passport is synchronized.", "success");
 }

@@ -724,6 +724,7 @@
       const vList = [];
       const pList = [];
       const seenVUid = new Set();
+      const seenEmails = new Set();
 
       const localRecords = getLocalVerificationRecords();
       const localMap = new Map();
@@ -734,8 +735,8 @@
         const vData = cachedVault.get(uid) || getLocalVaultData(uid) || {};
         const localRec = localMap.get(uid) || {};
 
-        const selfie = vData.selfieData || localRec.selfieData || p.selfieData || (p.photoUrl && p.photoUrl.startsWith('data:image') ? p.photoUrl : null) || p.photoUrl;
-        const govt = vData.govtIdData || localRec.govtIdData || p.govtIdData || null;
+        const selfie = p.selfieData || vData.selfieData || localRec.selfieData || (p.photoUrl && p.photoUrl.startsWith('data:image') ? p.photoUrl : null) || p.photoUrl;
+        const govt = p.govtIdData || vData.govtIdData || localRec.govtIdData || null;
         const vStatus = p.verificationStatus || localRec.verificationStatus || vData.status || "unverified";
 
         // Combine public profile with confidential KYC vault & local storage
@@ -750,15 +751,17 @@
         };
 
         // 1. Identity Verification Filter: pending or pending_review or has uploaded selfie/ID
-        if (
-          combined.verificationStatus === 'pending' ||
-          combined.verificationStatus === 'pending_review' ||
-          vData.status === 'pending_review' ||
-          (!combined.verificationStatus && (combined.selfieData || combined.govtIdData)) ||
-          (combined.selfieData && combined.govtIdData && combined.verificationStatus !== 'verified' && combined.verificationStatus !== 'rejected')
-        ) {
-          vList.push(combined);
-          seenVUid.add(uid);
+        const hasPhoto = !!(combined.selfieData || combined.govtIdData || combined.selfieSubmitted || combined.govtIdSubmitted);
+        const isPending = combined.verificationStatus === 'pending' || combined.verificationStatus === 'pending_review' || vData.status === 'pending_review';
+        const isNotFinal = combined.verificationStatus !== 'verified' && combined.verificationStatus !== 'rejected';
+
+        if (isPending || (hasPhoto && isNotFinal)) {
+          const normEmail = (combined.email || '').trim().toLowerCase();
+          if (!normEmail || !seenEmails.has(normEmail)) {
+            if (normEmail) seenEmails.add(normEmail);
+            vList.push(combined);
+            seenVUid.add(uid);
+          }
         }
 
         // 2. Payment Approval Filter: subscription.status == 'pending_review' or has UTR awaiting confirmation
@@ -772,13 +775,14 @@
 
       // Add any local verification submissions not already represented from Firestore
       localRecords.forEach(r => {
-        if (!seenVUid.has(r.uid)) {
-          if (
-            r.verificationStatus === 'pending' ||
-            r.verificationStatus === 'pending_review' ||
-            r.selfieData ||
-            r.govtIdData
-          ) {
+        const normEmail = (r.email || '').trim().toLowerCase();
+        if (!seenVUid.has(r.uid) && (!normEmail || !seenEmails.has(normEmail))) {
+          const hasPhoto = !!(r.selfieData || r.govtIdData || r.selfieSubmitted || r.govtIdSubmitted);
+          const isPending = r.verificationStatus === 'pending' || r.verificationStatus === 'pending_review';
+          const isNotFinal = r.verificationStatus !== 'verified' && r.verificationStatus !== 'rejected';
+
+          if (isPending || (hasPhoto && isNotFinal)) {
+            if (normEmail) seenEmails.add(normEmail);
             vList.push(r);
             seenVUid.add(r.uid);
           }
@@ -1025,6 +1029,7 @@
                     Active Circuit: <span class="text-rose-400 font-semibold">${escapeHtml(traveler.upcomingCircuit || 'Goa')}</span> |
                     Submitted: <span class="text-slate-400 font-mono-code">${formattedDate}</span>
                   </p>
+                  ${traveler.email ? `<p class="text-xs text-slate-300 mt-0.5 font-mono">Email: <span class="text-emerald-400 font-semibold">${escapeHtml(traveler.email)}</span></p>` : ''}
                 </div>
               </div>
 
@@ -1167,22 +1172,31 @@
       const finalReason = custom ? `${selectedVReason} Note: ${custom}` : selectedVReason;
       const uid = currentRejectVerificationTarget.uid;
       const name = currentRejectVerificationTarget.name;
+      const email = currentRejectVerificationTarget.email || '';
+      const accKey = email ? ('acc_' + email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_')) : null;
 
       if (isLiveFirebase && db) {
         try {
-          // 1. Update public profile to rejected with structured reason
-          await updateDoc(doc(db, "profiles", uid), {
+          const rejectPayload = {
             verificationStatus: "rejected",
             verificationRejectionReason: finalReason,
             reviewedAt: serverTimestamp()
-          });
+          };
+
+          // 1. Update public profile to rejected with structured reason
+          await setDoc(doc(db, "profiles", uid), rejectPayload, { merge: true });
+          if (accKey && accKey !== uid) {
+            await setDoc(doc(db, "profiles", accKey), rejectPayload, { merge: true });
+          }
 
           // 2. Mark confidential vault document as rejected
-          await setDoc(doc(db, "vault", uid), {
-            status: "rejected",
-            rejectionReason: finalReason,
-            reviewedAt: serverTimestamp()
-          }, { merge: true });
+          try {
+            await setDoc(doc(db, "vault", uid), {
+              status: "rejected",
+              rejectionReason: finalReason,
+              reviewedAt: serverTimestamp()
+            }, { merge: true });
+          } catch (ve) {}
         } catch (err) {
           console.warn("Firestore reject note (proceeding with local update):", err);
         }
@@ -1193,21 +1207,21 @@
         const uProfRaw = localStorage.getItem('safarmatch_user_profile');
         if (uProfRaw) {
           const uProf = JSON.parse(uProfRaw);
-          if (uProf.uid === uid || !uid || uid === 'guest' || uid === 'current_user') {
+          if (uProf.uid === uid || (accKey && uProf.uid === accKey) || !uid || uid === 'guest' || uid === 'current_user') {
             uProf.verificationStatus = 'rejected';
             uProf.verificationRejectionReason = finalReason;
-            localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
             localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
           }
         }
         localStorage.removeItem('safarmatch_awaiting_verification_' + uid);
+        if (accKey) localStorage.removeItem('safarmatch_awaiting_verification_' + accKey);
 
         // Update travelers list
         const travelersRaw = localStorage.getItem('safarmatch_all_travelers');
         if (travelersRaw) {
           const list = JSON.parse(travelersRaw);
           if (Array.isArray(list)) {
-            const idx = list.findIndex(t => t.uid === uid);
+            const idx = list.findIndex(t => t.uid === uid || (accKey && t.uid === accKey));
             if (idx >= 0) {
               list[idx].verificationStatus = 'rejected';
               list[idx].verificationRejectionReason = finalReason;
@@ -1238,21 +1252,32 @@
     window.adminApproveIdentity = async function(uid, name) {
       if (!confirm(`Are you sure you want to approve identity verification for ${name}?`)) return;
 
+      const traveler = verificationQueue.find(t => t.uid === uid) || {};
+      const email = traveler.email || '';
+      const accKey = email ? ('acc_' + email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_')) : null;
+
       if (isLiveFirebase && db) {
         try {
-          // 1. Grant Verified Explorer shield in public profiles
-          await updateDoc(doc(db, "profiles", uid), {
+          const updatePayload = {
             verificationStatus: "verified",
             selfieSubmitted: true,
             reviewedAt: serverTimestamp(),
             verificationRejectionReason: null
-          });
+          };
+
+          // 1. Grant Verified Explorer shield in public profiles
+          await setDoc(doc(db, "profiles", uid), updatePayload, { merge: true });
+          if (accKey && accKey !== uid) {
+            await setDoc(doc(db, "profiles", accKey), updatePayload, { merge: true });
+          }
 
           // 2. Archive confidential vault KYC document
-          await setDoc(doc(db, "vault", uid), {
-            status: "archived",
-            reviewedAt: serverTimestamp()
-          }, { merge: true });
+          try {
+            await setDoc(doc(db, "vault", uid), {
+              status: "archived",
+              reviewedAt: serverTimestamp()
+            }, { merge: true });
+          } catch (ve) {}
         } catch (err) {
           console.warn("Firestore approval note (proceeding with local update):", err);
         }

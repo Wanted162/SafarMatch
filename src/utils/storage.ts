@@ -20,6 +20,12 @@ export const STORAGE_KEYS = {
   CHATMETA_PREFIX: 'safarmatch_chatmeta_'
 };
 
+export function getAccountKeyFromEmail(email: string): string {
+  if (!email) return 'guest';
+  const clean = email.trim().toLowerCase();
+  return 'acc_' + clean.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
 export function getStoredProfile(): UserProfile | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
