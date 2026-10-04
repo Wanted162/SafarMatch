@@ -268,8 +268,22 @@ export function attachProfileRealtimeListener(uid: string): void {
       if (data.currentCircuit) currentProfile.currentCircuit = data.currentCircuit;
       if (data.upcomingDestination) currentProfile.upcomingDestination = data.upcomingDestination;
       if (data.bio) currentProfile.bio = data.bio;
-      if (data.photoUrl) currentProfile.photoUrl = data.photoUrl;
       if (data.homeLat) currentProfile.homeLat = data.homeLat;
+      if (data.photoUrl && data.photoUrl !== currentProfile.photoUrl) {
+        currentProfile.photoUrl = data.photoUrl;
+        const profileImg = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
+        const headerImg = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+        const menuImg = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
+        if (profileImg) profileImg.src = data.photoUrl;
+        if (headerImg) headerImg.src = data.photoUrl;
+        if (menuImg) menuImg.src = data.photoUrl;
+        try {
+          localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+          localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+        } catch (e) {}
+      } else if (data.photoUrl) {
+        currentProfile.photoUrl = data.photoUrl;
+      }
       if (data.homeLng) currentProfile.homeLng = data.homeLng;
 
       if (data.verificationRejectionReason) {

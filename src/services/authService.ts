@@ -14,7 +14,8 @@ import {
   signInAnonymously,
   type User 
 } from 'firebase/auth';
-import { auth, isLiveFirebase, googleProvider } from '../config/firebase';
+import { auth, db, isLiveFirebase, googleProvider } from '../config/firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { STORAGE_KEYS } from '../utils/storage';
 import { setSessionCookie, clearAllAuthCookies } from '../utils/cookieUtils';
 import { showToast } from '../utils/toast';
@@ -44,6 +45,7 @@ import {
   detachProfileRealtimeListener, 
   resetProfileToGuest,
   getCurrentProfile,
+  setCurrentProfile,
   DEFAULT_AVATAR
 } from './profileService';
 import type { UserProfile } from '../types';
@@ -391,6 +393,54 @@ export function initAuthListener(onUserDetected: (user: User | null) => void): v
         } catch (e) {}
 
         // Cloud-first hydration on auth change: fetch profiles/{uid} and vault/{uid}
+        let currentProfile = getCurrentProfile();
+        if (db) {
+          try {
+            const docSnap = await getDoc(doc(db, "profiles", user.uid));
+            if (docSnap.exists()) {
+              currentProfile = {
+                ...currentProfile,
+                uid: user.uid,
+                ...docSnap.data()
+              };
+              const avatarSrc = docSnap.data().photoUrl || user.photoURL || DEFAULT_AVATAR;
+              currentProfile.photoUrl = avatarSrc;
+
+              const profileImg = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
+              const headerImg = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+              const menuImg = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
+              if (profileImg) profileImg.src = avatarSrc;
+              if (headerImg) headerImg.src = avatarSrc;
+              if (menuImg) menuImg.src = avatarSrc;
+
+              try {
+                localStorage.setItem('safarmatch_user_profile', JSON.stringify(currentProfile));
+                localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(currentProfile));
+              } catch (e) {}
+              setCurrentProfile(currentProfile);
+            } else {
+              const avatarSrc = user.photoURL || currentProfile.photoUrl || DEFAULT_AVATAR;
+              currentProfile.uid = user.uid;
+              currentProfile.photoUrl = avatarSrc;
+              currentProfile.email = user.email || currentProfile.email;
+              currentProfile.name = user.displayName || currentProfile.name;
+              try {
+                await setDoc(doc(db, "profiles", user.uid), {
+                  uid: user.uid,
+                  name: currentProfile.name,
+                  email: currentProfile.email || '',
+                  photoUrl: currentProfile.photoUrl,
+                  verificationStatus: currentProfile.verificationStatus || 'unverified',
+                  subscriptionStatus: currentProfile.subscriptionStatus || 'free',
+                  updatedAt: serverTimestamp()
+                }, { merge: true });
+              } catch (e) {}
+            }
+          } catch (e) {
+            console.warn("Bootstrap on auth state change error:", e);
+          }
+        }
+
         await hydrateProfileFromFirestore(user.uid, user);
         attachProfileRealtimeListener(user.uid);
 
@@ -406,10 +456,15 @@ export function initAuthListener(onUserDetected: (user: User | null) => void): v
         if (headerUserName && user.displayName) {
           headerUserName.textContent = user.displayName.split(' ')[0];
         }
-        const headerUserAvatar = document.getElementById('header-user-avatar') as HTMLImageElement | null;
-        if (headerUserAvatar && user.photoURL) {
-          headerUserAvatar.src = user.photoURL;
-        }
+
+        const profileImg = document.getElementById('profile-display-avatar') as HTMLImageElement | null;
+        const headerImg = document.getElementById('header-user-avatar') as HTMLImageElement | null;
+        const menuImg = document.getElementById('menu-user-avatar') as HTMLImageElement | null;
+        const activeProfile = getCurrentProfile();
+        const finalAvatar = activeProfile.photoUrl || user.photoURL || DEFAULT_AVATAR;
+        if (profileImg) profileImg.src = finalAvatar;
+        if (headerImg) headerImg.src = finalAvatar;
+        if (menuImg) menuImg.src = finalAvatar;
 
         onUserDetected(user);
       } else {
