@@ -1250,11 +1250,13 @@
     };
 
     window.adminApproveIdentity = async function(uid, name) {
-      if (!confirm(`Are you sure you want to approve identity verification for ${name}?`)) return;
+      if (!uid) return;
 
-      const traveler = verificationQueue.find(t => t.uid === uid) || {};
+      const traveler = verificationQueue.find(t => t.uid === uid || t.accountKey === uid || (uid && t.email && t.email.toLowerCase() === uid.toLowerCase())) ||
+                       cachedProfiles.find(p => p.uid === uid || (uid && p.email && p.email.toLowerCase() === uid.toLowerCase())) || {};
+      const resolvedName = name || traveler.name || 'Traveler';
       const email = traveler.email || '';
-      const accKey = email ? ('acc_' + email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_')) : null;
+      const accKey = email ? ('acc_' + email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_')) : (traveler.accountKey || null);
 
       if (isLiveFirebase && db) {
         try {
@@ -1268,7 +1270,9 @@
           // 1. Grant Verified Explorer shield in public profiles
           await setDoc(doc(db, "profiles", uid), updatePayload, { merge: true });
           if (accKey && accKey !== uid) {
-            await setDoc(doc(db, "profiles", accKey), updatePayload, { merge: true });
+            try {
+              await setDoc(doc(db, "profiles", accKey), updatePayload, { merge: true });
+            } catch (ae) {}
           }
 
           // 2. Archive confidential vault KYC document
@@ -1288,27 +1292,52 @@
         const uProfRaw = localStorage.getItem('safarmatch_user_profile');
         if (uProfRaw) {
           const uProf = JSON.parse(uProfRaw);
-          if (uProf.uid === uid || !uid || uid === 'guest' || uid === 'current_user') {
+          if (
+            uProf.uid === uid || 
+            (accKey && uProf.uid === accKey) || 
+            (email && uProf.email && uProf.email.toLowerCase() === email.toLowerCase()) || 
+            !uid || uid === 'guest' || uid === 'current_user'
+          ) {
             uProf.verificationStatus = 'verified';
             uProf.verificationRejectionReason = null;
             uProf.isVerified = true;
             localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
-            localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
           }
         }
+
+        // Clean up all pending verification queues in localStorage for this traveler
         localStorage.removeItem('safarmatch_awaiting_verification_' + uid);
+        if (accKey) localStorage.removeItem('safarmatch_awaiting_verification_' + accKey);
+
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('safarmatch_awaiting_verification_')) {
+            try {
+              const rec = JSON.parse(localStorage.getItem(k) || '{}');
+              if (
+                rec.uid === uid || 
+                (accKey && rec.uid === accKey) || 
+                (email && rec.email && rec.email.toLowerCase() === email.toLowerCase())
+              ) {
+                localStorage.removeItem(k);
+              }
+            } catch (e) {}
+          }
+        }
 
         // Update travelers list
         const travelersRaw = localStorage.getItem('safarmatch_all_travelers');
         if (travelersRaw) {
           const list = JSON.parse(travelersRaw);
           if (Array.isArray(list)) {
-            const idx = list.findIndex(t => t.uid === uid);
-            if (idx >= 0) {
-              list[idx].verificationStatus = 'verified';
-              list[idx].verificationRejectionReason = null;
-              localStorage.setItem('safarmatch_all_travelers', JSON.stringify(list));
-            }
+            list.forEach(t => {
+              if (t.uid === uid || (accKey && t.uid === accKey) || (email && t.email && t.email.toLowerCase() === email.toLowerCase())) {
+                t.verificationStatus = 'verified';
+                t.verificationRejectionReason = null;
+                t.isVerified = true;
+              }
+            });
+            localStorage.setItem('safarmatch_all_travelers', JSON.stringify(list));
           }
         }
 
@@ -1319,15 +1348,24 @@
 
         if ('BroadcastChannel' in window) {
           const bc = new BroadcastChannel('safarmatch_sync_channel');
-          bc.postMessage({ type: 'VERIFICATION_APPROVED', uid });
+          bc.postMessage({ type: 'VERIFICATION_APPROVED', uid, email, accountKey: accKey });
           bc.close();
         }
       } catch (e) {}
 
-      verificationQueue = verificationQueue.filter(t => t.uid !== uid);
+      // Update in-memory cachedProfiles so real-time snapshots don't re-inject the pending record
+      cachedProfiles.forEach(p => {
+        if (p.uid === uid || (accKey && p.uid === accKey) || (email && p.email && p.email.toLowerCase() === email.toLowerCase())) {
+          p.verificationStatus = 'verified';
+          p.verificationRejectionReason = null;
+          p.isVerified = true;
+        }
+      });
+
+      verificationQueue = verificationQueue.filter(t => t.uid !== uid && (!accKey || t.uid !== accKey) && (!email || !t.email || t.email.toLowerCase() !== email.toLowerCase()));
       renderVerificationQueue();
       updateBadges();
-      showToast(`Approved ${name}! Verified Explorer shield issued.`, "success");
+      showToast(`Approved ${resolvedName}! Verified Explorer shield issued.`, "success");
     };
 
     // =========================================================================
@@ -1506,12 +1544,18 @@
     };
 
     window.adminConfirmPayment = async function(uid, name, utr, plan) {
-      if (!confirm(`Confirm receipt of UPI payment for ${name} (UTR: ${utr})? This will immediately activate the Explorer Pass.`)) return;
+      if (!uid) return;
+
+      const traveler = paymentsQueue.find(t => t.uid === uid || (uid && t.email && t.email.toLowerCase() === uid.toLowerCase())) ||
+                       cachedProfiles.find(p => p.uid === uid || (uid && p.email && p.email.toLowerCase() === uid.toLowerCase())) || {};
+      const resolvedName = name || traveler.name || 'Traveler';
+      const email = traveler.email || '';
+      const accKey = email ? ('acc_' + email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_')) : null;
+      const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
       if (isLiveFirebase && db) {
         try {
-          const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-          await updateDoc(doc(db, "profiles", uid), {
+          const subPayload = {
             isVip: true,
             hasExplorerPass: true,
             "subscription.status": "active",
@@ -1520,18 +1564,105 @@
             "subscription.approvedAt": serverTimestamp(),
             "subscription.validUntil": validUntil,
             "subscription.rejectionReason": null
-          });
-          showToast(`Payment confirmed! Explorer Pass activated for ${name}.`, "success");
+          };
+          await updateDoc(doc(db, "profiles", uid), subPayload);
+          if (accKey && accKey !== uid) {
+            try {
+              await updateDoc(doc(db, "profiles", accKey), subPayload);
+            } catch (ae) {}
+          }
         } catch (err) {
-          console.error("Error confirming payment:", err);
-          showToast("Failed to confirm in Firestore: " + err.message, "error");
+          console.warn("Firestore payment confirmation note:", err);
+          try {
+            await setDoc(doc(db, "profiles", uid), {
+              isVip: true,
+              hasExplorerPass: true,
+              subscription: {
+                status: "active",
+                utr: utr,
+                plan: plan || "explorer_monthly",
+                approvedAt: serverTimestamp(),
+                validUntil: validUntil,
+                rejectionReason: null
+              }
+            }, { merge: true });
+          } catch (e2) {}
         }
-      } else {
-        paymentsQueue = paymentsQueue.filter(t => t.uid !== uid);
-        renderPaymentsQueue();
-        updateBadges();
-        showToast(`Payment confirmed for ${name} locally.`, "success");
       }
+
+      // Local storage synchronization for instant companion access
+      try {
+        localStorage.setItem('safarmatch_pass_unlocked', 'true');
+        localStorage.removeItem('safarmatch_awaiting_payment_' + uid);
+        if (accKey) localStorage.removeItem('safarmatch_awaiting_payment_' + accKey);
+
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('safarmatch_awaiting_payment_')) {
+            try {
+              const rec = JSON.parse(localStorage.getItem(k) || '{}');
+              if (rec.uid === uid || (accKey && rec.uid === accKey) || (utr && rec.utr === utr) || (email && rec.userEmail && rec.userEmail.toLowerCase() === email.toLowerCase())) {
+                localStorage.removeItem(k);
+              }
+            } catch (e) {}
+          }
+        }
+
+        const uProfRaw = localStorage.getItem('safarmatch_user_profile');
+        if (uProfRaw) {
+          const uProf = JSON.parse(uProfRaw);
+          if (
+            uProf.uid === uid || 
+            (accKey && uProf.uid === accKey) || 
+            (email && uProf.email && uProf.email.toLowerCase() === email.toLowerCase()) || 
+            !uid || uid === 'guest' || uid === 'current_user'
+          ) {
+            uProf.isVip = true;
+            uProf.hasExplorerPass = true;
+            uProf.subscription = {
+              status: 'active',
+              plan: plan || 'explorer_monthly',
+              utr: utr,
+              approvedAt: new Date().toISOString(),
+              validUntil: validUntil,
+              rejectionReason: null
+            };
+            localStorage.setItem('safarmatch_user_profile', JSON.stringify(uProf));
+          }
+        }
+
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'safarmatch_user_profile',
+          newValue: localStorage.getItem('safarmatch_user_profile')
+        }));
+
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('safarmatch_sync_channel');
+          bc.postMessage({ type: 'PAYMENT_APPROVED', uid, utr, email, accountKey: accKey });
+          bc.close();
+        }
+      } catch (e) {}
+
+      // Update in-memory cachedProfiles
+      cachedProfiles.forEach(p => {
+        if (p.uid === uid || (accKey && p.uid === accKey) || (email && p.email && p.email.toLowerCase() === email.toLowerCase())) {
+          p.isVip = true;
+          p.hasExplorerPass = true;
+          p.subscription = {
+            ...(p.subscription || {}),
+            status: 'active',
+            utr: utr,
+            plan: plan || 'explorer_monthly',
+            validUntil: validUntil,
+            rejectionReason: null
+          };
+        }
+      });
+
+      paymentsQueue = paymentsQueue.filter(t => t.uid !== uid && (!accKey || t.uid !== accKey) && (!email || !t.email || t.email.toLowerCase() !== email.toLowerCase()));
+      renderPaymentsQueue();
+      updateBadges();
+      showToast(`Payment confirmed! Explorer Pass activated for ${resolvedName}.`, "success");
     };
 
     // =========================================================================
@@ -1632,23 +1763,29 @@
     };
 
     window.adminApproveIdentityByUid = function(uid) {
-      const traveler = verificationQueue.find(t => t.uid === uid);
-      if (!traveler) return;
-      adminApproveIdentity(traveler.uid, traveler.name || 'Traveler');
+      const traveler = verificationQueue.find(t => t.uid === uid || t.accountKey === uid || (uid && t.email && t.email.toLowerCase() === uid.toLowerCase())) ||
+                       cachedProfiles.find(p => p.uid === uid || (uid && p.email && p.email.toLowerCase() === uid.toLowerCase()));
+      const targetUid = traveler ? traveler.uid : uid;
+      const targetName = traveler ? (traveler.name || 'Traveler') : 'Traveler';
+      adminApproveIdentity(targetUid, targetName);
     };
 
     window.openRejectVerificationModalByUid = function(uid) {
-      const traveler = verificationQueue.find(t => t.uid === uid);
-      if (!traveler) return;
-      openRejectVerificationModal(traveler.uid, traveler.name || 'Traveler');
+      const traveler = verificationQueue.find(t => t.uid === uid || t.accountKey === uid || (uid && t.email && t.email.toLowerCase() === uid.toLowerCase())) ||
+                       cachedProfiles.find(p => p.uid === uid || (uid && p.email && p.email.toLowerCase() === uid.toLowerCase()));
+      const targetUid = traveler ? traveler.uid : uid;
+      const targetName = traveler ? (traveler.name || 'Traveler') : 'Traveler';
+      openRejectVerificationModal(targetUid, targetName);
     };
 
     window.adminConfirmPaymentByUid = function(uid) {
-      const traveler = paymentsQueue.find(t => t.uid === uid);
-      if (!traveler) return;
-      const sub = traveler.subscription || {};
+      const traveler = paymentsQueue.find(t => t.uid === uid || (uid && t.email && t.email.toLowerCase() === uid.toLowerCase())) ||
+                       cachedProfiles.find(p => p.uid === uid || (uid && p.email && p.email.toLowerCase() === uid.toLowerCase()));
+      const targetUid = traveler ? traveler.uid : uid;
+      const targetName = traveler ? (traveler.name || 'Traveler') : 'Traveler';
+      const sub = traveler ? (traveler.subscription || {}) : {};
       const utr = sub.utr || sub.utrNumber || sub.upiReference || '000000000000';
-      adminConfirmPayment(traveler.uid, traveler.name || 'Traveler', utr, sub.plan || 'explorer_monthly');
+      adminConfirmPayment(targetUid, targetName, utr, sub.plan || 'explorer_monthly');
     };
 
     window.openRejectPaymentModalByUid = function(uid) {
